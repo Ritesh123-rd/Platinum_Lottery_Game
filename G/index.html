@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Platinum Lottery System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <div class="app-wrapper">
+
+    <!-- TOP NAV -->
+    <div class="top-nav">
+      <button class="nav-tab active" onclick="switchPage('G')">G</button>
+      <button class="nav-tab" onclick="switchPage('H')">H</button>
+      <button class="nav-tab" onclick="switchPage('3D')">3D</button>
+      <button class="nav-tab" onclick="switchPage('4D')">4D</button>
+      <button class="nav-tab" onclick="switchPage('C')">C</button>
+      <div class="nav-spacer"></div>
+      <div class="nav-right">
+        <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
+        <span class="nav-loc" id="navLoc">LocV-1.0.0.2</span>
+        <button class="icon-btn">
+          <svg viewBox="0 0 100 100" width="34" height="34">
+            <!-- Circular Arrow -->
+            <path d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 84.6 22.7" fill="none" stroke="black" stroke-width="6"
+              stroke-linecap="round" />
+            <path d="M84.6 5 L84.6 22.7 L67 22.7" fill="none" stroke="black" stroke-width="6" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <!-- Centered Lock -->
+            <rect x="36" y="55" width="28" height="20" rx="3" fill="black" />
+            <path d="M41 55 V50 A9 9 0 0 1 59 50 V55" fill="none" stroke="black" stroke-width="6"
+              stroke-linecap="round" />
+          </svg>
+        </button>
+        <button class="icon-btn power-btn">
+          <svg viewBox="0 0 100 100" width="44" height="44">
+            <path d="M50 20 V50" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+            <path d="M30 35 A30 30 0 1 0 70 35" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- SHARED HEADER BAR -->
+    <div class="header-section" id="sharedHeader">
+      <div class="header-logo-col">
+        <img src="../image.png" alt="Platinum" class="plat-img" />
+      </div>
+      <div class="header-right-col">
+        <div class="header-bar" id="sharedHeaderBar">
+          <div class="hdr-group-left">
+            <div class="hdr-left-box">
+              <div class="hdr-gamename-stacked" id="hdrGamename">
+                <div>PLATINUM</div>
+                <div>HIT</div>
+              </div>
+              <span class="hdr-time" id="hdrTime">12:00 pm</span>
+            </div>
+            <div class="hdr-tx-stack" id="hdrTxStack">
+              <div class="hdr-tx-lbl">Last Transaction:</div>
+              <div class="hdr-tx-val" id="hdrLastTx">0</div>
+
+            </div>
+          </div>
+
+          <div class="hdr-countdown-box">
+            <div class="hdr-countdown countdown-style" id="hdrCountdown">13:34</div>
+          </div>
+
+          <div class="hdr-group-right">
+            <div class="hdr-ssvi-box">
+              <span class="hdr-ssvi" id="hdrSsvi">SSNE009</span>
+            </div>
+            <span class="hdr-limit">Limit: <span id="statBalance">0.00</span></span>
+          </div>
+
+          <button class="hdr-refresh" id="hdrRefresh">↻</button>
+        </div>
+
+        <div class="h-winners" id="hWinners">
+          <div class="h-wnum"><span class="wnum-time">11:37 AM</span> 1006</div>
+          <div class="h-wnum"><span class="wnum-time">11:22 AM</span> 1186</div>
+          <div class="h-wnum"><span class="wnum-time">11:07 AM</span> 1274</div>
+          <div class="h-wnum"><span class="wnum-time">10:52 AM</span> 1365</div>
+          <div class="h-wnum"><span class="wnum-time">10:37 AM</span> 1421</div>
+          <div class="h-wnum"><span class="wnum-time">10:22 AM</span> 1574</div>
+          <div class="h-wnum"><span class="wnum-time">10:07 AM</span> 1683</div>
+          <div class="h-wnum"><span class="wnum-time">09:52 AM</span> 1745</div>
+          <div class="h-wnum"><span class="wnum-time">09:37 AM</span> 1805</div>
+          <div class="h-wnum"><span class="wnum-time">09:22 AM</span> 1919</div>
+          <div class="h-ver-lbl" id="hdrVer" style="text-align:left;">v-3.5.0.8</div>
+        </div>
+
+        <div class="ticker-bar" id="sharedTicker" style="display:none">
+          <div class="ticker-track">
+            <span class="ti">11:37 AM <b>A05</b></span>
+            <span class="ti">11:22 AM <b>G65</b></span>
+            <span class="ti">11:07 AM <b>D36</b></span>
+            <span class="ti">10:52 AM <b>D38</b></span>
+            <span class="ti">10:37 AM <b>E40</b></span>
+            <span class="ti">10:22 AM <b>G69</b></span>
+            <span class="ti">10:07 AM <b>D35</b></span>
+            <span class="ti">09:52 AM <b>C28</b></span>
+            <span class="ti">09:37 AM <b>B14</b></span>
+            <span class="ti">09:22 AM <b>H74</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+
+      <!-- PAGE G -->
+      <div class="page active" id="page-G">
+        <div class="g-layout">
+          <div class="g-labels" id="gLabels"></div>
+          <div class="g-right">
+            <div class="preview-row" id="gPreview"></div>
+            <div class="g-grid" id="gGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-sb" id="rightSb"></div>
+    </div><!-- /main-area -->
+
+    <!-- SHARED BOTTOM BAR -->
+    <div class="bottom-bar" id="sharedBottom">
+      <div class="bb-claim">
+        <span class="bb-clabel">Claim (U):</span>
+        <input class="bb-cinput" type="text" placeholder="Pressed F8" />
+      </div>
+      <button class="bb-play" id="playBtn">PLAY(F7)</button>
+      <button class="bb-clear" onclick="clearSelections()">Clear(ESC)</button>
+      <div class="bb-stats main-stats">
+        <div class="bb-stat-pod">
+          <div class="bstat"><label>Total Selected spots</label>
+            <div class="bval" id="statSpots">0</div>
+          </div>
+          <div class="bstat"><label>Prize pool Contribution</label>
+            <div class="bval" id="statPrize">0</div>
+          </div>
+        </div>
+        <div class="bb-stat-pod">
+          <div class="bstat"><label>Game service</label>
+            <div class="bval">0</div>
+          </div>
+          <div class="bstat"><label>Total Points</label>
+            <div class="bval" id="statTotalPts">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bb-family-box">
+        <div class="bb-fam-check"><input type="checkbox" id="bbFam" /></div>
+        <label for="bbFam">Family</label>
+      </div>
+      <div class="bb-ver" id="bbVer">V-4.0.0.0</div>
+    </div>
+
+    <!-- EXTRA BOTTOM BAR — required by script.js extraBottomBar reference -->
+    <div id="extraBottomBar" style="display:none;"></div>
+
+    <!-- Hidden bars -->
+    <div class="s3-bottom-bar high-fidelity" id="s3Bottom" style="display:none;"></div>
+    <div class="c-bottom-bar" id="cBottomBar" style="display:none;"></div>
+
+    <!-- ADVANCE DRAW MODAL -->
+    <div id="advanceModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>ADVANCE DRAW</h2>
+          <button class="close-modal" onclick="closeAdvanceModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="draw-grid-container" id="advanceDrawGrid">
+            <!-- Draws will be populated here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn secondary" onclick="closeAdvanceModal()">Cancel</button>
+          <button class="modal-btn primary" onclick="confirmAdvanceDraw()">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANCEL BET MODAL (Current Draw History) -->
+    <div id="cancelBetModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content history-modal">
+        <div class="modal-header">
+          <h2>CURRENT DRAW BET HISTORY</h2>
+          <button class="close-modal" onclick="closeCancelModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="history-table-container">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Barcode</th>
+                  <th>Draw Time</th>
+                  <th>Bet Time</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="cancelHistoryBody">
+                <!-- Data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn secondary" onclick="closeCancelModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BET HISTORY MODAL (All Draws by Date) -->
+    <div id="betHistoryModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content history-modal">
+        <div class="modal-header">
+          <h2>BET HISTORY</h2>
+          <div style="display:flex; align-items:center; gap:8px; margin-left:20px;">
+             <input type="date" id="historyDateInput" style="padding:4px; border-radius:4px; border:1px solid #777; background:#333; color:white;">
+             <button class="modal-btn primary" onclick="fetchBetHistory()" style="padding:4px 12px;">Search</button>
+          </div>
+          <button class="close-modal" onclick="closeBetHistoryModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="history-table-container">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Barcode</th>
+                  <th>Draw Time</th>
+                  <th>Bet Time</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="betHistoryBody">
+                <!-- Data will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn secondary" onclick="closeBetHistoryModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGOUT CONFIRMATION MODAL -->
+    <div id="logoutModal" class="logout-modal" style="display:none;">
+      <div class="logout-content">
+        <div class="logout-title">LOGOUT?</div>
+        <div class="logout-msg">Are you sure you want to end your session?</div>
+        <div class="logout-actions">
+          <button class="logout-btn logout-no" onclick="closeLogoutModal()">Cancel</button>
+          <button class="logout-btn logout-yes" onclick="confirmLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /app-wrapper -->
+  <script src="../config.js"></script>
+  <script src="../api.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

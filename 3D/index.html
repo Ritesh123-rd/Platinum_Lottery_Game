@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Platinum Lottery System - 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- TOP NAV -->
+    <div class="top-nav">
+      <button class="nav-tab" onclick="switchPage('G')">G</button>
+      <button class="nav-tab" onclick="switchPage('H')">H</button>
+      <button class="nav-tab active" onclick="switchPage('3D')">3D</button>
+      <button class="nav-tab" onclick="switchPage('4D')">4D</button>
+      <button class="nav-tab" onclick="switchPage('C')">C</button>
+      <div class="nav-spacer"></div>
+      <div class="nav-right">
+        <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
+        <span class="nav-loc" id="navLoc">LocV-1.0.0.2</span>
+        <button class="icon-btn">
+          <svg viewBox="0 0 100 100" width="34" height="34">
+            <path d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 84.6 22.7" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" />
+            <path d="M84.6 5 L84.6 22.7 L67 22.7" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            <rect x="36" y="55" width="28" height="20" rx="3" fill="black" />
+            <path d="M41 55 V50 A9 9 0 0 1 59 50 V55" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button class="icon-btn power-btn">
+          <svg viewBox="0 0 100 100" width="44" height="44">
+            <path d="M50 20 V50" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+            <path d="M30 35 A30 30 0 1 0 70 35" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+      <div class="page active" id="page-3D">
+        <div class="s3-header-area">
+          <div class="s3-logo-row">
+            <div class="s3-logo-box">
+              <img src="../image.png" alt="P" class="s3-plat-mini">
+            </div>
+          </div>
+          <div class="s3-topbar">
+            <!-- First Grid Column -->
+            <div class="s3-hdr-col s3-col-1">
+              <div class="s3-hdr-left">
+                <span class="s3-gamename">PLATINUM SPOTS3</span>
+                <span class="s3-time" id="s3Time">12:00 pm</span>
+              </div>
+              <span class="s3-tx">200</span>
+            </div>
+
+            <!-- Second Grid Column -->
+            <div class="s3-hdr-col s3-col-2">
+              <span class="s3-ssvi-label">SSNE009</span>
+              <div class="hdr-countdown s3-cnt-box" id="s3Countdown">12:41</div>
+              <div class="s3-hdr-right">
+                <div class="s3-ver-mini">V-1.3.6</div>
+                <div class="s3-limit-box">LIMIT : <span id="s3LimitVal">35318.74</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="s3-body">
+          <div class="s3-left">
+            <div class="s3-filterbar">
+              <div class="s3-checkbox-area">
+                <div class="s3-cbx-row s3-row-top">
+                  <label class="s3-cbx"><input type="checkbox" checked /><span class="cbx-lbl italic">Ind.</span></label>
+                  <label class="s3-cbx"><input type="checkbox" /><span class="cbx-lbl pink">Multi.</span></label>
+                  <label class="s3-cbx"><input type="checkbox" /><span class="cbx-lbl pink">All.</span></label>
+                </div>
+                <div class="s3-cbx-row s3-row-bot">
+                  <label class="s3-cbx"><input type="checkbox" checked /><span class="cbx-lbl italic">A</span></label>
+                  <label class="s3-cbx"><input type="checkbox" /><span class="cbx-lbl pink">B</span></label>
+                  <label class="s3-cbx"><input type="checkbox" /><span class="cbx-lbl pink">C</span></label>
+                </div>
+              </div>
+              <div class="s3-tbtn-group">
+                <button class="s3-tbtn active"><div class="s3-tbtn-top"><div class="tbtn-check">✓</div></div><div class="s3-tbtn-bot">Box</div></button>
+                <button class="s3-tbtn"><div class="s3-tbtn-top"><div class="tbtn-box"></div></div><div class="s3-tbtn-bot">Straight</div></button>
+                <button class="s3-tbtn"><div class="s3-tbtn-top"><div class="tbtn-box"></div></div><div class="s3-tbtn-bot">FP</div></button>
+                <button class="s3-tbtn"><div class="s3-tbtn-top"><div class="tbtn-box"></div></div><div class="s3-tbtn-bot">BP</div></button>
+                <button class="s3-tbtn"><div class="s3-tbtn-top"><div class="tbtn-box"></div></div><div class="s3-tbtn-bot">SP</div></button>
+                <button class="s3-tbtn"><div class="s3-tbtn-top"><div class="tbtn-box"></div></div><div class="s3-tbtn-bot">AP</div></button>
+              </div>
+            </div>
+
+            <div class="s3-digit-controls">
+              <label class="s3-cbx-premium all digit-row-all"><input type="checkbox" /><span class="cbx-lbl">ALL</span></label>
+              <div class="s3-digit-row" id="s3Digits"></div>
+            </div>
+
+            <div class="s3-addnum-area">
+              <button class="s3-addnum-btn-p">ADDNUMBER</button>
+              <span class="s3-range-lbl">Range-:</span>
+              <div class="s3-num-input">NUM</div>
+              <span class="s3-to-lbl">To</span>
+              <div class="s3-num-input">NUM</div>
+            </div>
+
+            <div class="s3-main-selection-area">
+              <div class="s3-selection-canvas"></div>
+            </div>
+          </div>
+
+          <div class="s3-right">
+            <div class="s3-results-container">
+              <div class="s3-results" id="s3Results"></div>
+            </div>
+            <div class="s3-football-panel">
+              <div class="s3-stadium-area">
+                <div class="s3-stadium-bg"></div>
+              </div>
+              <div class="s3-football-btns">
+                <button class="s3-side-btn gold">Reprint<br>(F2)</button>
+                <button class="s3-side-btn gold">Advance<br>Spot</button>
+                <button class="s3-side-btn gold">Cancel<br>(F10)</button>
+                <button class="s3-side-btn gold" onclick="clearSelections()">Clear<br>(ESC)</button>
+                <button class="s3-side-btn green" id="playBtn">PLAY<br>(F7)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D bottom bar -->
+    <div class="s3-bottom-bar high-fidelity" id="s3Bottom" style="display:flex;">
+      <div class="s3-left-grid">
+        <div class="s3-stats-box">
+          <div class="s3-stat-item"><label>Total Selected spots</label><div class="s3-bval" id="s3statSpots">0</div></div>
+          <div class="s3-stat-item"><label>Prize pool Contribution</label><div class="s3-bval" id="s3statPrize">0</div></div>
+        </div>
+        <div class="s3-stats-box">
+          <div class="s3-stat-item"><label>Game service points</label><div class="s3-bval">0</div></div>
+          <div class="s3-stat-item"><label>Total Points</label><div class="s3-bval">0</div></div>
+        </div>
+        <div class="s3-footer-ctrl">
+          <button class="s3-rnd-pick">Random Pick</button>
+          <div class="s3-family-box"><input type="checkbox" id="s3fam"><label for="s3fam">Family</label></div>
+        </div>
+      </div>
+      <div class="s3-footer-global">
+        <div class="s3-status-box">Pressed F8</div>
+        <button class="s3-glb-btn motor">MOTOR 1</button>
+        <button class="s3-glb-btn screen">SCREEN 2</button>
+        <button class="s3-glb-btn info">INFO (I)</button>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

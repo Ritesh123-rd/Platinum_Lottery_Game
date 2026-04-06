@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Platinum Lottery System - HIT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- TOP NAV -->
+    <div class="top-nav">
+      <button class="nav-tab" onclick="switchPage('G')">G</button>
+      <button class="nav-tab active" onclick="switchPage('H')">H</button>
+      <button class="nav-tab" onclick="switchPage('3D')">3D</button>
+      <button class="nav-tab" onclick="switchPage('4D')">4D</button>
+      <button class="nav-tab" onclick="switchPage('C')">C</button>
+      <div class="nav-spacer"></div>
+      <div class="nav-right">
+        <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
+        <span class="nav-loc" id="navLoc">LocV-1.0.0.2</span>
+        <button class="icon-btn">
+          <svg viewBox="0 0 100 100" width="34" height="34">
+            <path d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 84.6 22.7" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" />
+            <path d="M84.6 5 L84.6 22.7 L67 22.7" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            <rect x="36" y="55" width="28" height="20" rx="3" fill="black" />
+            <path d="M41 55 V50 A9 9 0 0 1 59 50 V55" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button class="icon-btn power-btn">
+          <svg viewBox="0 0 100 100" width="44" height="44">
+            <path d="M50 20 V50" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+            <path d="M30 35 A30 30 0 1 0 70 35" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- SHARED HEADER BAR -->
+    <div class="header-section" id="sharedHeader">
+      <div class="header-logo-col">
+        <img src="../image.png" alt="Platinum" class="plat-img" />
+      </div>
+      <div class="header-right-col">
+        <div class="header-bar premium-hdr" id="sharedHeaderBar">
+          <div class="hdr-group-left">
+            <div class="hdr-left-box">
+              <div class="hdr-gamename-stacked" id="hdrGamename">
+                <div>PLATINUM</div>
+                <div>HIT</div>
+              </div>
+              <span class="hdr-time" id="hdrTime">12:00 pm</span>
+            </div>
+            <div class="hdr-tx-stack" id="hdrTxStack">
+              <div class="hdr-tx-lbl">Last Transaction:</div>
+              <div class="hdr-tx-val" id="hdrLastTx">200</div>
+            </div>
+          </div>
+
+          <div class="hdr-countdown-box">
+            <div class="hdr-countdown countdown-style" id="hdrCountdown">13:34</div>
+          </div>
+
+          <div class="hdr-group-right">
+            <div class="hdr-ssvi-box">
+              <span class="hdr-ssvi" id="hdrSsvi">SSNE009</span>
+            </div>
+            <span class="hdr-limit">Limit: <span id="hdrLimitValue">35318.74</span></span>
+          </div>
+          <button class="hdr-refresh" id="hdrRefresh">↻</button>
+        </div>
+
+        <div class="h-winners" id="hWinners">
+          <div class="h-wnum">1006</div>
+          <div class="h-wnum">1186</div>
+          <div class="h-wnum">1274</div>
+          <div class="h-wnum">1365</div>
+          <div class="h-wnum">1421</div>
+          <div class="h-wnum">1574</div>
+          <div class="h-wnum">1683</div>
+          <div class="h-wnum">1745</div>
+          <div class="h-wnum">1805</div>
+          <div class="h-wnum">1919</div>
+          <div class="h-time-box">11:45:00 AM</div>
+          <div class="h-ver-lbl" id="hdrVer">v-3.5.0.8</div>
+        </div>
+
+        <div class="ticker-bar" id="sharedTicker" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+      <div class="page active" id="page-H">
+        <div class="h-content">
+          <div class="h-ranges" id="hRanges"></div>
+          <div class="h-boxes-col" id="hMiddleBoxes"></div>
+          <div class="h-grid-area">
+            <div class="h-col-hdr" id="hColHdr"></div>
+            <div class="h-grid" id="hGrid"></div>
+          </div>
+          <div class="h-qty-pts">
+            <div class="h-qp-hdr"><span>Qty</span><span>Pts</span></div>
+            <div class="h-qp-col h-qty-col" id="hQtyCol"></div>
+            <div class="h-pts-col h-pts-col" id="hPtsCol"></div>
+          </div>
+        </div>
+      </div>
+      <div class="right-sb h-sidebar-mode right-sb-premium" id="rightSb"></div>
+    </div>
+
+    <!-- SHARED BOTTOM BAR -->
+    <div class="bottom-bar fd-footer-mode" id="sharedBottom">
+      <div class="bb-claim">
+        <span class="bb-clabel">Claim (U):</span>
+        <input class="bb-cinput" type="text" placeholder="Pressed F8" />
+      </div>
+      <button class="bb-play" id="playBtn">PLAY(F7)</button>
+      <button class="bb-clear" onclick="clearSelections()">Clear(ESC)</button>
+      <div class="bb-stats main-stats">
+        <div class="bb-stat-pod">
+          <div class="bstat"><label>Total Selected spots</label>
+            <div class="bval" id="statSpots">0</div>
+          </div>
+          <div class="bstat"><label>Prize pool Contribution</label>
+            <div class="bval" id="statPrize">0</div>
+          </div>
+        </div>
+        <div class="bb-stat-pod">
+          <div class="bstat"><label>Game service</label>
+            <div class="bval">0</div>
+          </div>
+          <div class="bstat"><label>Total Points</label>
+            <div class="bval" id="statTotalPts">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4D-ONLY HIGH-FIDELITY STATS -->
+      <div class="bb-stats-4d">
+        <div class="bb-stat-pod">
+          <label>Prize Pool Contribution</label>
+          <div class="bval" id="statPrize4D">0</div>
+        </div>
+        <div class="bb-stat-pod">
+          <label>GameService Points</label>
+          <div class="bval">0</div>
+        </div>
+        <div class="bb-stat-pod">
+          <label>Total Selected Spot</label>
+          <div class="bval" id="statSpots4D">0</div>
+          <div class="bval">0</div>
+          <label>Total Points</label>
+        </div>
+      </div>
+      <div class="bb-family-box">
+        <div class="bb-fam-check"><input type="checkbox" id="bbFam" /></div>
+        <label for="bbFam">Family</label>
+      </div>
+      <div class="bb-ver" id="bbVer">V-4.0.0.0</div>
+    </div>
+
+    <!-- Hidden bars -->
+    <div id="extraBottomBar" style="display:none;"></div>
+    <div class="s3-bottom-bar high-fidelity" id="s3Bottom" style="display:none;"></div>
+    <div class="c-bottom-bar" id="cBottomBar" style="display:none;"></div>
+
+    <!-- ADVANCE DRAW MODAL -->
+    <div id="advanceModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>ADVANCE DRAW</h2>
+          <button class="close-modal" onclick="closeAdvanceModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="draw-grid-container" id="advanceDrawGrid">
+            <!-- Draws will be populated here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn secondary" onclick="closeAdvanceModal()">Cancel</button>
+          <button class="modal-btn primary" onclick="confirmAdvanceDraw()">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGOUT CONFIRMATION MODAL -->
+    <div id="logoutModal" class="logout-modal" style="display:none;">
+      <div class="logout-content">
+        <div class="logout-title">LOGOUT?</div>
+        <div class="logout-msg">Are you sure you want to end your session?</div>
+        <div class="logout-actions">
+          <button class="logout-btn logout-no" onclick="closeLogoutModal()">Cancel</button>
+          <button class="logout-btn logout-yes" onclick="confirmLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

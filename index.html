@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platinum Lottery - Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ee1c25; /* Vibrant Red from logo */
+            --primary-dark: #b80000;
+            --white: #ffffff;
+            --black: #111111;
+            --glass-white: rgba(255, 255, 255, 0.95);
+            --error: #ff4d4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Oswald', sans-serif;
+            background: #ee1c25;
+            background: linear-gradient(135deg, #ee1c25 0%, #7e0000 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--black);
+        }
+
+        /* Red Theme Blobs */
+        .bg-blobs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: move 25s infinite alternate ease-in-out;
+            filter: blur(40px);
+        }
+        .blob-1 { width: 600px; height: 600px; top: -200px; left: -100px; }
+        .blob-2 { width: 500px; height: 500px; bottom: -150px; right: -100px; background: rgba(0, 0, 0, 0.2); }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1) rotate(0deg); }
+            to { transform: translate(100px, 100px) scale(1.2) rotate(30deg); }
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 140px;
+            height: auto;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #f4f4f4;
+            border: 2px solid #f4f4f4;
+            border-radius: 12px;
+            color: var(--black);
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(238, 28, 37, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: var(--white);
+            font-weight: 900;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(238, 28, 37, 0.3);
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(238, 28, 37, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                max-width: 340px;
+            }
+            .logo img {
+                width: 110px;
+            }
+            h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            .tagline {
+                font-size: 9px;
+                margin-bottom: 15px;
+                padding: 3px 10px;
+            }
+            input {
+                padding: 10px 14px;
+                font-size: 15px;
+            }
+            .login-btn {
+                padding: 12px;
+                font-size: 16px;
+            }
+            .footer-text {
+                margin-top: 20px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .login-container {
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+            .logo {
+                margin-bottom: 15px;
+            }
+            .logo img {
+                width: 90px;
+            }
+            h1 {
+                margin-bottom: 10px;
+            }
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: 700;
+            display: none;
+        }
+
+        .loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer-text {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #888;
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+
+        .tagline {
+            display: inline-block;
+            background: var(--black);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="logo">
+            <img src="image.png" alt="Platinum Logo">
+        </div>
+        <div class="tagline">Premium Quality Goods</div>
+        <h1>L O G I N</h1>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" required placeholder="Username">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" required placeholder="Password">
+                </div>
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span class="btn-text">Log In</span>
+                <div class="loader"></div>
+            </button>
+            <div id="errorMsg" class="error-msg">Invalid username or password.</div>
+        </form>
+        <div class="footer-text">
+            © 2026 PLATINUM SYSTEM • V-4.0.0.0
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = loginBtn.querySelector('.btn-text');
+            const loader = loginBtn.querySelector('.loader');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // Reset UI
+            errorMsg.style.display = 'none';
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            loginBtn.disabled = true;
+
+            try {
+                const data = await API.login(username, password);
+                console.log('Login API response:', data);
+
+                if (data.status === true) {
+                    // Success - store user data
+                    const userData = {
+                        user_id: data.user_id,
+                        username: data.username,
+                        password: data.password,
+                        role: data.role
+                    };
+                    sessionStorage.setItem('user', JSON.stringify(userData));
+                    window.location.href = 'G/index.html'; // Default redirect
+                } else {
+                    // Failure
+                    errorMsg.textContent = data.message || 'Login failed. Please try again.';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                errorMsg.textContent = 'Connection error. Please check your internet.';
+                errorMsg.style.display = 'block';
+            } finally {
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Check if already logged in with valid session
+        const existingUser = sessionStorage.getItem('user');
+        if (existingUser) {
+            try {
+                const parsed = JSON.parse(existingUser);
+                if (parsed.username) {
+                    window.location.href = 'G/index.html';
+                } else {
+                    // Invalid/corrupt session data - clear it
+                    sessionStorage.removeItem('user');
+                }
+            } catch(e) {
+                sessionStorage.removeItem('user');
+            }
+        }
+    </script>
+</body>
+</html>

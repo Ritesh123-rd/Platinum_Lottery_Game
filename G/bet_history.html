@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platinum - Bet History</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ee1c25;
+            --primary-dark: #b80000;
+            --bg: #111;
+            --card-bg: #222;
+            --text: #fff;
+            --gold: #f1ce07;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--primary-dark); }
+
+        .filter-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input[type="date"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-family: inherit;
+        }
+
+        button.search-btn {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        tr:hover { background: #2a2a2a; }
+
+        .status-claim { color: #00ff00; font-weight: bold; }
+        .status-pending { color: #ffcc00; }
+
+        .no-data {
+            padding: 40px;
+            text-align: center;
+            color: #888;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            th, td { padding: 10px; font-size: 13px; }
+            .filter-section { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bet History</h1>
+            <a href="index.html" class="back-btn">Back to Game</a>
+        </header>
+
+        <div class="filter-section">
+            <label for="historyDate">Select Date:</label>
+            <input type="date" id="historyDate">
+            <button class="search-btn" onclick="loadHistory()">View History</button>
+        </div>
+
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Barcode</th>
+                    <th>Draw Time</th>
+                    <th>Bet Time</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                    <th>Win Amt</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                <!-- Data will be injected here -->
+            </tbody>
+        </table>
+        <div id="noData" class="no-data" style="display:none;">No records found for this date.</div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../api.js"></script>
+    <script>
+        // Set default date to today
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('historyDate').value = today;
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            const date = document.getElementById('historyDate').value;
+            const container = document.getElementById('historyBody');
+            const noData = document.getElementById('noData');
+            
+            const userString = sessionStorage.getItem('user');
+            if (!userString) {
+                alert("Session expired. Please login again.");
+                window.location.href = "../index.html";
+                return;
+            }
+            const user = JSON.parse(userString);
+            const username = user.username || (user.data && user.data.username);
+
+            container.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading history...</td></tr>';
+            noData.style.display = "none";
+
+            try {
+                const resp = await API.getGBetHistory(username, date);
+                container.innerHTML = '';
+                
+                if (resp.status && resp.tickets && resp.tickets.length > 0) {
+                    resp.tickets.forEach(t => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${t.barcode}</td>
+                            <td>${t.draw_times}</td>
+                            <td>${t.bet_time || t.draw_times}</td>
+                            <td>${t.qty}</td>
+                            <td>${parseInt(t.amount) * 2}</td>
+                            <td>${t.win_amt}</td>
+                            <td class="${t.claim_status == '1' ? 'status-claim' : 'status-pending'}">
+                                ${t.claim_status == '1' ? 'Claimed' : 'Pending'}
+                            </td>
+                        `;
+                        container.appendChild(tr);
+                    });
+                } else {
+                    noData.style.display = "block";
+                }
+            } catch (err) {
+                console.error('History load error:', err);
+                container.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Error loading history.</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>
