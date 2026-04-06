@@ -102,6 +102,30 @@ const API = {
             console.error('API CancleTicket Error:', error);
             throw error;
         }
+    },
+
+    lastDrawBetAmount: async (username, last_bet_amount) => {
+        try {
+            let url = window.BASE_URL + `G/GameApi/LastDrawBetAmount.php?username=${username}`;
+            if (last_bet_amount !== undefined && last_bet_amount !== null) {
+                url += `&last_bet_amount=${last_bet_amount}`;
+            }
+            const response = await fetch(url);
+            return await response.json();
+        } catch (error) {
+            console.error('API LastDrawBetAmount Error:', error);
+            throw error;
+        }
+    },
+
+    reprintTicket: async (barcode, username) => {
+        try {
+            const response = await fetch(window.BASE_URL + `G/GameApi/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
+            return await response.json();
+        } catch (error) {
+            console.error('API ReprintTicket Error:', error);
+            throw error;
+        }
     }
 };
 

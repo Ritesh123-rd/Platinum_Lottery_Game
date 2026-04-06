@@ -47,6 +47,7 @@ function buildSidebar(btns) {
     if (b.t.includes('Clear')) btn.onclick = clearSelections;
     if (b.t.includes('Advance')) btn.onclick = openAdvanceModal;
     if (b.t.includes('History')) btn.onclick = openBetHistoryModal;
+    if (b.t.includes('Reprint')) btn.onclick = openReprintModal;
     sb.appendChild(btn);
   });
 }
@@ -172,12 +173,9 @@ function updateStats() {
       totalAmount += val;
     }
   }
-
-  // Apply advance draw multiplier to both qty and amount
   const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
   const finalSpots = totalSpots * drawCount;
   const finalAmount = totalAmount * drawCount;
-
   const spotsEl = document.getElementById('statSpots');
   const prizeEl = document.getElementById('statPrize');
   const totalPointsEl = document.getElementById('statTotalPts');
@@ -239,12 +237,8 @@ window.openAdvanceModal = async function() {
           </label>`
         ).join('');
       }
-    } else {
-      if(grid) grid.innerHTML = '<p style="color:#f44;">No advance times available.</p>';
-    }
-  } catch (err) {
-    if(grid) grid.innerHTML = '<p style="color:#f44;">Error fetching advance draw times.</p>';
-  }
+    } else { if(grid) grid.innerHTML = '<p style="color:#f44;">No advance times available.</p>'; }
+  } catch (err) { if(grid) grid.innerHTML = '<p style="color:#f44;">Error fetching advance draw times.</p>'; }
 };
 
 window.closeAdvanceModal = function() {
@@ -255,18 +249,13 @@ window.closeAdvanceModal = function() {
 window.confirmAdvanceDraw = function() {
   const sels = document.querySelectorAll('.adv_slot_cb:checked');
   advanceTimeVal = Array.from(sels).map(cb => cb.value);
-  if(advanceTimeVal.length > 0) {
-    alert("Advance time(s) selected: " + advanceTimeVal.join(', '));
-  }
-  updateStats(); // Update totals to reflect multiplier
+  updateStats();
   closeAdvanceModal();
 };
 
 window.openCancelModal = function() {
   const modal = document.getElementById('cancelBetModal');
   if (modal) modal.style.display = 'flex';
-  const tbody = document.getElementById('cancelHistoryBody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
   if (window.fetchCancelHistory) window.fetchCancelHistory();
 };
 
@@ -292,47 +281,21 @@ window.fetchCancelHistory = async function() {
           </tr>`
         ).join('');
       }
-    } else {
-      if(tbody) tbody.innerHTML = '<tr><td colspan="7">No tickets found for current draw.</td></tr>';
-    }
-  } catch(e) {
-    const tbody = document.getElementById('cancelHistoryBody');
-    if(tbody) tbody.innerHTML = '<tr><td colspan="7">Error loading history.</td></tr>';
-  }
+    } else { if(tbody) tbody.innerHTML = '<tr><td colspan="7">No tickets found.</td></tr>'; }
+  } catch(e) { if(tbody) tbody.innerHTML = '<tr><td colspan="7">Error loading history.</td></tr>'; }
 };
 
 window.cancelTicket = async function(id) {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
-  overlay.innerHTML = `
-    <div style="background:#222;padding:20px 30px;border-radius:12px;text-align:center;color:#fff;border:2px solid #ee1c25;box-shadow:0 10px 30px rgba(0,0,0,0.5);font-family:'Oswald',sans-serif;">
-      <h3 style="margin-bottom:10px;color:#ee1c25;font-family:'Orbitron',sans-serif;letter-spacing:1px;">CONFIRM CANCELLATION</h3>
-      <p style="margin-bottom:20px;font-size:16px;color:#ddd;">Are you sure you want to cancel ticket <strong style="color:#fff;font-size:18px;">${id}</strong>?</p>
-      <div style="display:flex;justify-content:center;gap:15px;">
-        <button id="btnNoCancel" style="padding:10px 20px;background:#444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;transition:0.3s;">Keep Ticket</button>
-        <button id="btnYesCancel" style="padding:10px 20px;background:#ee1c25;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;transition:0.3s;box-shadow:0 4px 10px rgba(238,28,37,0.3);">Yes, Cancel</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-
-  document.getElementById('btnNoCancel').onclick = () => overlay.remove();
-  document.getElementById('btnYesCancel').onclick = async () => {
-    overlay.remove();
-    try {
-      const res = await API.cancleTicket(id);
-      if(res.status) {
-        alert("Ticket cancelled successfully.");
-        if (window.fetchCancelHistory) window.fetchCancelHistory();
-        const refreshBtn = document.getElementById('hdrRefresh');
-        if (refreshBtn) refreshBtn.click();
-      } else {
-        alert(res.message || "Failed to cancel ticket.");
-      }
-    } catch(e) {
-      alert("Error cancelling ticket.");
-    }
-  };
+  if(!confirm(`Are you sure you want to cancel ticket ${id}?`)) return;
+  try {
+    const res = await API.cancleTicket(id);
+    if(res.status) {
+      alert("Ticket cancelled successfully.");
+      if (window.fetchCancelHistory) window.fetchCancelHistory();
+      const refreshBtn = document.getElementById('hdrRefresh');
+      if (refreshBtn) refreshBtn.click();
+    } else { alert(res.message || "Failed to cancel ticket."); }
+  } catch(e) { alert("Error cancelling ticket."); }
 };
 
 window.openBetHistoryModal = function() {
@@ -358,7 +321,6 @@ window.fetchBetHistory = async function() {
   const dateStr = input ? input.value : "";
   const tbody = document.getElementById('betHistoryBody');
   if(tbody) tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
-  
   try {
     const res = await API.betHistory(user.username, dateStr);
     if(res.status && res.tickets && res.tickets.length > 0) {
@@ -370,39 +332,29 @@ window.fetchBetHistory = async function() {
           </tr>`
         ).join('');
       }
-    } else {
-      if(tbody) tbody.innerHTML = '<tr><td colspan="6">No tickets found.</td></tr>';
-    }
-  } catch(e) {
-    if(tbody) tbody.innerHTML = '<tr><td colspan="6">Error loading history.</td></tr>';
-  }
+    } else { if(tbody) tbody.innerHTML = '<tr><td colspan="6">No tickets found.</td></tr>'; }
+  } catch(e) { if(tbody) tbody.innerHTML = '<tr><td colspan="6">Error loading history.</td></tr>'; }
 };
 
 async function playG() {
   const userStr = sessionStorage.getItem('user');
   if (!userStr) return alert("Please Login");
   const user = JSON.parse(userStr);
-  
   let all_datas12 = [];
   let total_load_c_amount = 0;
   let total_load_c_qty = 0;
-  
   for (let code in allBets) {
     if (allBets[code] > 0) {
-      // Strip the letter prefix (e.g., 'A00' -> '00') for the API
       const numCode = code.substring(1);
       all_datas12.push(`${numCode}X${allBets[code]}`);
       total_load_c_amount += allBets[code];
       total_load_c_qty += 1;
     }
   }
-  
   if (all_datas12.length === 0) return alert("Please select at least one bet.");
-  
   const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
   const payloadAmount = total_load_c_amount * drawCount;
   const payloadQty = total_load_c_qty * drawCount;
-
   const payload = {
     username: user.username,
     all_datas12: all_datas12.join(','),
@@ -410,104 +362,78 @@ async function playG() {
     total_load_c_qty: payloadQty,
     advancr_draw_time: advanceTimeVal.length > 0 ? advanceTimeVal : ""
   };
-  
   try {
     const res = await API.insertData(payload);
-    console.log("Insert Data Res:", res);
     if(res && res.status) {
-      alert(res.message || "Bet placed successfully!");
+      const ticketObj = {
+        barcode: res.barcode || '0000000000',
+        username: user.username,
+        record_date: new Date().toISOString().split('T')[0],
+        draw_time: advanceTimeVal.length > 0 ? advanceTimeVal[0] : (document.getElementById('hdrTime')?.textContent || ''),
+        tck_time: new Date().toLocaleTimeString('en-US', { hour12: false }),
+        qty: payloadQty,
+        amount: payloadAmount
+      };
+      const betLines = [];
+      for (let code in allBets) {
+        if (allBets[code] > 0) { betLines.push({ num: code.substring(1), qty: allBets[code] }); }
+      }
+      generateReprintTicket(ticketObj, betLines);
       clearSelections();
-      advanceTimeVal = []; // reset advance selection
+      advanceTimeVal = [];
       const refreshBtn = document.getElementById('hdrRefresh');
       if (refreshBtn) refreshBtn.click();
-    } else {
-      alert("Error: " + (res.message || "Failed to place bet."));
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Error placing bet.");
-  }
+    } else { alert("Error: " + (res.message || "Failed to place bet.")); }
+  } catch (err) { alert("Error placing bet."); }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   document.body.classList.add('body-G');
   const wrapper = document.querySelector('.app-wrapper');
   if (wrapper) wrapper.classList.add('layout-g');
-  const bar = document.getElementById('sharedHeaderBar');
-  if (bar) bar.classList.add('premium-hdr');
-  const bb = document.getElementById('sharedBottom');
-  if (bb) bb.classList.add('g-footer-mode');
-  const rsb = document.getElementById('rightSb');
-  if (rsb) rsb.classList.add('right-sb-premium', 'g-sidebar-mode');
-
   buildSidebar(config.btns);
   buildGGrid();
-
   const playBtn = document.getElementById('playBtn');
   if (playBtn) playBtn.onclick = playG;
-
   const powerBtn = document.querySelector('.power-btn');
-  if (powerBtn) {
-    powerBtn.onclick = () => {
-      const modal = document.getElementById('logoutModal');
-      if (modal) modal.style.display = 'flex';
-    };
-  }
-
-  window.closeLogoutModal = () => {
-    const m = document.getElementById('logoutModal'); if (m) m.style.display = 'none';
-  };
-  window.confirmLogout = async () => {
-    sessionStorage.removeItem('user');
-    window.location.href = '../index.html';
-  };
+  if (powerBtn) powerBtn.onclick = () => { const m = document.getElementById('logoutModal'); if(m) m.style.display='flex'; };
+  window.closeLogoutModal = () => { const m = document.getElementById('logoutModal'); if (m) m.style.display = 'none'; };
+  window.confirmLogout = async () => { sessionStorage.removeItem('user'); window.location.href = '../index.html'; };
 
   const getBalance = async () => {
     const balanceEl = document.getElementById('statBalance');
     const userString = sessionStorage.getItem('user');
-
-    if (!userString) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    let user;
+    if (!userString) return;
+    const user = JSON.parse(userString);
     try {
-      user = JSON.parse(userString);
-    } catch(e) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    const username = user.username;
-
-    if (!username) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    try {
-      const resp = await API.balance(username);
+      const resp = await API.balance(user.username);
       if (resp && resp.success === true && resp.data) {
-        if (balanceEl) balanceEl.textContent = resp.data.balance;
+        if (balanceEl) balanceEl.textContent = Math.floor(resp.data.balance);
       }
-    } catch (err) {
-      console.error('Balance fetch error:', err);
-    }
+    } catch (err) { console.error('Balance error:', err); }
   };
-
   const refreshBtn = document.getElementById('hdrRefresh');
   if (refreshBtn)  refreshBtn.onclick = getBalance;
-
   getBalance();
 
-  // Sync Timer API initially
+  const lastDrawBetAmount = async () => {
+    const userString = sessionStorage.getItem('user');
+    if (!userString) return;
+    const user = JSON.parse(userString);
+    try {
+      const resp = await API.lastDrawBetAmount(user.username);
+      if (resp && resp.status === true) {
+        const lastAmountEl = document.getElementById('L_Draw_Amount');
+        if (lastAmountEl) lastAmountEl.textContent = Math.floor(resp.last_bet_amount || 0);
+      }
+    } catch (err) { console.error('Last draw error:', err); }
+  };
+  lastDrawBetAmount();
+
   const syncTimer = async () => {
     try {
       const res = await API.timer();
-      if(res.success && res.time) {
-        countdown1 = parseInt(res.time);
-      }
+      if(res.success && res.time) countdown1 = parseInt(res.time);
     } catch(e) { console.error('Timer API Error:', e); }
   };
   syncTimer();
@@ -515,4 +441,131 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateClock();
   setInterval(updateClock, 1000);
   setInterval(updateCountdowns, 1000);
+});
+
+window.openReprintModal = async function() {
+  const modal = document.getElementById('reprintModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    const body = document.getElementById('reprintHistoryBody');
+    if(body) body.innerHTML = '<tr><td colspan="6" style="padding:20px; color:#fff;">Loading...</td></tr>';
+    const userStr = sessionStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const username = user ? user.username : 'anil';
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      const res = await API.betHistory(username, today);
+      if(body) {
+        if(res && res.status === true && res.tickets && res.tickets.length > 0) {
+          body.innerHTML = res.tickets.map(t => `
+            <tr>
+              <td>${t.id}</td>
+              <td style="color:#0f0;">${t.barcode}</td>
+              <td>${t.draw_times}</td>
+              <td>${t.qty}</td>
+              <td>${t.amount}</td>
+              <td><button onclick="directReprint('${t.barcode}')" style="background:#ed1c24; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">REPRINT</button></td>
+            </tr>`).join('');
+        } else { body.innerHTML = '<tr><td colspan="6">No bets found.</td></tr>'; }
+      }
+    } catch (e) { if(body) body.innerHTML = '<tr><td colspan="6">Error.</td></tr>'; }
+  }
+};
+
+window.directReprint = async function(barcode) {
+  const userStr = sessionStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const username = user ? user.username : 'anil';
+  try {
+    const res = await API.reprintTicket(barcode, username);
+    if(res && res.status === true && res.tickets && res.tickets.length > 0) {
+      generateReprintTicket(res.tickets[0], res.tickets[0].bet_lines);
+    } else { alert("Ticket not found."); }
+  } catch (err) { alert("Reprint failed."); }
+};
+
+window.closeReprintModal = function() {
+  const modal = document.getElementById('reprintModal');
+  if (modal) modal.style.display = 'none';
+};
+
+function generateReprintTicket(ticket, lines) {
+  const canvas = document.createElement('canvas');
+  JsBarcode(canvas, ticket.barcode, { format: "CODE128", width: 1.5, height: 40, displayValue: false, margin: 0 });
+  const barcodeData = canvas.toDataURL("image/png");
+
+  const printWindow = window.open('', '_blank', 'width=400,height=800');
+  let betLinesHtml = '';
+  if(lines && Array.isArray(lines)) {
+    lines.forEach(line => {
+      const numVal = parseInt(line.num);
+      const letter = LETTERS[Math.floor(numVal / 10)] || '';
+      const fullNum = letter + String(numVal).padStart(2, '0');
+      betLinesHtml += `<tr>
+          <td style="font-size: 16px; font-weight: bold; padding: 4px 0; border-bottom: 1px solid #ddd; text-align:left;">${fullNum}</td>
+          <td style="font-size: 16px; font-weight: bold; padding: 4px 0; border-bottom: 1px solid #ddd; text-align:right;">${line.qty}</td>
+        </tr>`;
+    });
+  }
+
+  const content = `
+    <html>
+      <head>
+        <title>PLATINUM LOTTERY</title>
+        <style>
+          @page { size: 80mm auto; margin: 0; }
+          body { font-family: 'Courier New', Courier, monospace; width: 74mm; margin: 0; padding: 4mm; color: #000; }
+          .container { border: 2px solid #000; padding: 5px; }
+          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
+          .brand { font-size: 26px; font-weight: 900; letter-spacing: 2px; }
+          .sub { font-size: 14px; font-weight: bold; }
+          .info-sec { font-size: 12px; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
+          .row { display: flex; justify-content: space-between; }
+          .bet-table { width: 100%; border-collapse: collapse; }
+          .total-box { background: #000; color: #fff; padding: 8px; margin-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; }
+          .footer { text-align: center; margin-top: 15px; font-size: 11px; border-top: 1px solid #000; padding-top: 8px; }
+          .bc-box { text-align: center; margin: 10px 0; }
+          .bc-img { width: 100%; max-height: 50px; }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">
+        <div class="container">
+          <div class="header">
+            <div class="brand">PLATINUM</div>
+            <div class="sub">GREEN WIN GAME</div>
+          </div>
+          <div class="info-sec">
+            <div class="row"><b>ID:</b> <span>${ticket.username}</span></div>
+            <div class="row"><b>DATE:</b> <span>${ticket.record_date}</span></div>
+            <div class="row"><b>DRAW:</b> <span>${ticket.draw_time}</span></div>
+            <div class="row"><b>TIME:</b> <span>${ticket.tck_time}</span></div>
+          </div>
+          <table class="bet-table">
+            <thead>
+              <tr style="border-bottom:2px solid #000;">
+                <th style="text-align:left;">NUMBER</th>
+                <th style="text-align:right;">QTY</th>
+              </tr>
+            </thead>
+            <tbody>${betLinesHtml}</tbody>
+          </table>
+          <div class="total-box"><span>TOTAL:</span><span>Rs. ${ticket.amount}.00</span></div>
+          <div class="bc-box">
+            <div style="font-weight:bold; letter-spacing:2px;">${ticket.barcode}</div>
+            <img class="bc-img" src="${barcodeData}" />
+          </div>
+          <div class="footer">
+            <div>**********</div>
+            <div>GOOD LUCK - PLAY AGAIN</div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  printWindow.document.write(content);
+  printWindow.document.close();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'F2') { e.preventDefault(); openReprintModal(); }
 });

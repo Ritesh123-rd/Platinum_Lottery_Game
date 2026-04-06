@@ -10,6 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="../style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 </head>
 
 <body>
@@ -65,7 +66,7 @@
             </div>
             <div class="hdr-tx-stack" id="hdrTxStack">
               <div class="hdr-tx-lbl">Last Transaction:</div>
-              <div class="hdr-tx-val" id="hdrLastTx">0</div>
+              <div class="hdr-tx-val" id="L_Draw_Amount">0</div>
 
             </div>
           </div>
@@ -139,6 +140,7 @@
         <input class="bb-cinput" type="text" placeholder="Pressed F8" />
       </div>
       <button class="bb-play" id="playBtn">PLAY(F7)</button>
+      <button class="bb-reprint" style="display:none;"></button>
       <button class="bb-clear" onclick="clearSelections()">Clear(ESC)</button>
       <div class="bb-stats main-stats">
         <div class="bb-stat-pod">
@@ -274,6 +276,45 @@
     </div>
 
   </div><!-- /app-wrapper -->
+  <!-- REPRINT TICKET MODAL (Enhanced with History) -->
+  <div id="reprintModal" class="modal-overlay" style="display:none; z-index:99999;">
+    <div class="modal-content history-modal" style="max-width:850px; background:#111; border:2px solid #ed1c24; box-shadow:0 0 40px rgba(0,0,0,0.9); border-radius:12px;">
+      <div class="modal-header" style="background:linear-gradient(to right, #ed1c24, #911); padding:15px; border-radius:12px 12px 0 0; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0; font-size:1.5rem; color:#fff; font-family:'Orbitron', sans-serif; letter-spacing:1px;">REPRINT BET HISTORY</h2>
+        <button class="close-modal" onclick="closeReprintModal()" style="background:none; border:none; color:#fff; font-size:2.2rem; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <!-- Manual Search Box -->
+        <div style="display:flex; gap:12px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:20px; align-items:center;">
+          <label style="color:#aaa; font-weight:bold; font-family:'Oswald';">BARCODE:</label>
+          <input type="text" id="reprintBarcodeInp" style="flex:1; padding:12px; border-radius:6px; border:1px solid #444; background:#000; color:#0f0; font-size:18px; text-transform:uppercase; font-family:monospace; outline:none;" placeholder="ENTER MANUALLY..." />
+          <button class="modal-btn primary" onclick="handleReprintSubmit()" style="background:#ed1c24; border:none; padding:12px 30px; color:#fff; border-radius:6px; cursor:pointer; font-weight:bold; font-family:'Oswald';">PRINT</button>
+        </div>
+        
+        <div class="history-table-container" style="max-height:450px; overflow-y:auto; background:#000; border-radius:8px; border:1px solid #333; box-shadow:inset 0 0 10px #000;">
+          <table class="history-table" style="width:100%; border-collapse:collapse; color:#ddd; font-family:'Oswald', sans-serif; font-size:15px;">
+            <thead style="background:linear-gradient(to bottom, #222, #111); position:sticky; top:0; z-index:10;">
+              <tr style="border-bottom:2px solid #444;">
+                <th style="padding:15px; text-align:center;">ID</th>
+                <th style="padding:15px; text-align:center;">Barcode</th>
+                <th style="padding:15px; text-align:center;">Draw Time</th>
+                <th style="padding:15px; text-align:center;">Qty</th>
+                <th style="padding:15px; text-align:center;">Amount</th>
+                <th style="padding:15px; text-align:center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="reprintHistoryBody" style="text-align:center;">
+              <tr><td colspan="6" style="padding:40px; color:#666;">Loading recent bets...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:15px; border-top:1px solid #222; text-align:right;">
+        <button class="modal-btn" onclick="closeReprintModal()" style="background:#555; border:none; padding:10px 30px; color:#fff; border-radius:6px; cursor:pointer; font-family:'Oswald';">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../config.js"></script>
   <script src="../api.js"></script>
   <script src="script.js"></script>
