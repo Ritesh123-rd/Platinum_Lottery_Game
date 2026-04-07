@@ -527,6 +527,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  const getBalance = async () => {
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    try {
+      const res = await API.balance(user.username, null, '4D');
+      if (res && res.success && res.data) {
+        const limitVal = document.getElementById('hdrLimitValue');
+        if (limitVal) limitVal.textContent = res.data.balance;
+      }
+    } catch (e) { console.error('Balance error:', e); }
+  };
+
+  getBalance();
+  setInterval(getBalance, 5000);
+
   buildSidebar(config.btns);
   buildFDGrid();
   updateClock();

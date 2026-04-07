@@ -142,6 +142,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  const getBalance = async () => {
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    try {
+      const res = await API.balance(user.username, null, '3D');
+      if (res && res.success && res.data) {
+        const limitVal = document.getElementById('s3LimitVal');
+        if (limitVal) limitVal.textContent = res.data.balance;
+      }
+    } catch (e) { console.error('Balance error:', e); }
+  };
+
+  getBalance();
+  setInterval(getBalance, 5000);
+
   buildS3Digits();
   updateClock();
   applyMobileScale();

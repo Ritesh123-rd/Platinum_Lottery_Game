@@ -138,6 +138,22 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '../index.html';
     };
   }
+  const getBalance = async () => {
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    try {
+      const res = await API.balance(user.username, null, 'C');
+      if (res && res.success && res.data) {
+        const limitVal = document.getElementById('cLimitVal');
+        if (limitVal) limitVal.textContent = res.data.balance;
+      }
+    } catch (e) { console.error('Balance error:', e); }
+  };
+
+  getBalance();
+  setInterval(getBalance, 5000);
+
   buildCHistory();
   updateClock();
   applyMobileScale();
