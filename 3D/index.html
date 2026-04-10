@@ -95,20 +95,20 @@
             </div>
 
             <div class="s3-digit-controls">
-              <label class="s3-cbx-premium all digit-row-all"><input type="checkbox" /><span class="cbx-lbl">ALL</span></label>
+              <label class="s3-cbx-premium all digit-row-all"><input type="checkbox" id="allDigitsCbx" /><span class="cbx-lbl">ALL</span></label>
               <div class="s3-digit-row" id="s3Digits"></div>
             </div>
 
             <div class="s3-addnum-area">
-              <button class="s3-addnum-btn-p">ADDNUMBER</button>
+              <input type="text" id="addNumberInput" class="s3-num-input" maxlength="3" placeholder="ADD NUM" style="width: 80px; margin-right: 10px;">
               <span class="s3-range-lbl">Range-:</span>
-              <div class="s3-num-input">NUM</div>
+              <input type="text" id="rangeFrom" class="s3-num-input" maxlength="3" placeholder="FROM">
               <span class="s3-to-lbl">To</span>
-              <div class="s3-num-input">NUM</div>
+              <input type="text" id="rangeTo" class="s3-num-input" maxlength="3" placeholder="TO">
             </div>
 
-            <div class="s3-main-selection-area">
-              <div class="s3-selection-canvas"></div>
+            <div class="s3-main-selection-area" style="overflow-y: auto; max-height: 380px; background: #004d11;">
+              <div id="output" class="flex flex-wrap gap-2 p-2" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 10px 60px 10px;"></div>
             </div>
           </div>
 
@@ -145,7 +145,7 @@
           <div class="s3-stat-item"><label>Total Points</label><div class="s3-bval">0</div></div>
         </div>
         <div class="s3-footer-ctrl">
-          <button class="s3-rnd-pick">Random Pick</button>
+          <button class="s3-rnd-pick" id="randomPickBtn">Random Pick</button>
           <div class="s3-family-box"><input type="checkbox" id="s3fam"><label for="s3fam">Family</label></div>
         </div>
       </div>

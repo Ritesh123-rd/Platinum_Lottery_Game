@@ -1,0 +1,556 @@
+<script>
+                    // ADVANCR DRAW KE LIYE
+                    // ⬇️ Helper: how many draws to multiply
+                    function getDrawMultiplier() {
+                      const el = document.getElementById('totaldrawsel');
+                      if (!el) return 1;
+                      const raw = (el.value ?? '').trim();
+                      if (raw === '') return 1;
+                      const n = parseInt(raw, 10);
+                      if (isNaN(n)) return 1;
+                      return Math.max(0, n);
+                    }
+
+
+
+                    const selectedDigits = new Set();
+                    const allBtn = document.getElementById("btnAll");
+                    const container = document.getElementById("output");
+                    const form = document.getElementById('betForm');
+                    // ✅ Print button safety (F2/F6 ke liye)
+                    const printBtn = document.getElementById('printBtn') || document.querySelector("button[name='SUBMIT_DATAA']");
+
+                    // 🔒 HIDDEN random picks buffer (UI pe dikhana nahi)
+                    const hiddenTickets = []; // { code: "A123", betType: "STR", rate: 10 }
+
+                    // Digit select toggle
+                    document.querySelectorAll(".num-btn").forEach(btn => {
+                      btn.addEventListener("click", () => {
+                        const num = btn.dataset.num;
+                        if (selectedDigits.has(num)) {
+                          selectedDigits.delete(num);
+                          btn.classList.remove("bg-green-300");
+                        } else {
+                          selectedDigits.add(num);
+                          btn.classList.add("bg-green-300");
+                        }
+                        if (selectedDigits.size === 10) {
+                          allBtn.classList.add("bg-green-300");
+                        } else {
+                          allBtn.classList.remove("bg-green-300");
+                        }
+                      });
+                    });
+
+                    // Helper → combinations of k
+                    function getCombinations(arr, k) {
+                      let result = [];
+
+                      function helper(start, combo) {
+                        if (combo.length === k) {
+                          result.push(combo.slice());
+                          return;
+                        }
+                        for (let i = start; i < arr.length; i++) {
+                          combo.push(arr[i]);
+                          helper(i + 1, combo);
+                          combo.pop();
+                        }
+                      }
+                      helper(0, []);
+                      return result;
+                    }
+
+                    // Helper → permutations of an array
+                    function getPermutations(arr) {
+                      let result = [];
+
+                      function permute(path, options) {
+                        if (options.length === 0) {
+                          result.push(path.join(""));
+                          return;
+                        }
+                        for (let i = 0; i < options.length; i++) {
+                          permute([...path, options[i]], options.slice(0, i).concat(options.slice(i + 1)));
+                        }
+                      }
+                      permute([], arr);
+                      return result;
+                    }
+
+                    // ✅ All button
+                    allBtn.addEventListener("click", () => {
+                      const allSelected = allBtn.classList.contains("bg-green-300");
+                      if (allSelected) {
+                        selectedDigits.clear();
+                        allBtn.classList.remove("bg-green-300");
+                        document.querySelectorAll(".num-btn").forEach(btn => btn.classList.remove("bg-green-300"));
+                      } else {
+                        selectedDigits.clear();
+                        for (let i = 0; i <= 9; i++) selectedDigits.add(i.toString());
+                        allBtn.classList.add("bg-green-300");
+                        document.querySelectorAll(".num-btn").forEach(btn => btn.classList.add("bg-green-300"));
+                      }
+                    });
+
+                    // ✅ Helper: selected BetTypes
+                    function getSelectedBetTypes() {
+                      const betTypes = [];
+                      document.querySelectorAll(".optionCheck:checked").forEach(cb => {
+                        betTypes.push(cb.parentElement.textContent.trim());
+                      });
+                      if (document.getElementById("masterCheck")?.checked) {
+                        return ["Box", "STR", "FP", "BP", "SP", "AP"];
+                      }
+                      return betTypes;
+                    }
+
+                    // ✅ Helper: 2-digit auto-submit condition
+                    function shouldAutoSubmitForTwoDigits() {
+                      const boxChecked = document.querySelector("label:has(input.optionCheck):nth-child(2) input").checked;
+                      const strChecked = document.querySelector("label:has(input.optionCheck):nth-child(3) input").checked;
+                      const spChecked = document.querySelector("label:has(input.optionCheck):nth-child(4) input").checked;
+                      const fpChecked = document.querySelector("label:has(input.optionCheck):nth-child(5) input").checked;
+                      const bpChecked = document.querySelector("label:has(input.optionCheck):nth-child(6) input").checked;
+                      const apChecked = document.querySelector("label:has(input.optionCheck):nth-child(7) input").checked;
+                      return !boxChecked && !strChecked && (fpChecked || bpChecked || spChecked || apChecked);
+                    }
+
+                    function getSelectedGroups() {
+                      const groups = [];
+                      document.querySelectorAll(".childCheck:checked").forEach(cb => {
+                        const label = cb.nextElementSibling.textContent.trim(); // A / B / C
+                        groups.push(label);
+                      });
+                      return groups;
+                    }
+
+                    // default A if none
+                    function getSelectedGroupsOrDefault() {
+                      const g = getSelectedGroups();
+                      return g.length ? g : ['A'];
+                    }
+
+                    function addCard(num, betType, rate) {
+                      const selectedGroups = getSelectedGroupsOrDefault();
+                      selectedGroups.forEach(group => {
+                        const safeGroup = (group && group.trim()) ? group.trim() : 'A';
+                        const label = document.createElement("label");
+                        label.className = "ticket flex flex-col items-center justify-center w-20 p-2 border border-green-600 text-center";
+                        label.style = "height: 100px; width: 63px;";
+                        label.innerHTML = `
+                          <span class="fullCode" style="display:none;">${safeGroup}${num}</span>
+                          <span class="dispNum">${num}</span>
+                          <span class="betType">${betType}</span>
+                          <span class="rate">${rate}</span>
+                          <span class="text-red-600 font-bold cursor-pointer remove">X</span>
+                        `;
+                        label.querySelector(".remove").addEventListener("click", () => {
+                          label.remove();
+                          updateTotal();
+                        });
+                        container.appendChild(label);
+                      });
+                    }
+
+                    // ✅ Build the hidden field right before submit (NOW merges visible + hidden)
+                    form.addEventListener('submit', (e) => {
+                      // visible UI tickets -> "BETTYPEXCODEXRATE"
+                      function mapBetType(bt) {
+                        const MAP = {
+                          Box: 'BO',
+                          STR: 'ST',
+                          SP: 'SP',
+                          AP: 'AP',
+                          BP: 'BP',
+                          FP: 'FP'
+                        };
+                        return MAP[bt] ?? bt; // unknown stays as-is
+                      }
+
+                      const visiblePairs = Array.from(document.querySelectorAll('#output .ticket')).map(card => {
+                        const code = card.querySelector('.fullCode')?.textContent.trim() ?? '';
+                        const rate = card.querySelector('.rate')?.textContent.trim() ?? '0';
+                        const bt = mapBetType(card.querySelector('.betType')?.textContent.trim() ?? '');
+                        return `${bt}N${code}X${rate}`;
+                      });
+
+                      const hiddenPairs = hiddenTickets.map(t => `${mapBetType(t.betType)}N${t.code}X${t.rate}`);
+
+
+                      const allPairs = [...visiblePairs, ...hiddenPairs];
+
+                      const setHidden = (name, value, id) => {
+                        let el = document.getElementById(id);
+                        if (!el) {
+                          el = document.createElement('input');
+                          el.type = 'hidden';
+                          el.name = name;
+                          el.id = id;
+                          form.appendChild(el);
+                        }
+                        el.value = value;
+                      };
+
+                      setHidden('tck_result', allPairs.join(','), 'hiddenTickets');
+
+                      // total from UI (already ui + hidden)
+                      const grandTotal = parseInt(document.getElementById('totalAmount').textContent.trim() || '0', 10);
+                      setHidden('total_amount_to_play', String(grandTotal), 'hiddenTotal');
+
+                      if (grandTotal === 0) { // number compare
+                        e.preventDefault(); // <- stop the submit
+                        alert('place select bet!');
+                        window.location.href = '';
+                        return;
+                      }
+                    });
+
+
+
+                    form.addEventListener('keydown', (e) => {
+                      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault();
+                    });
+
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                      const form = document.getElementById('betForm');
+                      const printBtn = document.getElementById('printBtn');
+
+                      // make sure all other buttons are non-submit
+                      document.querySelectorAll('#betForm button:not(#printBtn)').forEach(b => {
+                        if (!b.hasAttribute('type')) b.setAttribute('type', 'button');
+                      });
+
+                      // F6 hotkey = trigger only #printBtn submit
+                      document.addEventListener('keydown', (e) => {
+                        if (e.key === 'F6') {
+                          e.preventDefault();
+                          if (form && printBtn) {
+                            if (form.requestSubmit) {
+                              form.requestSubmit(printBtn); // modern browsers
+                            } else {
+                              printBtn.click(); // fallback
+                            }
+                          }
+                        }
+                      });
+                    });
+
+
+
+                    function generateRange() {
+                      const $from = document.getElementById("rangeFrom");
+                      const $to = document.getElementById("rangeTo");
+
+                      const fromRaw = ($from.value || "").replace(/\D/g, "");
+                      const toRaw = ($to.value || "").replace(/\D/g, "");
+                      if (!fromRaw || !toRaw) return;
+
+                      // 👉 Decide mode by input width, not by numeric size
+                      const width = Math.max(fromRaw.length, toRaw.length); // 2 or 3
+                      const fromVal = parseInt(fromRaw, 10);
+                      const toVal = parseInt(toRaw, 10);
+                      if (isNaN(fromVal) || isNaN(toVal) || fromVal > toVal) return;
+
+                      for (let n = fromVal; n <= toVal; n++) {
+                        const formatted = n.toString().padStart(width, "0");
+
+                        if (width === 2) {
+                          // 2-digit mode (FP/BP/SP/AP). Only auto-add if your flag says so.
+                          if (shouldAutoSubmitForTwoDigits()) {
+                            generateFromTwoDigits(formatted);
+                          }
+                        } else {
+                          // 3-digit mode (Box/STR) — always use the 3-digit generator
+                          generateFromInput(formatted);
+                        }
+                      }
+
+                      // clear fields
+                      $from.value = "";
+                      $to.value = "";
+                    }
+
+                    // Trigger only when both inputs have consistent widths (2 or 3)
+                    ["rangeFrom", "rangeTo"].forEach(id => {
+                      document.getElementById(id).addEventListener("input", () => {
+                        const f = document.getElementById("rangeFrom").value.replace(/\D/g, "");
+                        const t = document.getElementById("rangeTo").value.replace(/\D/g, "");
+                        if ((f.length === 2 && t.length === 2) || (f.length === 3 && t.length === 3)) {
+                          generateRange();
+                        }
+                      });
+                    });
+
+
+
+                    function updateTotal() {
+                      const uiSum = Array.from(document.querySelectorAll("#output .ticket .rate"))
+                        .reduce((acc, s) => acc + (parseInt(s.textContent.trim(), 10) || 0), 0);
+
+                      const hiddenSum = hiddenTickets.reduce(
+                        (acc, t) => acc + (parseInt(t.rate, 10) || 0), 0
+                      );
+
+                      const baseTotal = uiSum + hiddenSum;
+                      const N = getDrawMultiplier();
+                      const finalTotal = baseTotal * N;
+
+                      document.getElementById("totalAmount").textContent = String(finalTotal);
+                    }
+
+
+                    const _drawInput = document.getElementById('totaldrawsel');
+                    if (_drawInput) {
+                      ['input', 'change'].forEach(ev => {
+                        _drawInput.addEventListener(ev, () => {
+                          updateTotal(); // multiply on every edit
+                        });
+                      });
+                    }
+
+
+
+
+                    // ✅ Generate from ADD NUMBER input
+                    function generateFromInput(baseNum) {
+                      const betTypes = getSelectedBetTypes();
+                      const selectedRate = parseInt(document.querySelector('input[name="rate"]:checked').value);
+                      betTypes.forEach(type => {
+                        let displayNum = baseNum;
+                        if (type === "FP") displayNum = baseNum.slice(0, 2);
+                        else if (type === "BP") displayNum = baseNum.slice(1);
+                        else if (type === "SP") displayNum = baseNum[0] + baseNum[2];
+                        else if (type === "AP") displayNum = baseNum.slice(0, 2);
+                        addCard(displayNum, type, selectedRate);
+                      });
+                      updateTotal();
+                    }
+
+                    function generateFromTwoDigits(baseNum) {
+                      const betTypes = getSelectedBetTypes();
+                      const selectedRate = parseInt(document.querySelector('input[name="rate"]:checked').value);
+                      betTypes.forEach(type => {
+                        let displayNum = baseNum;
+                        addCard(displayNum, type, selectedRate);
+                      });
+                      updateTotal();
+                    }
+
+                    // ✅ Input listener
+                    document.getElementById("addNumberInput").addEventListener("input", e => {
+                      const val = e.target.value;
+                      if (val.length === 3 && /^\d{3}$/.test(val)) {
+                        generateFromInput(val);
+                        e.target.value = "";
+                      } else if (val.length === 2 && /^\d{2}$/.test(val)) {
+                        if (shouldAutoSubmitForTwoDigits()) {
+                          generateFromTwoDigits(val);
+                          e.target.value = "";
+                        }
+                      }
+                    });
+
+                    // 🔄 Random picks (HIDDEN MODE: store only, DON'T display)
+                    function pushHiddenTicketsForGroups(num, betType, rate) {
+                      const groups = getSelectedGroupsOrDefault();
+                      groups.forEach(g => {
+                        hiddenTickets.push({
+                          code: `${g}${num}`,
+                          betType,
+                          rate
+                        });
+                      });
+                    }
+
+                    // Hidden mode: not display on UI, 000 - 999
+                    function generateRandomPicks(clearFirst = false) {
+                      const qtyEl = document.getElementById("qtyInput");
+                      const betType = document.getElementById("betType")?.value || "STR";
+                      const selectedRate = parseInt(document.querySelector('input[name="rate"]:checked')?.value || "0", 10);
+                      const qty = parseInt(qtyEl.value, 10);
+                      if (isNaN(qty) || qty <= 0) {
+                        // Qty invalid=> remove all previous random picks and update total
+                        // (manual/other hidden picks safe rahenge)
+                        stripRandomHidden();
+                        updateTotal();
+                        return;
+                      }
+
+                      if (clearFirst) {
+                        // UI clear optional (as before)
+                        container.innerHTML = "";
+                        // Purane sab hidden remove
+                        hiddenTickets.length = 0;
+                      } else {
+                        // UI ko mat chuo; sirf purane RANDOM picks hatao
+                        stripRandomHidden();
+                      }
+
+                      const allNumbers = Array.from({
+                        length: 1000
+                      }, (_, i) => i.toString().padStart(3, "0"));
+                      allNumbers.sort(() => Math.random() - 0.5);
+
+                      // EXACT qty push — current groups ke saath
+                      const groups = getSelectedGroupsOrDefault();
+                      let taken = 0;
+                      for (let i = 0; i < allNumbers.length && taken < qty; i++) {
+                        const n = allNumbers[i];
+                        groups.forEach(g => {
+                          hiddenTickets.push({
+                            code: `${g}${n}`,
+                            betType,
+                            rate: selectedRate,
+                            _src: 'RND' // 🔖 tag as random
+                          });
+                        });
+                        taken++;
+                      }
+
+                      updateTotal();
+                    }
+
+                    // 🔧 helper: remove previous RANDOM hidden tickets only
+                    function stripRandomHidden() {
+                      if (!hiddenTickets.length) return;
+                      const keep = hiddenTickets.filter(t => t._src !== 'RND');
+                      hiddenTickets.length = 0;
+                      hiddenTickets.push(...keep);
+                    }
+                    document.getElementById("qtyInput").addEventListener("input", e => {
+                      const val = e.target.value;
+                      if (/^\d+$/.test(val)) {
+                        generateRandomPicks(); // ab yeh replace karega, accumulate nahi
+                      } else {
+                        // Non-numeric -> saare random picks hata do
+                        stripRandomHidden();
+                        updateTotal();
+                      }
+                    });
+
+
+
+                    document.getElementById("clearBtn")?.addEventListener("click", () => {
+                      container.innerHTML = "";
+                      hiddenTickets.length = 0; // if you’re using hidden picks
+                      // ⬇️ ADD THIS
+                      updateTotal();
+                    });
+
+
+
+                    // ✅ GenerateBtn old logic (digits + single/dup/triple)
+                    document.getElementById("generateBtn").addEventListener("click", () => {
+                      const digits = Array.from(selectedDigits).sort();
+                      const betType = document.getElementById("betType").value;
+                      container.innerHTML = "";
+                      if (digits.length < 1) return;
+
+                      const singleChecked = document.querySelector("#chkSingle").checked;
+                      const dupChecked = document.querySelector("#chkDup").checked;
+                      const tripleChecked = document.querySelector("#chkTriple").checked;
+
+                      let results = [];
+
+                      function expandForSingle(digs) {
+                        let temp = [];
+                        if (digs.length === 1) {
+                          temp.push(digs[0] + digs[0] + digs[0]);
+                        } else if (digs.length === 2) {
+                          let [a, b] = digs;
+                          temp.push(a + a + b, a + b + a, b + a + a);
+                          temp.push(b + b + a, b + a + b, a + b + b);
+                        } else {
+                          const combos = getCombinations(digs, 3);
+                          combos.forEach(c => temp.push(...getPermutations(c)));
+                        }
+                        return temp;
+                      }
+
+                      function expandForDuplicate(digs) {
+                        let temp = [];
+                        if (digs.length === 1) {
+                          temp.push(digs[0] + digs[0] + digs[0]);
+                        } else {
+                          digs.forEach(d => {
+                            digs.forEach(e => {
+                              if (d !== e) temp.push(d + d + e, d + e + d, e + d + d);
+                            });
+                          });
+                        }
+                        return temp;
+                      }
+
+                      if (singleChecked && !dupChecked && !tripleChecked) {
+                        results = expandForSingle(digits);
+                      } else if (!singleChecked && dupChecked && !tripleChecked) {
+                        results = expandForDuplicate(digits);
+                      } else if (!singleChecked && !dupChecked && tripleChecked) {
+                        digits.forEach(d => results.push(d + d + d));
+                      } else if (singleChecked && dupChecked && !tripleChecked) {
+                        results.push(...expandForSingle(digits));
+                        results.push(...expandForDuplicate(digits));
+                      } else if (singleChecked && !dupChecked && tripleChecked) {
+                        results.push(...expandForSingle(digits));
+                        digits.forEach(d => results.push(d + d + d));
+                      } else if (!singleChecked && dupChecked && tripleChecked) {
+                        results.push(...expandForDuplicate(digits));
+                        digits.forEach(d => results.push(d + d + d));
+                      } else if (singleChecked && dupChecked && tripleChecked) {
+                        results.push(...expandForSingle(digits));
+                        results.push(...expandForDuplicate(digits));
+                        digits.forEach(d => results.push(d + d + d));
+                      } else if (!singleChecked && !dupChecked && !tripleChecked) {
+                        results = expandForSingle(digits);
+                      }
+
+                      results = [...new Set(results)];
+
+                      const selectedRate = parseInt(document.querySelector('input[name="rate"]:checked').value);
+                      results.forEach(num => addCard(num, betType, selectedRate));
+                      updateTotal();
+                    });
+
+                    function getSubmitData() {
+                      const cards = document.querySelectorAll("#output .ticket");
+                      const data = [];
+                      cards.forEach(card => {
+                        data.push({
+                          number: card.querySelector(".fullCode")?.textContent.trim() ?? "",
+                          betType: card.querySelector(".betType")?.textContent.trim() ?? "",
+                          rate: card.querySelector(".rate")?.textContent.trim() ?? ""
+                        });
+                      });
+                      return data;
+                    }
+
+                    document.getElementById("submitBtn")?.addEventListener("click", () => {
+                      const payload = getSubmitData();
+                      console.log("🚀 Submit Data:", payload);
+                    });
+
+                    // ⚠️ Your existing click handler retained (no removal). It will call form.submit(),
+                    // and our form 'submit' handler will overwrite/augment hidden inputs to include hidden picks.
+                    document.querySelector("button[name='SUBMIT_DATAA']").addEventListener("click", e => {
+                      e.preventDefault(); // form reload रोकने के लिए
+
+                      const allCodes = [];
+                      document.querySelectorAll("#output .fullCode").forEach(span => {
+                        allCodes.push(span.textContent);
+                      });
+
+                      let hidden = document.getElementById("hiddenTickets");
+                      if (!hidden) {
+                        hidden = document.createElement("input");
+                        hidden.type = "hidden";
+                        hidden.name = "tck_result";
+                        hidden.id = "hiddenTickets";
+                        document.querySelector("form").appendChild(hidden);
+                      }
+                      hidden.value = allCodes.join(",");
+
+                      document.querySelector("form").submit(); // triggers form.submit handler above
+                    });
+                  </script>

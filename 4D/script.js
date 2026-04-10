@@ -123,11 +123,12 @@ function buildSidebar(btns) {
 }
 
 function getCheckedSidebarIndices() {
-  let indices = [];
+  const indices = new Set();
   document.querySelectorAll('.fd-r-box input').forEach((chk, idx) => {
-      if (chk.checked) indices.push(idx);
+    if (chk.checked) indices.add(idx);
   });
-  return indices.length > 0 ? indices : [currentRangeIndex]; // Default to current if none checked
+  indices.add(currentRangeIndex); // Always include the range we are currently interacting with
+  return Array.from(indices);
 }
 
 function setGridValueWithFilters(relNum, val) {
