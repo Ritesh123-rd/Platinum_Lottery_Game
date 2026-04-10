@@ -541,9 +541,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) { console.error('Balance error:', e); }
   };
 
+
+  const syncTimer = async () => {
+    try {
+      const res = await API.timer();
+      if (res.success && res.time) countdown1 = parseInt(res.time);
+    } catch (e) { console.error('Timer API Error:', e); }
+  };
+  syncTimer();
+
+
   getBalance();
   setInterval(getBalance, 5000);
-
+  syncTimer();
+  setInterval(syncTimer, 5000);
   buildSidebar(config.btns);
   buildFDGrid();
   updateClock();
