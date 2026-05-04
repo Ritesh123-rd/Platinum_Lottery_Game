@@ -7,12 +7,61 @@ function switchPage(p) {
   else if (p !== '3D') window.location.href = '../' + p + '/index.html';
 }
 
+async function buildResults() {
+  const resContainer = document.getElementById('s3Results');
+  if (!resContainer) return;
+
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const data = await window.API.resultDateWise(today);
+
+    if (data && data.status && data.results) {
+      resContainer.innerHTML = '';
+      
+      const rows = { 'A': [], 'B': [], 'C': [] };
+      data.results.forEach(item => {
+        const fullResult = item.result; // e.g. "A134, B060, C532"
+        const parts = fullResult.split(',');
+
+        parts.forEach(p => {
+          const trimmed = p.trim();
+          const prefix = trimmed.charAt(0);
+          if (rows[prefix]) {
+            rows[prefix].push({ time: item.time, code: trimmed });
+          }
+        });
+      });
+
+      ['C', 'B', 'A'].forEach(p => {
+        const rowData = rows[p];
+        if (rowData.length === 0) return;
+
+        const rowEl = document.createElement('div');
+        rowEl.className = 's3-res-row';
+        
+        // Show last 10 for each row
+        rowData.slice(0, 10).forEach(item => {
+          const box = document.createElement('div');
+          box.className = 's3-res-box';
+          box.innerHTML = `<div class="s3-res-time">${item.time}</div><div class="s3-res-code">${item.code}</div>`;
+          rowEl.appendChild(box);
+        });
+        resContainer.appendChild(rowEl);
+      });
+    }
+  } catch (err) {
+    console.error('Build Results Error:', err);
+  }
+}
+
+setInterval(buildResults, 10000);
+
 function buildS3Digits() {
   const row = document.getElementById('s3Digits');
   const allCbx = document.getElementById('allDigitsCbx');
-  if(!row) return;
+  if (!row) return;
   row.innerHTML = '';
-  
+
   [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(n => {
     const d = document.createElement('div');
     d.className = 's3-dgt'; d.textContent = n;
@@ -21,61 +70,35 @@ function buildS3Digits() {
       d.classList.toggle('sel');
       const k = String(n);
       if (sel['3D'].has(k)) sel['3D'].delete(k); else sel['3D'].add(k);
-      
-      // Update ALL checkbox status
+
       if (allCbx) {
         allCbx.checked = (sel['3D'].size === 10);
       }
-      // No more instant generation here
     };
     row.appendChild(d);
   });
 
-  // Handle ALL checkbox toggle
   if (allCbx) {
     allCbx.addEventListener('change', () => {
       sel['3D'].clear();
       const digits = document.querySelectorAll('.s3-dgt');
       if (allCbx.checked) {
-        [0,1,2,3,4,5,6,7,8,9].forEach(n => sel['3D'].add(String(n)));
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(n => sel['3D'].add(String(n)));
         digits.forEach(d => d.classList.add('sel'));
       } else {
         digits.forEach(d => d.classList.remove('sel'));
       }
     });
   }
-  
-  // ... rest of the code for results ...
 
-  const res = document.getElementById('s3Results');
-  if(res) {
-    res.innerHTML = '';
-    const times = ['11:45 AM', '11:30 AM', '11:15 AM', '11:00 AM', '10:45 AM', '10:30 AM', '10:15 AM', '10:00 AM', '9:45 AM', '9:30 AM'];
-    const gameData = [
-      ['C089', 'C124', 'C554', 'C581', 'C472', 'C063', 'C215', 'C255', 'C170', 'C589'],
-      ['B871', 'B174', 'B975', 'B353', 'B527', 'B380', 'B436', 'B393', 'B795', 'B516'],
-      ['A966', 'A166', 'A234', 'A385', 'A923', 'A237', 'A468', 'A289', 'A025', 'A205']
-    ];
-
-    gameData.forEach(rowCodes => {
-      const row = document.createElement('div');
-      row.className = 's3-res-row';
-      rowCodes.forEach((code, i) => {
-        const box = document.createElement('div');
-        box.className = 's3-res-box';
-        box.innerHTML = `<div class="s3-res-time">${times[i]}</div><div class="s3-res-code">${code}</div>`;
-        row.appendChild(box);
-      });
-      res.appendChild(row);
-    });
-  }
+  buildResults(); 
 }
 
 function updateStats() {
   const n = sel['3D'].size;
   const s3s = document.getElementById('s3statSpots');
   const s3p = document.getElementById('s3statPrize');
-  if (s3s) s3s.textContent = n; 
+  if (s3s) s3s.textContent = n;
   if (s3p) s3p.textContent = n * 10;
 }
 
@@ -84,17 +107,22 @@ function clearSelections() {
   document.querySelectorAll('.s3-dgt.sel').forEach(e => e.classList.remove('sel'));
   const output = document.getElementById('output');
   if (output) output.innerHTML = '';
-  
+
+  // Reset Top Row Checkboxes (Ind: checked, others: unchecked)
+  const indCbx = document.getElementById('indCbx');
+  const multiCbx = document.getElementById('multiCbx');
+  const allCbxTop = document.getElementById('allCbxTop');
+  if (indCbx) indCbx.checked = true;
+  if (multiCbx) multiCbx.checked = false;
+  if (allCbxTop) allCbxTop.checked = false;
+
   // Reset Group Checkboxes (A: checked, B/C: unchecked)
-  const inputsBot = document.querySelectorAll('.s3-row-bot input');
-  if(inputsBot[0]) inputsBot[0].checked = true;
-  if(inputsBot[1]) inputsBot[1].checked = false;
-  if(inputsBot[2]) inputsBot[2].checked = false;
-  
-  // Reset Top Row Checkboxes (Ind: checked, All: unchecked)
-  const inputsTop = document.querySelectorAll('.s3-row-top input');
-  if(inputsTop[0]) inputsTop[0].checked = true;
-  if(inputsTop[2]) inputsTop[2].checked = false;
+  const cbxA = document.getElementById('cbxA');
+  const cbxB = document.getElementById('cbxB');
+  const cbxC = document.getElementById('cbxC');
+  if (cbxA) cbxA.checked = true;
+  if (cbxB) cbxB.checked = false;
+  if (cbxC) cbxC.checked = false;
 
   // Reset Bet Types (Box: active, Others: inactive)
   document.querySelectorAll('.s3-tbtn').forEach(btn => {
@@ -130,13 +158,134 @@ function updateCountdowns() {
   }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'F7') { 
-    e.preventDefault(); 
-    const pb = document.getElementById('playBtn');
-    if(pb) pb.click(); 
+async function showReprintModal(isReprint = true, selectedDate = null) {
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+
+  const today = new Date().toISOString().split("T")[0];
+  const dateToFetch = selectedDate || today;
+
+  let tableRows = "";
+
+  try {
+    const response = await window.API.betHistory(user.username, dateToFetch);
+    const tickets = response.tickets || response.data || [];
+    const recordDate = response.record_date || dateToFetch;
+
+    if (response.status && tickets.length > 0) {
+      tickets.forEach((item, index) => {
+        tableRows += `
+          <tr style="background:#222; color: #ddd;">
+            <td style="padding:10px; border-bottom:1px solid #444;">${index + 1}</td>
+            <td style="padding:10px; border-bottom:1px solid #444;">${item.barcode}</td>
+            <td style="padding:10px; border-bottom:1px solid #444;">${item.draw_times}</td>
+            <td style="padding:10px; border-bottom:1px solid #444;">${item.amount}</td>
+            <td style="padding:10px; border-bottom:1px solid #444;">${item.qty || '0'}</td>
+            <td style="padding:10px; border-bottom:1px solid #444;">${recordDate}</td>
+            ${isReprint ? `
+              <td style="padding:10px; border-bottom:1px solid #444;">
+                <button class="nav-tab active" onclick="confirmReprint('${item.barcode}')" style="width:auto; padding:5px 15px; margin:0; font-size:12px;">REPRINT</button>
+              </td>
+            ` : ''}
+          </tr>
+        `;
+      });
+    } else {
+      tableRows = `<tr><td colspan="${isReprint ? 7 : 6}" style="padding:20px; text-align:center; color:#666;">No bets found for ${recordDate}.</td></tr>`;
+    }
+  } catch (error) {
+    console.error("Bet History Error:", error);
+    tableRows = `<tr><td colspan="${isReprint ? 7 : 6}" style="padding:20px; text-align:center; color:red;">Failed to load history.</td></tr>`;
   }
-  if (e.key === 'Escape' || e.key === 'F10') clearSelections();
+
+  // Check if modal already exists to just update it
+  let modal = document.querySelector(".reprint-modal-overlay");
+  if (modal) {
+    modal.querySelector(".history-table tbody").innerHTML = tableRows;
+    return;
+  }
+
+  modal = document.createElement("div");
+  modal.className = "modal-overlay reprint-modal-overlay";
+  modal.style.display = "flex";
+
+  modal.innerHTML = `
+    <div class="modal-content history-modal" style="width:900px; max-width:95%;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:15px; flex:1;">
+          <h2 style="margin:0; font-size:20px;">${isReprint ? 'REPRINT TICKET' : 'BET HISTORY'}</h2>
+          <input type="date" id="historyDateInput" value="${dateToFetch}" 
+                 style="padding:5px 10px; border-radius:4px; border:1px solid #444; background:#000; color:#0f0;"
+                 onchange="showReprintModal(${isReprint}, this.value)">
+          ${isReprint ? `
+            <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex:1;">
+              <input type="text" id="barcodeSearch" placeholder="ENTER BARCODE..." style="flex:1; padding:6px 12px; border-radius:4px; border:1px solid #444; background:#000; color:#0f0; font-size:14px; outline:none;" />
+              <button class="nav-tab active" onclick="confirmReprint(document.getElementById('barcodeSearch').value)" style="width:auto; padding:6px 15px; margin:0;">PRINT</button>
+            </div>
+          ` : ''}
+        </div>
+        <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+        <table class="history-table" style="width:100%; border-collapse:collapse; color:#ddd; font-size:13px;">
+          <thead>
+            <tr style="background:#333; color:#f1ce07; text-align:left;">
+              <th style="padding:10px; border-bottom:1px solid #444;">Sr.No</th>
+              <th style="padding:10px; border-bottom:1px solid #444;">Barcode</th>
+              <th style="padding:10px; border-bottom:1px solid #444;">Draw Time</th>
+              <th style="padding:10px; border-bottom:1px solid #444;">Amount</th>
+              <th style="padding:10px; border-bottom:1px solid #444;">Qty</th>
+              <th style="padding:10px; border-bottom:1px solid #444;">Date</th>
+              ${isReprint ? '<th style="padding:10px; border-bottom:1px solid #444;">Action</th>' : ''}
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function confirmReprint(barcode) {
+  if (!barcode) return alert('Please enter barcode');
+  showStatusModal("SUCCESS", "Ticket " + barcode + " reprinted successfully!", "success");
+}
+
+function openReprintModal() { showReprintModal(true); }
+function openBetHistoryModal() { showReprintModal(false); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'F11') {
+    e.preventDefault();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+  if (e.key === 'F7') {
+    e.preventDefault();
+    const pb = document.getElementById('playBtn');
+    if (pb) pb.click();
+  }
+  if (e.key === 'F2') {
+    e.preventDefault();
+    openReprintModal();
+  }
+  if (e.key === 'F10') {
+    e.preventDefault();
+    openCancelModal();
+  }
+  if (e.key === 'i' || e.key === 'I') {
+    e.preventDefault();
+    openBetHistoryModal();
+  }
+  if (e.key === 'Escape') clearSelections();
 });
 
 const DESIGN_W = 1366;
@@ -146,23 +295,32 @@ function applyMobileScale() {
   const wrapper = document.querySelector('.app-wrapper');
   if (!wrapper) return;
 
-  const isPortrait = window.innerHeight > window.innerWidth;
-  const isMobileW = window.innerWidth <= 600;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const isFullscreen = !!document.fullscreenElement;
+  const isPortrait = vh > vw;
+  const isMobileW = vw <= 600;
+  const needsScale = isFullscreen || (isPortrait && isMobileW);
 
-  if (isPortrait && isMobileW) {
-    const scaleByW = window.innerWidth / DESIGN_W;
-    const scaleByH = window.innerHeight / DESIGN_H;
+  if (needsScale) {
+    const scaleByW = vw / DESIGN_W;
+    const scaleByH = vh / DESIGN_H;
     const scale = Math.min(scaleByW, scaleByH);
+
+    const scaledW = DESIGN_W * scale;
+    const scaledH = DESIGN_H * scale;
+    const offsetX = (vw - scaledW) / 2;
+    const offsetY = (vh - scaledH) / 2;
 
     wrapper.style.width = DESIGN_W + 'px';
     wrapper.style.height = DESIGN_H + 'px';
     wrapper.style.transformOrigin = 'top left';
-    wrapper.style.transform = `scale(${scale})`;
+    wrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
     wrapper.style.position = 'absolute';
     wrapper.style.top = '0';
     wrapper.style.left = '0';
 
-    document.body.style.height = (DESIGN_H * scale) + 'px';
+    document.body.style.height = vh + 'px';
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
   } else {
@@ -181,8 +339,16 @@ function applyMobileScale() {
 
 window.addEventListener('resize', applyMobileScale);
 window.addEventListener('orientationchange', applyMobileScale);
+document.addEventListener('fullscreenchange', applyMobileScale);
 
 document.addEventListener('DOMContentLoaded', () => {
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) {
+    alert('Session expired. Please login again.');
+    window.location.href = '../index.html';
+    return;
+  }
+  
   document.body.classList.add('body-3D');
 
   const powerBtn = document.querySelector('.power-btn');
@@ -197,6 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const userStr = sessionStorage.getItem('user');
     if (!userStr) return;
     const user = JSON.parse(userStr);
+
+    // Update ID display
+    const idEl = document.querySelector('.s3-id-box span');
+    if (idEl) idEl.textContent = user.username;
+
     try {
       const res = await API.balance(user.username, null, '3D');
       if (res && res.success && res.data) {
@@ -245,34 +416,68 @@ function setupRandomPick() {
 }
 
 function setupGroups() {
-  const inputsTop = document.querySelectorAll('.s3-row-top input');
-  const inputsBot = document.querySelectorAll('.s3-row-bot input');
-  const allCbx = inputsTop[2];
+  const indCbx = document.getElementById('indCbx');
+  const multiCbx = document.getElementById('multiCbx');
+  const allCbxTop = document.getElementById('allCbxTop');
+  const cbxA = document.getElementById('cbxA');
+  const cbxB = document.getElementById('cbxB');
+  const cbxC = document.getElementById('cbxC');
+  const bots = [cbxA, cbxB, cbxC];
 
-  if (allCbx) {
-    allCbx.addEventListener('change', () => {
-      inputsBot.forEach(cb => { cb.checked = allCbx.checked; });
-      document.querySelectorAll('.s3-tbtn').forEach(btn => {
-        if (allCbx.checked) {
-          btn.classList.add('active');
-          const icon = btn.querySelector('.tbtn-check, .tbtn-box');
-          if(icon) { icon.className = 'tbtn-check'; icon.textContent = '✓'; }
-        } else {
-          btn.classList.remove('active');
-          const icon = btn.querySelector('.tbtn-check, .tbtn-box');
-          if(icon) { icon.className = 'tbtn-box'; icon.textContent = ''; }
-          if (btn.querySelector('.s3-tbtn-bot').textContent.trim() === 'Box') {
-             btn.classList.add('active');
-             if(icon) { icon.className = 'tbtn-check'; icon.textContent = '✓'; }
-          }
-        }
+  // Logic for Ind. / Multi. / All. (Top Row)
+  const setTop = (selected) => {
+    indCbx.checked = (selected === 'ind');
+    multiCbx.checked = (selected === 'multi');
+    allCbxTop.checked = (selected === 'all');
+  };
+
+  indCbx.addEventListener('change', () => {
+    if (indCbx.checked) {
+      setTop('ind');
+      // Ensure only one bottom is checked
+      let first = true;
+      bots.forEach(cb => {
+        if (first && cb.checked) first = false;
+        else cb.checked = false;
       });
-    });
-  }
-  
-  inputsBot.forEach(cb => {
+      if (first && cbxA) cbxA.checked = true;
+    } else {
+      indCbx.checked = true; // Prevent unchecking if it's already active
+    }
+  });
+
+  multiCbx.addEventListener('change', () => {
+    if (multiCbx.checked) setTop('multi');
+    else multiCbx.checked = true;
+  });
+
+  allCbxTop.addEventListener('change', () => {
+    if (allCbxTop.checked) {
+      setTop('all');
+      bots.forEach(cb => cb.checked = true);
+    } else {
+      allCbxTop.checked = true;
+    }
+  });
+
+  // Logic for A / B / C (Bottom Row)
+  bots.forEach((cb, idx) => {
     cb.addEventListener('change', () => {
-      if (!cb.checked && allCbx) allCbx.checked = false;
+      if (indCbx.checked) {
+        // Radio button behavior
+        bots.forEach(other => { if (other !== cb) other.checked = false; });
+        if (!cb.checked) cb.checked = true; // Keep at least one checked
+      } else {
+        // Multi or All mode behavior
+        const checkedCount = bots.filter(c => c.checked).length;
+        if (checkedCount === 0) {
+          cb.checked = true; // Keep at least one checked
+        } else if (checkedCount === 3) {
+          setTop('all');
+        } else {
+          setTop('multi');
+        }
+      }
     });
   });
 }
@@ -280,6 +485,13 @@ function setupGroups() {
 function setupBetTypes() {
   document.querySelectorAll('.s3-tbtn').forEach(btn => {
     btn.onclick = () => {
+      const activeBtns = document.querySelectorAll('.s3-tbtn.active');
+      
+      // If clicking an active button AND it's the only one active, don't allow unselecting
+      if (btn.classList.contains('active') && activeBtns.length <= 1) {
+        return; 
+      }
+
       btn.classList.toggle('active');
       const iconBox = btn.querySelector('.tbtn-check, .tbtn-box');
       if (btn.classList.contains('active')) {
@@ -316,6 +528,9 @@ function addCard(num, betType, rate = 10, fromGrid = false) {
   groups.forEach(group => {
     const card = document.createElement('div');
     card.className = 'ticket' + (fromGrid ? ' from-grid' : '');
+    card.dataset.num = num;
+    card.dataset.group = group;
+    card.dataset.type = betType;
     card.style = "background: #fff; color: #000; padding: 6px; border-radius: 4px; width: 63px; height: 100px; text-align: center; border: 2px solid #000; font-size: 13px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);";
     card.innerHTML = `
       <div class="fullCode" style="display:none">${group}${num}</div>
@@ -350,9 +565,9 @@ function generateFromInput(baseNum, fromGrid = false) {
     else if (type === "BP") displayNum = baseNum.slice(1);
     else if (type === "SP") displayNum = baseNum[0] + baseNum[2];
     else if (type === "AP") displayNum = baseNum.slice(0, 2);
-    
+
     if (["Box", "Straight"].includes(type) && baseNum.length !== 3) return;
-    
+
     addCard(displayNum, type, rate, fromGrid);
   });
 }
@@ -365,7 +580,7 @@ function generateFromTwoDigits(baseNum) {
   const rate = 10;
   betTypes.forEach(type => {
     if (['FP', 'BP', 'SP', 'AP'].includes(type)) {
-      addCard(baseNum, type, rate, false); 
+      addCard(baseNum, type, rate, false);
     }
   });
 }
@@ -395,7 +610,7 @@ function setupAddNumber() {
   }
 
   [rangeFromInput, rangeToInput].forEach(el => {
-    if(!el) return;
+    if (!el) return;
     el.addEventListener('input', () => {
       const fVal = rangeFromInput.value;
       const tVal = rangeToInput.value;
@@ -405,22 +620,22 @@ function setupAddNumber() {
         const toInt = parseInt(tVal, 10);
         if (isNaN(fromInt) || isNaN(toInt) || fromInt > toInt) return;
         const width = Math.max(fVal.length, tVal.length);
-        
+
         if (sel['3D'].size > 0) {
-           let combinations = generateAllGridPossible(width);
-           combinations.forEach(num => {
-             const nInt = parseInt(num, 10);
-             if (nInt >= fromInt && nInt <= toInt) {
-               if (width === 3) generateFromInput(num);
-               else generateFromTwoDigits(num);
-             }
-           });
+          let combinations = generateAllGridPossible(width);
+          combinations.forEach(num => {
+            const nInt = parseInt(num, 10);
+            if (nInt >= fromInt && nInt <= toInt) {
+              if (width === 3) generateFromInput(num);
+              else generateFromTwoDigits(num);
+            }
+          });
         } else {
-           for (let i = fromInt; i <= toInt; i++) {
-             const num = String(i).padStart(width, '0');
-             if (width === 3) generateFromInput(num);
-             else generateFromTwoDigits(num);
-           }
+          for (let i = fromInt; i <= toInt; i++) {
+            const num = String(i).padStart(width, '0');
+            if (width === 3) generateFromInput(num);
+            else generateFromTwoDigits(num);
+          }
         }
         rangeFromInput.value = '';
         rangeToInput.value = '';
@@ -442,14 +657,14 @@ function isValidForGrid(numStr) {
 function generateAllGridPossible(len) {
   const digits = Array.from(sel['3D']);
   let results = [];
-  
+
   function backtrack(current) {
     if (current.length === len) { results.push(current); return; }
     for (let d of digits) {
       backtrack(current + d);
     }
   }
-  
+
   backtrack("");
   return results;
 }
@@ -524,10 +739,10 @@ function generateFromInput(baseNum, fromGrid = false) {
     else if (type === "BP") displayNum = baseNum.slice(1);
     else if (type === "SP") displayNum = baseNum[0] + baseNum[2];
     else if (type === "AP") displayNum = baseNum.slice(0, 2);
-    
+
     // Safety check: Box/Straight require 3 digits
     if (["Box", "Straight"].includes(type) && baseNum.length !== 3) return;
-    
+
     addCard(displayNum, type, rate, fromGrid);
   });
 }
@@ -544,15 +759,243 @@ function generateFromTwoDigits(baseNum) {
 }
 
 // Update updateStats to include tickets
-const originalUpdateStats = updateStats;
-updateStats = function() {
+function updateStats() {
   const n = sel['3D'].size;
   const tickets = document.querySelectorAll('#output .ticket').length;
   const s3s = document.getElementById('s3statSpots');
   const s3p = document.getElementById('s3statPrize');
   const points = document.querySelectorAll('.s3-stat-item .s3-bval')[3]; // Total Points
 
-  if (s3s) s3s.textContent = n + tickets; 
-  if (s3p) s3p.textContent = (n + tickets) * 10;
-  if (points) points.textContent = (n + tickets) * 10;
-};
+  const drawCount = selectedAdvanceDraws.size > 0 ? selectedAdvanceDraws.size : 1;
+  const totalTickets = n + tickets;
+  const finalAmount = totalTickets * 10 * drawCount;
+
+  if (s3s) s3s.textContent = totalTickets * drawCount;
+  if (s3p) s3p.textContent = finalAmount;
+  if (points) points.textContent = finalAmount;
+}
+
+// Modal Control Functions
+let selectedAdvanceDraws = new Set();
+
+async function openAdvanceModal() {
+  const modal = document.getElementById('advanceModal');
+  const grid = document.getElementById('advanceDrawGrid');
+  if (!modal || !grid) return;
+
+  grid.innerHTML = '<p style="text-align:center; color:#f1ce07;">Loading draws...</p>';
+  modal.style.display = 'flex';
+
+  try {
+    const res = await window.API.advancDrawTime();
+    if (res && res.status && res.slots) {
+      grid.innerHTML = '';
+      res.slots.forEach((time, index) => {
+        const isChecked = selectedAdvanceDraws.has(time);
+        const item = document.createElement('div');
+        item.className = 'draw-checkbox-item' + (isChecked ? ' selected' : '');
+        item.style = "display: flex; align-items: center; gap: 8px; padding: 12px; background: #2a1a4a; border: 2px solid #4a3a6a; border-radius: 8px; cursor: pointer; transition: all 0.3s; color: white;";
+        item.innerHTML = `
+          <input type="checkbox" ${isChecked ? 'checked' : ''} class="draw-checkbox" style="width:18px; height:18px; cursor:pointer;">
+          <span class="draw-time-label" style="font-size:14px; font-weight:600;">${time}</span>
+        `;
+        item.onclick = (e) => {
+          const cb = item.querySelector('.draw-checkbox');
+          if (e.target !== cb) cb.checked = !cb.checked;
+          
+          if (cb.checked) {
+            selectedAdvanceDraws.add(time);
+            item.classList.add('selected');
+            item.style.background = "#5a4a7a";
+          } else {
+            selectedAdvanceDraws.delete(time);
+            item.classList.remove('selected');
+            item.style.background = "#2a1a4a";
+          }
+          const countEl = document.getElementById('selectedDrawCount');
+          if (countEl) countEl.textContent = selectedAdvanceDraws.size;
+          updateStats();
+        };
+        grid.appendChild(item);
+      });
+      const countEl = document.getElementById('selectedDrawCount');
+      if (countEl) countEl.textContent = selectedAdvanceDraws.size;
+    } else {
+      grid.innerHTML = '<p style="text-align:center; color:#aaa;">No advance draws available.</p>';
+    }
+  } catch (err) {
+    grid.innerHTML = '<p style="text-align:center; color:red;">Error loading draws.</p>';
+  }
+}
+
+function confirmAdvanceDraw() {
+  closeAdvanceModal();
+}
+
+function closeAdvanceModal() { document.getElementById('advanceModal').style.display = 'none'; }
+
+async function openCancelModal() {
+  const modal = document.getElementById('cancelBetModal');
+  const tbody = modal.querySelector('.history-table tbody');
+  if (!modal || !tbody) return;
+
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+
+  modal.style.display = 'flex';
+  tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center; color:#f1ce07;">Loading bets...</td></tr>';
+
+  try {
+    const res = await window.API.currentDrawBetHistory(user.username);
+    const tickets = res.tickets || res.data || [];
+
+    if (res.status && tickets.length > 0) {
+      tbody.innerHTML = '';
+      tickets.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding:10px; border-bottom:1px solid #444;">${index + 1}</td>
+          <td style="padding:10px; border-bottom:1px solid #444;">${item.barcode}</td>
+          <td style="padding:10px; border-bottom:1px solid #444;">${item.draw_times}</td>
+          <td style="padding:10px; border-bottom:1px solid #444;">${item.amount}</td>
+          <td style="padding:10px; border-bottom:1px solid #444;">
+            <button class="nav-tab active" onclick="cancelTicketById(${item.id})" style="width:auto; padding:5px 15px; margin:0; font-size:12px;">CANCEL</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center; color:#666;">No recent bets found for the current draw.</td></tr>';
+    }
+  } catch (err) {
+    console.error("Fetch Current Bet History Error:", err);
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center; color:red;">Failed to load bets.</td></tr>';
+  }
+}
+
+function showStatusModal(title, message, type) {
+  const modal = document.createElement("div");
+  modal.className = "status-modal-overlay";
+  modal.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:10000; font-family: sans-serif;";
+  
+  const icon = type === "success" ? "✓" : "✕";
+  const iconColor = type === "success" ? "#4caf50" : "#f44336";
+  
+  modal.innerHTML = `
+    <div style="background:#1a1a1a; width:350px; border-radius:12px; overflow:hidden; border:1px solid #333; box-shadow:0 10px 30px rgba(0,0,0,0.5); text-align:center;">
+      <div style="padding:30px 20px; background:${type === 'success' ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)'};">
+        <div style="font-size:60px; color:${iconColor}; margin-bottom:15px; font-weight:bold;">${icon}</div>
+        <div style="font-size:22px; color:#fff; font-weight:bold; margin-bottom:10px; text-transform:uppercase;">${title}</div>
+        <div style="font-size:14px; color:#aaa; line-height:1.5;">${message}</div>
+      </div>
+      <div style="padding:20px; border-top:1px solid #333;">
+        <button style="background:${iconColor}; color:#fff; border:none; padding:12px 40px; border-radius:6px; cursor:pointer; font-weight:bold; width:100%; font-size:16px;" onclick="this.closest('.status-modal-overlay').remove()">OK</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function cancelTicketById(id) {
+  if (!confirm('Are you sure you want to cancel this ticket?')) return;
+
+  try {
+    const res = await window.API.ticketCancel(id);
+    if (res && res.status) {
+      showStatusModal("SUCCESS", res.message || 'Ticket cancelled successfully!', "success");
+      openCancelModal(); // Refresh the list
+      
+      // Update balance
+      const userStr = sessionStorage.getItem('user');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        const balRes = await window.API.balance(u.username, null, '3D');
+        if (balRes && balRes.success && balRes.data) {
+          const limitVal = document.getElementById('s3LimitVal');
+          if (limitVal) limitVal.textContent = balRes.data.balance;
+        }
+      }
+    } else {
+      showStatusModal("FAILED", res.message || 'Failed to cancel ticket.', "error");
+    }
+  } catch (err) {
+    console.error("Cancel Ticket Error:", err);
+    showStatusModal("ERROR", 'Connection error. Please try again.', "error");
+  }
+}
+
+function closeCancelModal() { document.getElementById('cancelBetModal').style.display = 'none'; }
+
+function openPlayModal() {
+  const points = document.querySelectorAll('.s3-stat-item .s3-bval')[3]?.textContent || '0';
+  const confirmPts = document.getElementById('confirmTotalPoints');
+  if (confirmPts) confirmPts.textContent = points;
+  document.getElementById('playModal').style.display = 'flex';
+}
+function closePlayModal() { document.getElementById('playModal').style.display = 'none'; }
+
+async function confirmPlay() {
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+
+  const tickets = document.querySelectorAll('#output .ticket');
+  if (tickets.length === 0) {
+    showStatusModal("EMPTY BET", "Please select at least one spot.", "error");
+    return;
+  }
+
+  const typeMap = {
+    'Box': 'BON',
+    'Straight': 'STN',
+    'FP': 'FPN',
+    'BP': 'BPN',
+    'SP': 'SPN',
+    'AP': 'APN'
+  };
+
+  let all_datas12 = [];
+  let totalAmount = 0;
+
+  tickets.forEach(t => {
+    const num = t.dataset.num;
+    const group = t.dataset.group;
+    const type = t.dataset.type;
+    const prefix = typeMap[type] || 'STN';
+    const rate = 10; 
+    
+    all_datas12.push(`${prefix}${group}${num}X${rate}`);
+    totalAmount += rate;
+  });
+
+  const payload = {
+    username: user.username,
+    all_datas12: all_datas12.join(','),
+    total_load_c_amount: totalAmount,
+    total_load_c_qty: 0,
+    advancr_draw_time: selectedAdvanceDraws.size > 0 ? Array.from(selectedAdvanceDraws) : ""
+  };
+
+  try {
+    const res = await window.API.insertData(payload);
+    if (res && res.status) {
+      showStatusModal("SUCCESS", res.message || 'Game placed successfully!', "success");
+      closePlayModal();
+      clearSelections();
+      selectedAdvanceDraws.clear(); // Reset advance draws
+      
+      // Refresh balance
+      const balRes = await window.API.balance(user.username, null, '3D');
+      if (balRes && balRes.success && balRes.data) {
+        const limitVal = document.getElementById('s3LimitVal');
+        if (limitVal) limitVal.textContent = balRes.data.balance;
+      }
+    } else {
+      showStatusModal("FAILED", res.message || 'Failed to place game.', "error");
+    }
+  } catch (err) {
+    console.error('Play Error:', err);
+    showStatusModal("ERROR", 'Connection error. Please try again.', "error");
+  }
+}

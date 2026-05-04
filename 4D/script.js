@@ -1,31 +1,33 @@
 // ==========================================
-// ADVANCE DRAW LOGIC (4D) - FIXED
+// ADVANCE DRAW LOGIC (4D)
 // ==========================================
-let selectedAdvanceDraws = new Set();
+let advanceTimeVal = [];
 
-function openAdvanceModal() {
+async function openAdvanceModal() {
   const modal = document.getElementById('advanceModal');
-  const grid = document.getElementById('advanceDrawGrid'); // HTML wala ID
+  const grid = document.getElementById('advanceDrawGrid');
   if (!modal || !grid) return;
 
-  grid.innerHTML = '';
-  selectedAdvanceDraws.clear();
-
-  const now = new Date();
-  for (let i = 1; i <= 16; i++) {
-    const drawTime = new Date(now.getTime() + i * 15 * 60000);
-    const timeStr = drawTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    
-    const item = document.createElement('div');
-    item.className = 'draw-item';
-    item.innerHTML = `
-      <span class="draw-time">${timeStr}</span>
-      <span class="draw-label">DRAW #${4000 + i}</span>
-    `;
-    item.onclick = () => toggleAdvanceDrawSelection(item, timeStr);
-    grid.appendChild(item);
-  }
+  grid.innerHTML = '<div style="color:white; padding:20px;">Loading draws...</div>';
+  advanceTimeVal = [];
   modal.style.display = 'flex';
+
+  try {
+    const res = await API.getAdvanceDrawTimes();
+    grid.innerHTML = '';
+    if (res && res.status === true && Array.isArray(res.slots)) {
+      grid.innerHTML = res.slots.map((s) =>
+        `<label style="display:flex;align-items:center;background:#222;padding:10px;border-radius:6px;gap:8px;color:#fff;cursor:pointer;">
+           <input type="checkbox" class="adv_slot_cb" value="${s}">${s}
+        </label>`
+      ).join('');
+    } else {
+      grid.innerHTML = '<p style="color:#ed1c24; padding:20px;">No upcoming draws available.</p>';
+    }
+  } catch (e) {
+    console.error("Advance draw fetch error:", e);
+    grid.innerHTML = '<p style="color:#ed1c24; padding:20px;">Error loading draws.</p>';
+  }
 }
 
 function closeAdvanceModal() {
@@ -33,24 +35,16 @@ function closeAdvanceModal() {
   if (modal) modal.style.display = 'none';
 }
 
-function toggleAdvanceDrawSelection(element, timeStr) {
-  if (selectedAdvanceDraws.has(timeStr)) {
-    selectedAdvanceDraws.delete(timeStr);
-    element.classList.remove('selected');
-  } else {
-    selectedAdvanceDraws.add(timeStr);
-    element.classList.add('selected');
-  }
-}
+// No longer needed with checkbox implementation
 
 function confirmAdvanceDraw() {
-  if (selectedAdvanceDraws.size === 0) {
-    alert("Please select at least one future draw!");
-    return;
+  const sels = document.querySelectorAll('.adv_slot_cb:checked');
+  advanceTimeVal = Array.from(sels).map(cb => cb.value);
+  if (advanceTimeVal.length > 0) {
+    alert("Advance Draws Selected: " + advanceTimeVal.join(', '));
   }
-  const draws = Array.from(selectedAdvanceDraws).join(', ');
-  alert("Advance Draws Selected: " + draws);
   closeAdvanceModal();
+  updateStats();
 }
 
 
@@ -77,6 +71,7 @@ let currentMasterStart = 1000;
 let currentRangeIndex = 0;
 let currentPage = '4D';
 let countdown1 = 379;
+let latestResults = null;
 
 const config = {
   gamename: 'PLATINUM 4D', ver: 'V-4.0.0.0',
@@ -111,13 +106,17 @@ function buildSidebar(btns) {
     }
     if (b.c === 'rand') {
       const btn = document.createElement('button'); btn.className = 'sb-random'; btn.textContent = b.t;
+      btn.onclick = randomPick;
       sb.appendChild(btn); return;
     }
     const btn = document.createElement('button');
     btn.className = 'sb-btn ' + (b.c || '');
     btn.textContent = b.t;
-    if (b.t.includes('Cancel') || b.t.includes('Clear')) btn.onclick = clearSelections;
+    if (b.t.includes('Clear')) btn.onclick = clearSelections;
+    if (b.t.includes('Cancel')) btn.onclick = openCancelModal;
+    if (b.t.includes('Reprint')) btn.onclick = openReprintModal;
     if (b.t.includes('Advance')) btn.onclick = openAdvanceModal;
+    if (b.t.includes('INFO')) btn.onclick = openBetHistoryModal;
     sb.appendChild(btn);
   });
 }
@@ -185,21 +184,66 @@ function handleInputApply(relNum, val) {
 function buildFDGrid() {
   const cols = 10;
   
-  document.querySelectorAll('.fd-chip-box input').forEach((chk, idx) => {
+  document.querySelectorAll('.fd-chip-box').forEach((label, idx) => {
+     const chk = label.querySelector('input');
+     
+     // Clicking the label/text area
+     label.addEventListener('click', (e) => {
+         // Focus on this range regardless of checkbox state
+         if (idx === 0) currentMasterStart = 1000;
+         else if (idx === 1) currentMasterStart = 3000;
+         else if (idx === 2) currentMasterStart = 5000;
+         
+         // Visual update
+         buildFDRangesSidebar();
+         renderFDGridItems();
+         updateWinnerHeader();
+     });
+
      chk.addEventListener('change', (e) => {
-         if (e.target.checked) {
-             if (idx === 0) currentMasterStart = 1000;
-             else if (idx === 1) currentMasterStart = 3000;
-             else if (idx === 2) currentMasterStart = 5000;
+         if (idx === 0) currentMasterStart = 1000;
+         else if (idx === 1) currentMasterStart = 3000;
+         else if (idx === 2) currentMasterStart = 5000;
+
+         // Build range text from all checked boxes
+         let ranges = [];
+         let themeColor = "#333"; // Default
+         
+         const checkedBoxes = document.querySelectorAll('.fd-chip-box input:checked');
+         
+         checkedBoxes.forEach(cb => {
+             const label = cb.parentElement.textContent.trim().split('-')[0];
+             ranges.push(label);
              
-             buildFDRangesSidebar();
-             renderFDGridItems();
-         } else {
-             // If trying to uncheck, check if at least one other is selected
-             const totalChecked = document.querySelectorAll('.fd-chip-box input:checked').length;
-             if (totalChecked === 0) {
-                 e.target.checked = true; // Force at least one
+             // If this one is the current master, use its color
+             if (label === String(currentMasterStart)) {
+                 if (label === "1000") themeColor = "#ffeb3b";
+                 else if (label === "3000") themeColor = "#4caf50";
+                 else if (label === "5000") themeColor = "#2196f3";
              }
+         });
+
+         // Update Header Title
+         const hdrName = document.getElementById('hdrGamename');
+         if (hdrName) {
+             const rangeStr = ranges.length > 0 ? `(${ranges.join(', ')})` : '(No Range)';
+             hdrName.innerHTML = `<div>PLATINUM 4D</div><div style="font-size:0.6em; opacity:0.8;">${rangeStr}</div>`;
+         }
+
+         // Update Header Theme Border
+         const sharedHdr = document.getElementById('sharedHeaderBar');
+         if (sharedHdr) {
+             sharedHdr.style.borderLeft = `10px solid ${themeColor}`;
+         }
+
+         buildFDRangesSidebar();
+         renderFDGridItems();
+         updateWinnerHeader();
+         
+         if (!e.target.checked && checkedBoxes.length === 0) {
+             // If nothing is checked, force at least one (optional but usually needed for view)
+             e.target.checked = true;
+             chk.dispatchEvent(new Event('change'));
          }
      });
   });
@@ -399,21 +443,446 @@ function updateStats() {
 
   const s4s = document.getElementById('statSpots4D');
   const s4p = document.getElementById('statPrize4D');
-  if (s4s) s4s.textContent = totalQty; 
-  if (s4p) s4p.textContent = totalPts;
+  const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
+  const grandTotalQty = totalQty * drawCount;
+  const grandTotalPts = totalPts * drawCount;
+
+  if (s4s) s4s.textContent = grandTotalQty; 
+  if (s4p) s4p.textContent = grandTotalPts;
   
   const spotsEl = document.getElementById('statSpots');
   const prizeEl = document.getElementById('statPrize');
-  const totalPtsEl = document.querySelector('.main-stats .bb-stat-pod:nth-of-type(2) .bstat:nth-of-type(2) .bval');
+  const totalPtsDisplay = document.querySelector('.main-stats .bb-stat-pod:nth-of-type(2) .bstat:nth-of-type(2) .bval');
 
-  if (spotsEl) spotsEl.textContent = totalQty; 
-  if (prizeEl) prizeEl.textContent = totalPts;
-  if (totalPtsEl) totalPtsEl.textContent = totalPts;
+  if (spotsEl) spotsEl.textContent = grandTotalQty; 
+  if (prizeEl) prizeEl.textContent = grandTotalPts;
+  if (totalPtsDisplay) totalPtsDisplay.textContent = grandTotalPts;
+}
+
+async function play4D() {
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return alert("Please Login");
+  const user = JSON.parse(userStr);
+
+  let hasBets = false;
+  let betsArr = [];
+  let baseQty = 0;
+  let baseAmt = 0;
+
+  for (let num in allBets) {
+    if (allBets[num] > 0) {
+      hasBets = true;
+      betsArr.push(`${num}X${allBets[num]}`);
+      baseQty++;
+      baseAmt += allBets[num];
+    }
+  }
+
+  if (!hasBets) {
+    alert("Please enter some points before playing!");
+    return;
+  }
+
+  const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
+  const totalAmt = baseAmt * drawCount;
+  const totalQty = baseQty * drawCount;
+
+  const payload = {
+    username: user.username,
+    all_datas12: betsArr.join(','),
+    total_load_c_amount: totalAmt,
+    total_load_c_qty: totalQty,
+    advancr_draw_time: advanceTimeVal.length > 0 ? advanceTimeVal : ""
+  };
+
+  try {
+    const res = await API.insertData(payload);
+    if (res && (res.status === true || res.status === "true")) {
+      alert(res.message || "Bet placed successfully!");
+      if (typeof fetchLastTransaction === 'function') fetchLastTransaction();
+
+      // AUTO PRINT LOGIC (Matching H game)
+      if (res.barcodes && res.barcodes.length > 0) {
+        try {
+          const ticketFetchPromises = res.barcodes.map(bc => API.reprintTicket(bc, user.username));
+          const results = await Promise.all(ticketFetchPromises);
+          const allTickets = [];
+          results.forEach(r => {
+            if (r && r.status && r.tickets) allTickets.push(...r.tickets);
+          });
+          if (allTickets.length > 0) printTickets(allTickets);
+        } catch (err) {
+          console.error("Auto print collection error (4D):", err);
+        }
+      }
+
+      clearSelections();
+      advanceTimeVal = [];
+      if (typeof window.getBalance === 'function') window.getBalance();
+    } else {
+      alert("Failed to place bet. Reason: " + (res ? res.message : "Unknown error"));
+    }
+  } catch (e) {
+    console.error("Bet error:", e);
+    alert("System error while placing bet. Check console for details.");
+  }
+}
+
+async function fetchBetHistory() {
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+  const dateInput = document.getElementById('historyDateInput');
+  const body = document.getElementById('historyTableBody');
+  if (!dateInput || !body) return;
+
+  body.innerHTML = '<tr><td colspan="8" style="padding:40px;">Fetching records...</td></tr>';
+
+  try {
+    const res = await API.betHistory(user.username, dateInput.value);
+    if (res && res.status === true && Array.isArray(res.tickets)) {
+      if (res.tickets.length === 0) {
+        body.innerHTML = '<tr><td colspan="8" style="padding:40px; color:#999;">No records found for this date.</td></tr>';
+        return;
+      }
+      body.innerHTML = res.tickets.map(t => {
+        const statusText = t.claim_status === "1" ? "CLAIMED" : "PENDING";
+        const winColor = parseFloat(t.win_amt) > 0 ? "#0f0" : "#fff";
+        return `
+          <tr style="border-bottom:1px solid #222;">
+            <td style="padding:12px;">${t.id}</td>
+            <td style="padding:12px; font-weight:bold; color:#ed1c24;">${t.barcode}</td>
+            <td style="padding:12px;">${t.draw_times}</td>
+            <td style="padding:12px;">${t.bet_time}</td>
+            <td style="padding:12px;">${t.qty}</td>
+            <td style="padding:12px;">${t.amount}</td>
+            <td style="padding:12px; font-weight:bold; color:${winColor}">${t.win_amt}</td>
+            <td style="padding:12px;"><span style="padding:4px 8px; border-radius:4px; font-size:11px; background:${t.claim_status === '1' ? '#060' : '#444'}">${statusText}</span></td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      body.innerHTML = '<tr><td colspan="8" style="padding:40px; color:#ed1c24;">Error: ' + (res.message || "Failed to load history") + '</td></tr>';
+    }
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="8" style="padding:40px; color:#ed1c24;">Connection error.</td></tr>';
+  }
+}
+
+function openBetHistoryModal() {
+  const modal = document.getElementById('betHistoryModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    const dateInput = document.getElementById('historyDateInput');
+    if (dateInput && !dateInput.value) {
+      const now = new Date();
+      dateInput.value = now.toISOString().split('T')[0];
+    }
+    fetchBetHistory();
+  }
+}
+
+function closeBetHistoryModal() {
+  const modal = document.getElementById('betHistoryModal');
+  if (modal) modal.style.display = 'none';
+}
+
+// REPRINT LOGIC
+function openReprintModal() {
+  const modal = document.getElementById('reprintModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    const dateInput = document.getElementById('reprintDateInput');
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
+    fetchReprintHistory();
+  }
+}
+
+function closeReprintModal() {
+  const modal = document.getElementById('reprintModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function fetchReprintHistory() {
+  const body = document.getElementById('reprintHistoryBody');
+  const dateInput = document.getElementById('reprintDateInput');
+  const userStr = sessionStorage.getItem('user');
+  if (!body || !dateInput || !userStr) return;
+  const user = JSON.parse(userStr);
+
+  body.innerHTML = '<tr><td colspan="6" style="padding:40px; color:#666;">Querying bets...</td></tr>';
+  try {
+    const res = await API.betHistory(user.username, dateInput.value);
+    if (res && res.status === true && Array.isArray(res.tickets)) {
+      if (res.tickets.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" style="padding:40px; color:#999;">No records for this date.</td></tr>';
+        return;
+      }
+      body.innerHTML = res.tickets.map(t => `
+        <tr style="border-bottom:1px solid #222;">
+          <td style="padding:12px;">${t.id}</td>
+          <td style="padding:12px; font-weight:bold; color:#ed1c24;">${t.barcode}</td>
+          <td style="padding:12px;">${t.draw_times}</td>
+          <td style="padding:12px;">${t.qty}</td>
+          <td style="padding:12px;">${t.amount}</td>
+          <td style="padding:12px;">
+            <button onclick="handleReprintDirect('${t.barcode}')" style="background:#ed1c24; color:#fff; border:none; padding:5px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">PRINT</button>
+          </td>
+        </tr>
+      `).join('');
+    } else { body.innerHTML = '<tr><td colspan="6" style="padding:40px;">No records found.</td></tr>'; }
+  } catch (e) {
+    console.error("Reprint fetch error:", e);
+    body.innerHTML = '<tr><td colspan="6" style="padding:40px;">Error loading data.</td></tr>';
+  }
+}
+
+async function handleReprintDirect(bc) {
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+  try {
+    const res = await API.reprintTicket(bc, user.username);
+    if (res && res.status && res.tickets) {
+      printTickets(res.tickets);
+    } else {
+      alert(res.message || "Ticket not found or error.");
+    }
+  } catch (e) { alert("Reprint failed."); }
+}
+
+function printTickets(ticketsArray) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return alert("Pop-up blocked. Allow pop-ups for printing.");
+
+  const ticketsHtml = ticketsArray.map((ticketObj) => {
+    const ticket = ticketObj.ticket || ticketObj;
+    const lines = ticket.bet_lines || [];
+    const barcodeValue = ticket.barcode || 'ERROR';
+    const barcodeData = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" + barcodeValue + "&height=10&scale=2&rotate=N&includetext=true";
+
+    const dTime = ticket.draw_times || ticket.draw_time || '--:--';
+    const bTime = ticket.bet_time || ticket.tck_time || '--:--';
+    const gDate = ticket.record_date || new Date().toISOString().split('T')[0];
+    const username = ticket.username || (sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user')).username : 'guest');
+
+    let tableRows = "";
+    for (let i = 0; i < lines.length; i += 3) {
+      tableRows += `<tr>`;
+      for (let j = 0; j < 3; j++) {
+        const item = lines[i + j];
+        if (item) {
+          tableRows += `<td style="border:2px solid #000; padding:4px; text-align:center; font-weight:900;">${item.num}</td><td style="border:2px solid #000; padding:4px; text-align:center; font-weight:900;">${item.qty}</td>`;
+        } else {
+          tableRows += `<td style="border:2px solid #000; padding:4px;"></td><td style="border:2px solid #000; padding:4px;"></td>`;
+        }
+      }
+      tableRows += `</tr>`;
+    }
+
+    return `
+      <div class="ticket-page" style="text-align:center; font-family:'Courier New', Courier, monospace; width:72mm; margin:0 auto; padding:5px 12px; background:white; color:black; border:none; page-break-after: always;">
+        <h2 style="margin:2px 0; font-size:18px; font-weight:900;">PLATINUM LOTTERY 4D</h2>
+        <p style="font-size:11px; margin:0; font-weight:bold;">(Ticket valid for 10 days)</p>
+        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+        
+        <div style="text-align:left; font-size:12px; line-height:1.5; font-weight:900;">
+          <div>Game Date : ${gDate}</div>
+          <div>Draw Time : ${dTime}</div>
+          <div>Ticket Time : ${bTime}</div>
+          <div>Retailer ID : ${username}</div>
+          <div>Total Point : ${ticket.amount || 0}</div>
+          <div>Total Qty : ${ticket.qty || 0}</div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; border:2px solid #000; font-weight:900;">
+          <thead>
+            <tr>
+              <th style="border:2px solid #000; padding:4px;">Num</th><th style="border:2px solid #000; padding:4px;">Qty</th>
+              <th style="border:2px solid #000; padding:4px;">Num</th><th style="border:2px solid #000; padding:4px;">Qty</th>
+              <th style="border:2px solid #000; padding:4px;">Num</th><th style="border:2px solid #000; padding:4px;">Qty</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+
+        <div style="margin-top:12px; text-align:center;">
+          <img src="${barcodeData}" style="width:100%; height:auto;" alt="barcode" />
+        </div>
+        <div style="border-top:1px dashed #000; margin:12px 0;"></div>
+        <div style="font-size:10px; font-weight:bold;">*** THANK YOU & GOOD LUCK ***</div>
+      </div>
+    `;
+  }).join('');
+
+  const content = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Receipts</title>
+      <style>
+        @page { size: auto; margin: 0; }
+        body { margin: 0; background: #fff; }
+        @media print { .ticket-page { border-bottom: none; } }
+      </style>
+    </head>
+    <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
+      ${ticketsHtml}
+    </body>
+    </html>
+  `;
+  printWindow.document.write(content);
+  printWindow.document.close();
+}
+
+async function handleReprintSubmit() {
+  const bcInp = document.getElementById('reprintBarcodeInp');
+  if (!bcInp || !bcInp.value) return alert("Enter barcode");
+  handleReprintDirect(bcInp.value.trim().toUpperCase());
+}
+
+// CANCEL LOGIC
+function openCancelModal() {
+  const modal = document.getElementById('cancelModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    fetchCancelHistory();
+  }
+}
+
+function closeCancelModal() {
+  const modal = document.getElementById('cancelModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function fetchCancelHistory() {
+  const body = document.getElementById('cancelHistoryBody');
+  const userStr = sessionStorage.getItem('user');
+  if (!body || !userStr) return;
+  const user = JSON.parse(userStr);
+
+  body.innerHTML = '<tr><td colspan="6" style="padding:40px; color:#666;">Fetching active bets...</td></tr>';
+  try {
+    const res = await API.currentDrawBetHistory(user.username);
+    if (res && res.status === true && Array.isArray(res.tickets)) {
+      if (res.tickets.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" style="padding:40px; color:#999;">No active tickets for this draw.</td></tr>';
+        return;
+      }
+      body.innerHTML = res.tickets.map(t => `
+        <tr style="border-bottom:1px solid #222;">
+          <td style="padding:12px;">${t.id}</td>
+          <td style="padding:12px; font-weight:bold; color:#ed1c24;">${t.barcode}</td>
+          <td style="padding:12px;">${t.draw_times}</td>
+          <td style="padding:12px;">${t.qty}</td>
+          <td style="padding:12px;">${t.amount}</td>
+          <td style="padding:12px;">
+            <button onclick="submitCancel('${t.id}')" style="background:#000; color:#ed1c24; border:1px solid #ed1c24; padding:5px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">CANCEL</button>
+          </td>
+        </tr>
+      `).join('');
+    } else { body.innerHTML = '<tr><td colspan="6" style="padding:40px;">No bets found.</td></tr>'; }
+  } catch (e) { body.innerHTML = '<tr><td colspan="6" style="padding:40px;">Error loading.</td></tr>'; }
+}
+
+async function submitCancel(ticketId) {
+  const modal = document.getElementById('confirmCancelModal');
+  const targetIdEl = document.getElementById('cancelTargetId');
+  const finalBtn = document.getElementById('finalCancelBtn');
+  
+  if (modal && targetIdEl && finalBtn) {
+    targetIdEl.textContent = `ID: ${ticketId}`;
+    modal.style.display = 'flex';
+    
+    finalBtn.onclick = async () => {
+      finalBtn.disabled = true;
+      finalBtn.textContent = "WAIT...";
+      try {
+        const res = await API.ticketCancel(ticketId);
+        if (res && (res.status === true || res.status === "true")) {
+          alert(res.message || "Ticket cancelled!");
+          closeConfirmCancel();
+          fetchCancelHistory();
+          if (typeof window.getBalance === 'function') window.getBalance();
+        } else {
+          alert("Cancel Failed: " + (res.message || "Unknown error"));
+        }
+      } catch (err) { alert("Error during cancel."); }
+      finally {
+        finalBtn.disabled = false;
+        finalBtn.textContent = "YES, CANCEL IT";
+      }
+    };
+  }
+}
+
+function closeConfirmCancel() {
+  const modal = document.getElementById('confirmCancelModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function fetchGameResults() {
+  try {
+    const res = await API.result();
+    if (res && res.status === true) {
+      latestResults = res;
+      updateWinnerHeader();
+    }
+  } catch (e) {
+    console.error("Fetch Results Error (4D):", e);
+  }
+}
+
+function updateWinnerHeader() {
+  if (!latestResults || !latestResults.previous_result) return;
+  const winnersContainer = document.getElementById('hWinners');
+  if (!winnersContainer) return;
+
+  // Split results: "1045, 1139, ..."
+  const allWinners = latestResults.previous_result.split(',').map(s => s.trim());
+  
+  // Filter based on current Master Start (1000, 3000, or 5000)
+  const rangePrefix = String(currentMasterStart)[0]; // '1', '3', or '5'
+  const filteredWinners = allWinners.filter(w => w.startsWith(rangePrefix));
+  
+  // Top 10 for that range
+  const displayWinners = filteredWinners.slice(0, 10);
+  
+  // Build HTML
+  let html = displayWinners.map(w => `<div class="h-wnum">${w}</div>`).join('');
+  
+  // Add draw time box
+  if (latestResults.previous_draw_time) {
+    html += `<div class="h-time-box">${latestResults.previous_draw_time}</div>`;
+  }
+  
+  // Add version label if exists in index.html, else dummy
+  html += `<div class="h-ver-lbl" id="hdrVer">${config.ver}</div>`;
+  
+  winnersContainer.innerHTML = html;
 }
 
 function clearSelections() {
   allBets = {};
   renderFDGridItems();
+}
+
+function randomPick() {
+  const activeGridStart = currentMasterStart + currentRangeIndex * 100;
+  const avail = [];
+  for (let i = 0; i < 100; i++) {
+    const num = String(activeGridStart + i).padStart(4, '0');
+    if (!allBets[num]) avail.push(i);
+  }
+  if (!avail.length) return;
+  const relNum = avail[Math.floor(Math.random() * avail.length)];
+  const val = Math.floor(Math.random() * 25) + 1; // 1 to 5 qty
+  handleInputApply(relNum, val);
+  renderFDGridItems();
+  updateStats();
 }
 
 function updateClock() {
@@ -440,7 +909,10 @@ document.addEventListener('keydown', e => {
     const pb = document.getElementById('playBtn');
     if(pb) pb.click(); 
   }
-  if (e.key === 'Escape' || e.key === 'F10') clearSelections();
+  if (e.key === 'F3') { e.preventDefault(); openBetHistoryModal(); }
+  if (e.key === 'F2') { e.preventDefault(); openReprintModal(); }
+  if (e.key === 'F10') { e.preventDefault(); openCancelModal(); }
+  if (e.key === 'Escape') clearSelections();
 });
 
 function scaleFonts() {
@@ -557,7 +1029,13 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(syncTimer, 5000);
   buildSidebar(config.btns);
   buildFDGrid();
+
+  const playBtn = document.getElementById('playBtn');
+  if (playBtn) playBtn.onclick = play4D;
+
   updateClock();
+  fetchGameResults();
+  setInterval(fetchGameResults, 60000); // Update every minute
   scaleFonts();
   applyMobileScale();
   setInterval(updateClock, 1000);

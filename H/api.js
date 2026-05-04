@@ -2,7 +2,7 @@
 Object.assign(window.API, {
     timer: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'H/GameApi/Timer.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumH/GameApi/Timer.php');
             return await response.json();
         } catch (error) {
             console.error('API Timer Error (H):', error);
@@ -12,7 +12,7 @@ Object.assign(window.API, {
 
     insertData: async (data) => {
         try {
-            const response = await fetch(window.BASE_URL + 'H/GameApi/InsertData.php', {
+            const response = await fetch(window.BASE_URL + 'PlatinumH/GameApi/InsertData.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -26,7 +26,7 @@ Object.assign(window.API, {
 
     advancDrawTime: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'H/GameApi/AdvancDrawTime.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumH/GameApi/AdvancDrawTime.php');
             return await response.json();
         } catch (error) {
             console.error('API AdvancDrawTime Error (H):', error);
@@ -36,7 +36,7 @@ Object.assign(window.API, {
 
     betHistory: async (username, date) => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/BetHistory.php?username=${username}&record_date=${date}`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/BetHistory.php?username=${username}&record_date=${date}`);
             return await response.json();
         } catch (error) {
             console.error('API BetHistory Error (H):', error);
@@ -46,7 +46,7 @@ Object.assign(window.API, {
 
     reprintTicket: async (barcode, username) => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API Reprint Error (H):', error);
@@ -56,7 +56,7 @@ Object.assign(window.API, {
 
     currentDrawBetHistory: async (username) => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/CurrentDrawBetHistory.php?username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/CurrentDrawBetHistory.php?username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API CurrentDrawBetHistory Error (H):', error);
@@ -66,7 +66,7 @@ Object.assign(window.API, {
 
     ticketCancel: async (id) => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/CancleTicket.php?id=${id}`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/CancleTicket.php?id=${id}`);
             return await response.json();
         } catch (error) {
             console.error('API TicketCancel Error (H):', error);
@@ -76,7 +76,7 @@ Object.assign(window.API, {
 
     resultDateWise: async (date) => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/ResultDateWise.php?record_date=${date}`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/ResultDateWise.php?record_date=${date}`);
             return await response.json();
         } catch (error) {
             console.error('API ResultDateWise Error (H):', error);
@@ -86,7 +86,7 @@ Object.assign(window.API, {
 
     result: async () => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/Result.php`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/Result.php`);
             return await response.json();
         } catch (error) {
             console.error('API Result Error (H):', error);
@@ -96,7 +96,7 @@ Object.assign(window.API, {
 
     lastDrawBetAmount: async (username) => {
         try {
-            const response = await fetch(window.BASE_URL + `H/GameApi/LastDrawBetAmount.php?username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumH/GameApi/LastDrawBetAmount.php?username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API LastDrawBetAmount Error (H):', error);
@@ -106,7 +106,7 @@ Object.assign(window.API, {
 
     claimTicket: async (data) => {
         try {
-            const response = await fetch(window.BASE_URL + 'H/GameApi/ClaimTickets.php', {
+            const response = await fetch(window.BASE_URL + 'PlatinumH/GameApi/ClaimTickets.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -118,5 +118,5 @@ Object.assign(window.API, {
         }
     }
 
-    
+
 });

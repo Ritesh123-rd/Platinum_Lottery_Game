@@ -1,228 +1,369 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Platinum Lottery System - CARD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="stylee.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Platinum Lottery System - CARD</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="../style.css" />
-</head>
-
-<body>
-  <div class="app-wrapper">
-
-    <!-- TOP NAV -->
-    <div class="top-nav">
-      <button class="nav-tab" onclick="switchPage('G')">G</button>
-      <button class="nav-tab" onclick="switchPage('H')">H</button>
-      <button class="nav-tab" onclick="switchPage('3D')">3D</button>
-      <button class="nav-tab" onclick="switchPage('4D')">4D</button>
-      <button class="nav-tab active" onclick="switchPage('C')">C</button>
-      <div class="nav-spacer"></div>
-      <div class="nav-right">
-        <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
-        <span class="nav-loc" id="navLoc">LocV-1.0.0.2</span>
-        <button class="icon-btn">
-          <svg viewBox="0 0 100 100" width="34" height="34">
-            <path d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 84.6 22.7" fill="none" stroke="black" stroke-width="6"
-              stroke-linecap="round" />
-            <path d="M84.6 5 L84.6 22.7 L67 22.7" fill="none" stroke="black" stroke-width="6" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <rect x="36" y="55" width="28" height="20" rx="3" fill="black" />
-            <path d="M41 55 V50 A9 9 0 0 1 59 50 V55" fill="none" stroke="black" stroke-width="6"
-              stroke-linecap="round" />
-          </svg>
-        </button>
-        <button class="icon-btn power-btn">
-          <svg viewBox="0 0 100 100" width="44" height="44">
-            <path d="M50 20 V50" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
-            <path d="M30 35 A30 30 0 1 0 70 35" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- MAIN AREA -->
-    <div class="main-area">
-      <!-- PAGE C -->
-      <div class="page active" id="page-C">
-        <div class="c-header">
-          <div class="plat-logo">
-            <img src="../image.png" alt="Platinum" class="plat-img" />
-          </div>
-          <div class="c-hdr-box"><span class="c-hdr-gamename">PLATINUM CARD</span></div>
-          <div class="c-hdr-box"><span class="c-hdr-ssvi">SSNE009</span></div>
-          <div class="c-hdr-box"><span class="c-hdr-time" id="cTime">11:55 am</span></div>
-          <div class="c-hdr-countdown countdown-style" id="cCountdown">03:28</div>
-          <div class="c-hdr-box"><span class="c-hdr-lasttx">Last Transaction- 200</span></div>
-          <div class="c-hdr-box"><span class="c-hdr-limit"><span id="cLimitVal">35318.74</span> : Limit</span></div>
-        </div>
-        <div class="c-card-bg">
-          <div class="c-grid-border">
-            <div class="c-grid">
-              <div class="c-item" onclick="toggleCard(this,'Horse')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Horse.png" class="c-card-img c-img-horse" alt="Horse"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Ball')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Football.png" class="c-card-img c-img-ball" alt="Ball"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Sun')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Sun.png" class="c-card-img c-img-sun" alt="Sun"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Cow')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Cow.png" class="c-card-img c-img-cow" alt="Cow"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Lamp')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Lamp.png" class="c-card-img c-img-lamp" alt="Lamp"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Kite')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Kite.png" class="c-card-img c-img-kite" alt="Kite"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Umbrella')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Umbrella.png" class="c-card-img c-img-umbrella" alt="Umbrella"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Rabbit')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Rabbit.png" class="c-card-img c-img-rabbit" alt="Rabbit"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Dove')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Pegion.png" class="c-card-img c-img-dove" alt="Dove"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Butterfly')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Butterfly.png" class="c-card-img c-img-butterfly" alt="Butterfly"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Tiger')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Tiger.png" class="c-card-img c-img-tiger" alt="Tiger"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-              <div class="c-item" onclick="toggleCard(this,'Rose')">
-                <div class="c-oval">
-                  <div class="c-floral"></div>
-                  <img src="../assets/Platinum-Game/Rose.png" class="c-card-img c-img-rose" alt="Rose"
-                    onerror="this.style.opacity=0">
-                </div>
-                <div class="c-namebox"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="c-bottom">
-          <div class="c-stats-col">
-            <div class="c-stats-row">
-              <div class="c-stat-pod">
-                <div class="c-stat"><label>Total Selected spots</label>
-                  <div class="csv" id="cSpots">0</div>
-                </div>
-                <div class="c-stat"><label>Prize pool Contribution</label>
-                  <div class="csv" id="cPrize">0</div>
-                </div>
-              </div>
-              <div class="c-stat-pod">
-                <div class="c-stat"><label>Game service points</label>
-                  <div class="csv">0</div>
-                </div>
-                <div class="c-stat"><label>Total Points</label>
-                  <div class="csv">0</div>
-                </div>
-              </div>
-            </div>
-            <div class="c-play-row">
-              <button class="c-playbtn" id="playBtn">PLAY (P)</button>
-              <button class="c-advbtn">Advance Draw</button>
-            </div>
-            <input class="c-claim-inp" type="text" placeholder="Pressed F8" />
-          </div>
-          <div class="c-actions">
-            <button class="cact-btn">DOUBLE (D)</button>
-            <button class="cact-btn" onclick="clearSelections()">CLEAR (C)</button>
-            <button class="cact-btn red">INFO (I)</button>
-            <button class="cact-btn">REBET (T)</button>
-            <button class="cact-btn gold">REPRINT (R)</button>
-            <button class="cact-btn gold" onclick="clearSelections()">CANCEL (L)</button>
-          </div>
-          <div class="c-qty-section">
-            <div class="c-qty-row">
-              <button class="cqty-btn sel" onclick="selectQty(this)"><span class="qty-l">QTY</span><span class="qty-v">10</span></button>
-              <button class="cqty-btn" onclick="selectQty(this)"><span class="qty-l">QTY</span><span class="qty-v">20</span></button>
-              <button class="cqty-btn" onclick="selectQty(this)"><span class="qty-l">QTY</span><span class="qty-v">50</span></button>
-              <button class="cqty-btn" onclick="selectQty(this)"><span class="qty-l">QTY</span><span class="qty-v">100</span></button>
-              <button class="cqty-btn" onclick="selectQty(this)"><span class="qty-l">QTY</span><span class="qty-v">500</span></button>
-              <button class="cqty-btn" onclick="selectQty(this)"><span class="qty-l">QTY</span><span class="qty-v">1000</span></button>
-            </div>
-            <div class="c-history" id="cHistory"></div>
-          </div>
+  <body>
+    <div class="app-wrapper">
+      <!-- TOP NAV -->
+      <div class="top-nav">
+        <button class="nav-tab" onclick="switchPage('G')">G</button>
+        <button class="nav-tab" onclick="switchPage('H')">H</button>
+        <button class="nav-tab" onclick="switchPage('3D')">3D</button>
+        <button class="nav-tab" onclick="switchPage('4D')">4D</button>
+        <button class="nav-tab active" onclick="switchPage('C')">C</button>
+        <div class="nav-spacer"></div>
+        <div class="nav-right">
+          <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
+          <span class="nav-loc" id="navLoc">LocV-1.0.0.2</span>
+          <button class="icon-btn">
+            <svg viewBox="0 0 100 100" width="34" height="34">
+              <path
+                d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 84.6 22.7"
+                fill="none"
+                stroke="black"
+                stroke-width="6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M84.6 5 L84.6 22.7 L67 22.7"
+                fill="none"
+                stroke="black"
+                stroke-width="6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <rect x="36" y="55" width="28" height="20" rx="3" fill="black" />
+              <path
+                d="M41 55 V50 A9 9 0 0 1 59 50 V55"
+                fill="none"
+                stroke="black"
+                stroke-width="6"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <button class="icon-btn power-btn">
+            <svg viewBox="0 0 100 100" width="44" height="44">
+              <path
+                d="M50 20 V50"
+                fill="none"
+                stroke="#600"
+                stroke-width="10"
+                stroke-linecap="round"
+              />
+              <path
+                d="M30 35 A30 30 0 1 0 70 35"
+                fill="none"
+                stroke="#600"
+                stroke-width="10"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
         </div>
       </div>
 
-    </div><!-- /main-area -->
+      <!-- MAIN AREA -->
+      <div class="main-area">
+        <!-- PAGE C -->
+        <div class="page active" id="page-C">
+          <div class="c-header">
+            <div class="plat-logo">
+              <img src="../image.png" alt="Platinum" class="plat-img" />
+            </div>
+            <div class="c-hdr-box">
+              <span class="c-hdr-gamename">PLATINUM CARD</span>
+            </div>
+            <div class="c-hdr-box"><span class="c-hdr-ssvi">SSNE009</span></div>
+            <div class="c-hdr-box">
+              <span class="c-hdr-time" id="cTime">11:55 am</span>
+            </div>
+            <div class="c-hdr-countdown countdown-style" id="cCountdown">
+              03:28
+            </div>
+            <div class="c-hdr-box">
+              <span class="c-hdr-lasttx">Last Transaction- 200</span>
+            </div>
+            <div class="c-hdr-box">
+              <span class="c-hdr-limit"
+                ><span id="cLimitVal">35318.74</span> : Limit</span
+              >
+            </div>
+          </div>
+          <div class="c-card-bg">
+            <div class="c-grid-border">
+              <div class="c-grid">
+                <div class="c-item" onclick="toggleCard(this, 'Horse')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Horse.png"
+                      class="c-card-img c-img-horse"
+                      alt="Horse"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Ball')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Football.png"
+                      class="c-card-img c-img-ball"
+                      alt="Ball"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Sun')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Sun.png"
+                      class="c-card-img c-img-sun"
+                      alt="Sun"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Cow')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Cow.png"
+                      class="c-card-img c-img-cow"
+                      alt="Cow"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Lamp')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Lamp.png"
+                      class="c-card-img c-img-lamp"
+                      alt="Lamp"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Kite')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Kite.png"
+                      class="c-card-img c-img-kite"
+                      alt="Kite"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Umbrella')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Umbrella.png"
+                      class="c-card-img c-img-umbrella"
+                      alt="Umbrella"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Rabbit')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Rabbit.png"
+                      class="c-card-img c-img-rabbit"
+                      alt="Rabbit"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Dove')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Pegion.png"
+                      class="c-card-img c-img-dove"
+                      alt="Dove"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Butterfly')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Butterfly.png"
+                      class="c-card-img c-img-butterfly"
+                      alt="Butterfly"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Tiger')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Tiger.png"
+                      class="c-card-img c-img-tiger"
+                      alt="Tiger"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+                <div class="c-item" onclick="toggleCard(this, 'Rose')">
+                  <div class="c-oval">
+                    <div class="c-floral"></div>
+                    <img
+                      src="../assets/Platinum-Game/Rose.png"
+                      class="c-card-img c-img-rose"
+                      alt="Rose"
+                      onerror="this.style.opacity = 0"
+                    />
+                  </div>
+                  <div class="c-namebox"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="c-bottom">
+            <div class="c-stats-col">
+              <div class="c-stats-row">
+                <div class="c-stat-pod">
+                  <div class="c-stat">
+                    <label>Total Selected spots</label>
+                    <div class="csv" id="cSpots">0</div>
+                  </div>
+                  <div class="c-stat">
+                    <label>Prize pool Contribution</label>
+                    <div class="csv" id="cPrize">0</div>
+                  </div>
+                </div>
+                <div class="c-stat-pod">
+                  <div class="c-stat">
+                    <label>Game service points</label>
+                    <div class="csv" id="cServicePts">0</div>
+                  </div>
+                  <div class="c-stat">
+                    <label>Total Points</label>
+                    <div class="csv" id="cTotalPts">0</div>
+                  </div>
+                </div>
+              </div>
+              <div class="c-play-row">
+                <button class="c-playbtn" id="playBtn">PLAY (P)</button>
+                <button class="c-advbtn" onclick="showAdvanceDrawModal()">
+                  Advance Draw
+                </button>
+              </div>
+              <input class="c-claim-inp" type="text" placeholder="Pressed F8" />
+            </div>
+            <div class="c-actions">
+              <button class="cact-btn" onclick="doubleBets()">DOUBLE (D)</button>
+              <button class="cact-btn" onclick="clearSelections()">
+                CLEAR (C)
+              </button>
+              <button class="cact-btn red" onclick="betHistoryReprint()">INFO (I)</button>
+              <button class="cact-btn">REBET (T)</button>
+              <button class="cact-btn gold" onclick="showReprintModal()">
+                REPRINT (R)
+              </button>
+              <button class="cact-btn gold" onclick="showCancelTicketModal()">
+                CANCEL (L)
+              </button>
+            </div>
+            <div class="c-qty-section">
+              <div class="c-qty-row">
+                <button class="cqty-btn sel" onclick="selectQty(this)">
+                  <span class="qty-l">QTY</span><span class="qty-v">10</span>
+                </button>
+                <button class="cqty-btn" onclick="selectQty(this)">
+                  <span class="qty-l">QTY</span><span class="qty-v">20</span>
+                </button>
+                <button class="cqty-btn" onclick="selectQty(this)">
+                  <span class="qty-l">QTY</span><span class="qty-v">50</span>
+                </button>
+                <button class="cqty-btn" onclick="selectQty(this)">
+                  <span class="qty-l">QTY</span><span class="qty-v">100</span>
+                </button>
+                <button class="cqty-btn" onclick="selectQty(this)">
+                  <span class="qty-l">QTY</span><span class="qty-v">500</span>
+                </button>
+                <button class="cqty-btn" onclick="selectQty(this)">
+                  <span class="qty-l">QTY</span><span class="qty-v">1000</span>
+                </button>
+              </div>
+              <div class="c-history" id="cHistory"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /main-area -->
 
-    <!-- C bottom bar -->
-    <div class="c-bottom-bar" id="cBottomBar" style="display:flex;">
-      <button class="c-scheme">Scheme</button>
+      <!-- C bottom bar -->
+      <div class="c-bottom-bar" id="cBottomBar" style="display: flex">
+        <button class="c-scheme">Scheme</button>
+      </div>
     </div>
+    <!-- /app-wrapper -->
 
-  </div><!-- /app-wrapper -->
-  <script src="../config.js"></script>
-  <script src="../api.js"></script>
-  <script src="api.js"></script>
-  <script src="script.js"></script>
-</body>
-
+  <!-- CLAIM RESULT MODAL -->
+  <div id="claimResultModal" class="modal-overlay" style="display:none; z-index:999999;">
+    <div class="modal-content" style="max-width:400px; background:#0a0a0a; border:2px solid #ed1c24; border-radius:12px; text-align:center; box-shadow: 0 0 50px rgba(237,28,36,0.3);">
+      <div id="claimResultHeader" class="modal-header" style="background:linear-gradient(to right, #ed1c24, #911); padding:10px; border-radius:10px 10px 0 0; display:block;">
+        <h2 id="claimTitle" style="margin:0; color:#fff; font-family:'Orbitron'; font-size:1.4rem; letter-spacing:2px;">CLAIM STATUS</h2>
+      </div>
+      <div class="modal-body" style="padding:30px; color:#fff;">
+        <div id="claimWinIcon" style="margin-bottom:15px; display:none;">
+          <div style="width:70px; height:70px; background:#0f0; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px #0f0;">
+             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#000" stroke-width="3"><path d="M20 6L9 17l-5-5"></path></svg>
+          </div>
+        </div>
+        <div id="claimWinMsg" style="font-size:32px; font-weight:bold; color:#0f0; margin-bottom:10px; font-family:'Oswald'; display:none;">WINNER!</div>
+        <div id="claimStatusMsg" style="font-size:20px; color:#ddd; margin-bottom:20px; font-family:'Oswald';">Checking ticket...</div>
+        
+        <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333; text-align:left; font-family:monospace; line-height:1.6;">
+          <div><span style="color:#666;">BARCODE:</span> <span id="claimResBarcode" style="color:#0f0;">-</span></div>
+          <div><span style="color:#666;">TERMINAL:</span> <span id="claimResUser" style="color:#fff;">-</span></div>
+          <div id="claimResNextRow"><span style="color:#666;">NEXT DRAW:</span> <span id="claimResNext" style="color:#fa0;">-</span></div>
+          <div id="claimResAmountRow" style="font-size:22px; border-top:1px solid #222; padding-top:10px; margin-top:10px; display:flex; justify-content:space-between;">
+             <span style="color:#666;">WIN AMT:</span> <span id="claimResAmount" style="color:#0f0; font-weight:900;">0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:15px; border-top:1px solid #1a1a1a;">
+        <button class="modal-btn primary" onclick="closeClaimResultModal()" style="width:100%; background:#ed1c24; padding:14px; font-size:18px; border:none; border-radius:8px; color:#fff; cursor:pointer; font-family:'Oswald'; font-weight:bold;">CLOSE (ESC)</button>
+      </div>
+    </div>
+  </div>
+    <script src="../config.js"></script>
+    <script src="../api.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>

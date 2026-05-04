@@ -1,8 +1,9 @@
 const API_CONFIG = {
-    BASE_URL: 'https://dhladvertising.site/platinumLottery/API/', // Placeholder, adjust as needed
+    BASE_URL: 'https://dhlmedia.online/LotteryAll/Games/',
     ENDPOINTS: {
         LOGIN: 'UserDetailes/login.php',
-        LOGOUT: 'UserDetailes/logout.php'
+        BALANCE: 'UserDetailes/balance.php',
+        LOGOUT: 'UserDetailes/logout.php',
     }
 };
 

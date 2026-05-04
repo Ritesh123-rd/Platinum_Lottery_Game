@@ -2,7 +2,7 @@
 Object.assign(window.API, {
     insertData: async (data) => {
         try {
-            const response = await fetch(window.BASE_URL + 'G/GameApi/InsertData.php', {
+            const response = await fetch(window.BASE_URL + 'PlatinumG/GameApi/InsertData.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -16,7 +16,7 @@ Object.assign(window.API, {
 
     currentDrawBetHistory: async (username) => {
         try {
-            const response = await fetch(window.BASE_URL + `G/GameApi/CurrentDrawBetHistory.php?username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumG/GameApi/CurrentDrawBetHistory.php?username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API CurrentDrawBetHistory Error:', error);
@@ -26,7 +26,7 @@ Object.assign(window.API, {
 
     betHistory: async (username, recordDate) => {
         try {
-            const url = window.BASE_URL + `G/GameApi/BetHistory.php?username=${username}&record_date=${recordDate}`;
+            const url = window.BASE_URL + `PlatinumG/GameApi/BetHistory.php?username=${username}&record_date=${recordDate}`;
             const response = await fetch(url);
             return await response.json();
         } catch (error) {
@@ -37,7 +37,7 @@ Object.assign(window.API, {
 
     timer: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'G/GameApi/Timer.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumG/GameApi/Timer.php');
             return await response.json();
         } catch (error) {
             console.error('API Timer Error:', error);
@@ -47,7 +47,7 @@ Object.assign(window.API, {
 
     advancDrawTime: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'G/GameApi/AdvancDrawTime.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumG/GameApi/AdvancDrawTime.php');
             return await response.json();
         } catch (error) {
             console.error('API AdvancDrawTime Error:', error);
@@ -57,7 +57,7 @@ Object.assign(window.API, {
 
     cancleTicket: async (id) => {
         try {
-            const response = await fetch(window.BASE_URL + `G/GameApi/CancleTicket.php?id=${id}`);
+            const response = await fetch(window.BASE_URL + `PlatinumG/GameApi/CancleTicket.php?id=${id}`);
             return await response.json();
         } catch (error) {
             console.error('API CancleTicket Error:', error);
@@ -67,7 +67,7 @@ Object.assign(window.API, {
 
     lastDrawBetAmount: async (username, last_bet_amount) => {
         try {
-            let url = window.BASE_URL + `G/GameApi/LastDrawBetAmount.php?username=${username}`;
+            let url = window.BASE_URL + `PlatinumG/GameApi/LastDrawBetAmount.php?username=${username}`;
             if (last_bet_amount !== undefined && last_bet_amount !== null) {
                 url += `&last_bet_amount=${last_bet_amount}`;
             }
@@ -81,7 +81,7 @@ Object.assign(window.API, {
 
     reprintTicket: async (barcode, username) => {
         try {
-            const response = await fetch(window.BASE_URL + `G/GameApi/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumG/GameApi/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API ReprintTicket Error:', error);
@@ -91,7 +91,7 @@ Object.assign(window.API, {
     
     claimTicket: async (barcode_number, username) => {
         try {
-            const response = await fetch(window.BASE_URL + 'G/GameApi/ClaimTickets.php', {
+            const response = await fetch(window.BASE_URL + 'PlatinumG/GameApi/ClaimTickets.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ barcode_number, username })
@@ -105,7 +105,7 @@ Object.assign(window.API, {
 
     result: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'G/GameApi/Result.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumG/GameApi/Result.php');
             return await response.json();
         } catch (error) {
             console.error('API Result Error:', error);
