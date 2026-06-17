@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Platinum Lottery System - Cricket Spots</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fontsource/dseg7-modern@5.2.5/index.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css?v=8" />
+    <link rel="stylesheet" href="style.css?v=8" />
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+</head>
+
+<body>
+    <div class="app-wrapper layout-d">
+
+        <!-- TOP NAV -->
+        <div class="top-nav">
+            <button class="nav-tab" onclick="switchPage('G')">G</button>
+            <button class="nav-tab" onclick="switchPage('H')">H</button>
+            <button class="nav-tab" onclick="switchPage('3D')">3D</button>
+            <button class="nav-tab" onclick="switchPage('4D')">4D</button>
+            <button class="nav-tab" onclick="switchPage('C')">C</button>
+            <button class="nav-tab active" onclick="switchPage('D')">D</button>
+            <div class="nav-spacer"></div>
+            <div class="nav-right">
+                <span class="nav-datetime" id="navDatetime">9/6/2028 | 19:38:49</span>
+                <span class="nav-loc" id="navLoc">Loc V-1.0.0.0</span>
+                <button class="icon-btn">
+                    <svg viewBox="0 0 100 100" width="34" height="34">
+                        <path d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 84.6 22.7" fill="none" stroke="black"
+                            stroke-width="6" stroke-linecap="round" />
+                        <path d="M84.6 5 L84.6 22.7 L67 22.7" fill="none" stroke="black" stroke-width="6"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <rect x="36" y="55" width="28" height="20" rx="3" fill="black" />
+                        <path d="M41 55 V50 A9 9 0 0 1 59 50 V55" fill="none" stroke="black" stroke-width="6"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+                <button class="icon-btn power-btn">
+                    <svg viewBox="0 0 100 100" width="44" height="44">
+                        <path d="M50 20 V50" fill="none" stroke="#600" stroke-width="10" stroke-linecap="round" />
+                        <path d="M30 35 A30 30 0 1 0 70 35" fill="none" stroke="#600" stroke-width="10"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- BRANDING HEADER ROW -->
+        <div class="branding-header">
+            <div class="top-left-logos">
+                <img src="../image.png" alt="Platinum" class="top-logo" />
+                <img src="../assets/Platinum-Game/dpageimage.png" class="top-helmet-green" alt="Helmet Green" />
+            </div>
+            <div class="nav-spacer"></div>
+            <div class="top-right-logos">
+                <img src="../assets/Platinum-Game/dpageimage.png" class="top-helmet-blue" alt="Helmet Blue" />
+                <span class="top-ver">V-1.0.0.1</span>
+            </div>
+        </div>
+
+        <!-- MAIN AREA -->
+        <div class="main-area">
+
+            <!-- LEFT SIDEBAR -->
+            <div class="left-sb">
+                <div class="draw-info-box">
+                    <div class="draw-game-lbl">SG023</div>
+                    <div class="draw-price-lbl">217.00</div>
+                </div>
+                <div class="previous-results-container">
+                    <table class="prev-results-table">
+                        <tbody>
+                            <tr><td>03:30 PM</td><td>C2</td></tr>
+                            <tr><td>03:15 PM</td><td>F5</td></tr>
+                            <tr><td>03:00 PM</td><td>F5</td></tr>
+                            <tr><td>02:45 PM</td><td>H7</td></tr>
+                            <tr><td>02:30 PM</td><td>J9</td></tr>
+                            <tr><td>02:15 PM</td><td>J9</td></tr>
+                            <tr><td>02:00 PM</td><td>D3</td></tr>
+                            <tr><td>01:45 PM</td><td>I8</td></tr>
+                            <tr><td>01:30 PM</td><td>J9</td></tr>
+                            <tr><td>01:15 PM</td><td>D3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CENTER PLAY BOARD -->
+            <div class="center-board">
+                <div class="pitch-container">
+                    <img src="../assets/Platinum-Game/BG2.png" class="pitch-bg" alt="Cricket Pitch" />
+
+                    <!-- Absolute Positioned Interactive Spots (Balls) - Centered Pyramid Cluster -->
+                    <div class="cricket-ball-spot" id="spot-E4" data-code="E4" onclick="clickBall('E4')">E4</div>
+                    <div class="cricket-ball-spot" id="spot-C2" data-code="C2" onclick="clickBall('C2')">C2</div>
+                    <div class="cricket-ball-spot" id="spot-A0" data-code="A0" onclick="clickBall('A0')">A0</div>
+                    <div class="cricket-ball-spot" id="spot-D3" data-code="D3" onclick="clickBall('D3')">D3</div>
+                    <div class="cricket-ball-spot" id="spot-I8" data-code="I8" onclick="clickBall('I8')">I8</div>
+                    <div class="cricket-ball-spot" id="spot-J9" data-code="J9" onclick="clickBall('J9')">J9</div>
+                    <div class="cricket-ball-spot" id="spot-F5" data-code="F5" onclick="clickBall('F5')">F5</div>
+                    <div class="cricket-ball-spot" id="spot-G6" data-code="G6" onclick="clickBall('G6')">G6</div>
+                    <div class="cricket-ball-spot" id="spot-H7" data-code="H7" onclick="clickBall('H7')">H7</div>
+                    <div class="cricket-ball-spot" id="spot-B1" data-code="B1" onclick="clickBall('B1')">B1</div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL (TIMER / ACTIONS) -->
+            <div class="right-panel">
+                <div class="right-info-stack">
+                    <div class="game-name-lbl">PLATINUM Game <span id="drawTimeLbl">05:30 PM</span></div>
+                    <div class="remaining-lbl">LastTrnasction <span id="lastTxVal">380</span></div>
+                </div>
+
+                <div class="digital-timer-box">
+                    <div class="digital-timer" id="dCountdown">00:05</div>
+                </div>
+
+                <div class="right-actions">
+                    <button class="action-btn" onclick="openReprintModal()">Reprint(F2)</button>
+                    <button class="action-btn" onclick="openAdvanceModal()">Advacned</button>
+                    <button class="action-btn" onclick="openCancelModal()">Cancel(F10)</button>
+                    <button class="action-btn" onclick="clearSelections()">Clear(ECS)</button>
+                    <button class="action-btn play-btn" id="playBtn">Play(F7)</button>
+                    <button class="action-btn" onclick="openBetHistoryModal()">Info(I)</button>
+                </div>
+                
+                <div class="pressed-indicator-box">Pressed F8</div>
+            </div>
+
+        </div><!-- /main-area -->
+
+        <!-- BOTTOM BAR -->
+        <div class="bottom-bar">
+            <!-- Input Grid -->
+            <div class="input-grid-wrapper">
+                <div class="spot-input-lbl">Select the spots</div>
+                <div class="input-grid" id="inputGrid">
+                    <!-- Dynamically generated inputs for A0 - J9 -->
+                </div>
+            </div>
+
+        <!-- Bottom Stats Container -->
+            <div class="bottom-stats-container">
+                <div class="stats-group">
+                    <div class="stat-item-box">
+                        <div class="stat-lbl">Total<br>Selected spots</div>
+                        <div class="stat-val-box"><span class="stat-val" id="statSpots">0</span></div>
+                    </div>
+                    <div class="stat-item-box">
+                        <div class="stat-lbl">Prize pool<br>Contribution</div>
+                        <div class="stat-val-box"><span class="stat-val" id="statPrize">0</span></div>
+                    </div>
+                </div>
+                
+                <div class="stats-group">
+                    <div class="stat-item-box">
+                        <div class="stat-lbl">Game<br>service points</div>
+                        <div class="stat-val-box"><span class="stat-val" id="statServicePts">0</span></div>
+                    </div>
+                    <div class="stat-item-box">
+                        <div class="stat-lbl">Total<br>Points</div>
+                        <div class="stat-val-box"><span class="stat-val" id="statTotalPts">0</span></div>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+
+        <!-- C bottom bar -->
+        <div class="c-bottom-bar" id="cBottomBar" style="display: flex">
+            <button class="c-scheme">Scheme</button>
+        </div>
+
+        <!-- REPRINT TICKET MODAL -->
+        <div id="reprintModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content history-modal">
+                <div class="modal-header">
+                    <h2>REPRINT LAST TICKET</h2>
+                    <button class="close-modal" onclick="closeReprintModal()">&times;</button>
+                </div>
+                <div class="modal-body" style="text-align: center; color: white; padding: 20px;">
+                    <p id="reprintStatus">Checking last transaction...</p>
+                    <button class="modal-btn primary" onclick="reprintLastTicket()" style="margin-top: 15px;">Print</button>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn secondary" onclick="closeReprintModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADVANCE DRAW MODAL -->
+        <div id="advanceModal" class="modal-overlay" style="display:none;">
+            <div class="adv-modal-box">
+                <div class="adv-modal-body" id="advanceDrawGrid">
+                    <!-- Date groups populated dynamically -->
+                </div>
+                <div class="adv-modal-footer">
+                    <button class="adv-footer-btn ok" onclick="confirmAdvanceDraw()">OK</button>
+                    <button class="adv-footer-btn cancel" onclick="cancelAdvanceDraw()">CANCEL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CANCEL BET MODAL (Custom Confirmation Popup) -->
+        <div id="cancelBetModal" class="modal-overlay" style="display:none;">
+            <div class="cancel-confirm-box">
+                <div class="cancel-confirm-msg">
+                    Are you sure, you want to<br>cancel?
+                </div>
+                <div class="cancel-confirm-actions">
+                    <button class="cancel-btn-yes" onclick="handleCancelConfirm()">YES</button>
+                    <button class="cancel-btn-no" onclick="closeCancelModal()">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BET HISTORY / INFO MODAL -->
+        <div id="betHistoryModal" class="modal-overlay" style="display:none; z-index:9000;">
+            <div style="background:#2d6e1f;border-radius:10px;width:700px;max-width:95vw;box-shadow:0 10px 40px rgba(0,0,0,0.8);overflow:hidden;font-family:'Oswald',sans-serif;position:relative;">
+                <!-- TABS ROW -->
+                <div style="display:flex;align-items:stretch;background:#1e5216;border-bottom:2px solid #14380f;">
+                    <button class="d-info-tab active" id="dtab-results" onclick="dSwitchTab('results')">Results</button>
+                    <button class="d-info-tab" id="dtab-game" onclick="dSwitchTab('game')">Game</button>
+                    <button class="d-info-tab" id="dtab-previous" onclick="dSwitchTab('previous')">View Previous Games</button>
+                    <button class="d-info-tab" id="dtab-report" onclick="dSwitchTab('report')">Report</button>
+                    <div style="flex:1;"></div>
+                    <div style="display:flex;align-items:center;gap:10px;padding:0 12px;">
+                        <span id="dInfoTitle" style="color:#fff;font-weight:bold;font-size:15px;">Result</span>
+                        <button onclick="closeBetHistoryModal()" style="background:#b00;border:2px solid #f66;border-radius:50%;width:26px;height:26px;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+                    </div>
+                </div>
+
+                <!-- TAB BODIES -->
+                <div style="min-height:340px;position:relative;">
+
+                    <!-- RESULTS TAB -->
+                    <div id="dtab-content-results" style="padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <span id="dResultsDateLabel" style="color:#fff;font-weight:bold;font-size:15px;background:rgba(0,0,0,0.4);padding:5px 14px;border-radius:4px;min-width:200px;text-align:center;"></span>
+                            <div style="display:flex;align-items:center;gap:6px;margin-left:8px;">
+                                <button id="dFilterAll" onclick="dSetFilter('all')" style="background:#f1ce07;color:#000;font-weight:bold;border:none;border-radius:4px;padding:3px 14px;cursor:pointer;font-family:'Oswald';font-size:14px;">All</button>
+                                <span id="dFilterCode" style="color:#f1ce07;font-weight:bold;font-size:16px;min-width:50px;"></span>
+                            </div>
+                        </div>
+                        <div id="dResultsScrollArea" style="max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:6px;border:1px solid rgba(255,255,255,0.15);">
+                            <table style="width:100%;border-collapse:collapse;color:#fff;font-family:'Oswald';font-size:14px;">
+                                <tbody id="dResultsBody">
+                                    <tr><td colspan="12" style="padding:30px;text-align:center;color:#aaa;">Loading results...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- GAME TAB -->
+                    <div id="dtab-content-game" style="display:none;padding:20px;">
+                        <div style="background:#fff;color:#000;border-radius:4px;padding:22px 32px;max-width:430px;margin:0 auto;font-family:Arial,sans-serif;font-size:14px;line-height:2.1;">
+                            <div style="font-weight:bold;margin-bottom:6px;">Game Acknowledgement Slip Fantasy<br>Spot the Ball</div>
+                            <hr style="border:none;border-top:1px solid #ccc;margin:8px 0 12px;">
+                            <div><strong>Date &amp; Time:</strong> <span id="dGameDateTime"></span></div>
+                            <div><strong>Agent Code :</strong> <span id="dGameAgentCode"></span></div>
+                            <div><strong>Date From :</strong> <span id="dGameDateFrom"></span></div>
+                            <div><strong>Date To :</strong> <span id="dGameDateTo"></span></div>
+                            <br>
+                            <div><strong>In Points :</strong><span id="dGameInPoints"></span></div>
+                            <div><strong>Out Points :</strong><span id="dGameOutPoints"></span></div>
+                            <div><strong>Margin :</strong><span id="dGameMargin"></span></div>
+                            <div><strong>Net To Pay :</strong><span id="dGameNetToPay"></span></div>
+                        </div>
+                        <div style="text-align:center;margin-top:15px;">
+                            <button onclick="dPrintGameSlip()" style="background:linear-gradient(to bottom,#e8e8e8,#c0c0c0);border:2px solid #888;color:#000;font-weight:bold;font-family:Arial;padding:8px 44px;cursor:pointer;font-size:15px;border-radius:2px;">PRINT</button>
+                        </div>
+                    </div>
+
+                    <!-- VIEW PREVIOUS GAMES TAB -->
+                    <div id="dtab-content-previous" style="display:none;padding:20px;">
+                        <div style="max-width:440px;margin:20px auto;">
+                            <div style="background:#f5f0a0;border-radius:8px 8px 0 0;padding:25px 20px;text-align:center;">
+                                <div style="font-weight:bold;font-size:20px;color:#333;margin-bottom:14px;font-family:Arial;">ALERT</div>
+                                <div id="dPreviousGamesMsg" style="font-size:26px;color:#111;font-family:Arial;">No Result Found.</div>
+                            </div>
+                            <div style="background:#5a2e09;height:28px;border-radius:0 0 8px 8px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- REPORT TAB -->
+                    <div id="dtab-content-report" style="display:none;padding:20px;">
+                        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+                            <button onclick="closeBetHistoryModal()" style="background:linear-gradient(to bottom,#8b0000,#5a0000);color:#f1ce07;font-size:17px;font-weight:bold;font-family:'Oswald';padding:8px 32px;border:none;border-radius:6px;cursor:pointer;">Close</button>
+                        </div>
+                        <div style="background:#3a7a25;border-radius:8px;padding:35px 20px;display:flex;gap:22px;justify-content:center;">
+                            <button onclick="dOpenReport('daywise')" style="background:#2d6e1f;color:#fff;font-size:17px;font-weight:bold;font-family:'Oswald';padding:22px 28px;border:none;border-radius:4px;cursor:pointer;min-width:185px;letter-spacing:1px;">DAY WISE&nbsp;&nbsp; REPORT</button>
+                            <button onclick="dOpenReport('gamewise')" style="background:#2d6e1f;color:#fff;font-size:17px;font-weight:bold;font-family:'Oswald';padding:22px 28px;border:none;border-radius:4px;cursor:pointer;min-width:185px;letter-spacing:1px;">GAME WISE REPORT</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT DATE RANGE FULL-SCREEN POPUP -->
+        <div id="dReportPopup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99999;flex-direction:column;">
+            <div style="display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid #ccc;background:#fff;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="text" id="dReportFromDisplay" readonly style="border:1px solid #999;padding:6px 10px;font-size:15px;font-family:Arial;width:120px;cursor:pointer;" onclick="document.getElementById('dReportFromPicker').showPicker()">
+                    <input type="date" id="dReportFromPicker" style="position:absolute;opacity:0;width:0;height:0;" onchange="dSyncReportDate('from',this.value)">
+                    <span onclick="document.getElementById('dReportFromPicker').showPicker()" style="cursor:pointer;font-size:24px;">📅</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="text" id="dReportToDisplay" readonly style="border:1px solid #999;padding:6px 10px;font-size:15px;font-family:Arial;width:120px;cursor:pointer;" onclick="document.getElementById('dReportToPicker').showPicker()">
+                    <input type="date" id="dReportToPicker" style="position:absolute;opacity:0;width:0;height:0;" onchange="dSyncReportDate('to',this.value)">
+                    <span onclick="document.getElementById('dReportToPicker').showPicker()" style="cursor:pointer;font-size:24px;">📅</span>
+                </div>
+                <button onclick="dShowReport()" style="border:2px solid #999;background:#f0f0f0;padding:6px 22px;font-size:15px;font-family:Arial;cursor:pointer;font-weight:bold;">SHOW</button>
+                <div style="flex:1;"></div>
+                <button onclick="dCloseReport()" style="background:#dd0000;border:3px solid #f88;border-radius:8px;width:46px;height:46px;color:#fff;font-size:28px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>
+            </div>
+            <div style="flex:1;background:#cccccc;padding:10px;overflow:auto;display:flex;flex-direction:column;">
+                <div id="dReportContent" style="background:#d4d4d4;flex:1;min-height:300px;padding:15px;font-family:Arial;font-size:14px;color:#333;"></div>
+            </div>
+            <div style="height:22px;background:#ddd;border-top:1px solid #bbb;display:flex;align-items:center;padding:0 4px;">
+                <div style="height:12px;width:55%;background:#aaa;border-radius:6px;"></div>
+            </div>
+        </div>
+
+        <style>
+            .d-info-tab{background:transparent;color:#cde8c0;border:none;padding:10px 15px;cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;font-weight:bold;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+            .d-info-tab:hover{color:#fff;background:rgba(255,255,255,.08);}
+            .d-info-tab.active{color:#fff;border-bottom:3px solid #f1ce07;background:rgba(255,255,255,.1);}
+        </style>
+
+
+
+
+        <!-- LOGOUT CONFIRMATION MODAL -->
+        <div id="logoutModal" class="logout-modal" style="display:none;">
+            <div class="logout-content">
+                <div class="logout-title">LOGOUT?</div>
+                <div class="logout-msg">Are you sure you want to end your session?</div>
+                <div class="logout-actions">
+                    <button class="logout-btn logout-no" onclick="closeLogoutModal()">Cancel</button>
+                    <button class="logout-btn logout-yes" onclick="confirmLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /app-wrapper -->
+
+    <script src="../config.js"></script>
+    <script src="../api.js"></script>
+    <script src="api.js?v=6"></script>
+    <script src="script.js?v=6"></script>
+</body>
+
+</html>

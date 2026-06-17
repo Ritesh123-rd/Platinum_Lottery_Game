@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Platinum Lottery - Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --primary: #ee1c25; /* Vibrant Red from logo */
-            --primary-dark: #b80000;
+            --primary: #ee1c25;
             --white: #ffffff;
             --black: #111111;
-            --glass-white: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
             --error: #ff4d4d;
         }
 
@@ -24,196 +27,192 @@
 
         body {
             font-family: 'Oswald', sans-serif;
-            background: #ee1c25;
-            background: linear-gradient(135deg, #ee1c25 0%, #7e0000 100%);
+            background: url('Login-Background.png') no-repeat center center fixed;
+            background-size: cover;
             height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
             overflow: hidden;
-            color: var(--black);
+            color: var(--white);
         }
 
-        /* Red Theme Blobs */
-        .bg-blobs {
+        /* Top Navbar */
+        .top-navbar {
+            width: 100%;
+            height: 70px;
+            background: rgba(10, 10, 15, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            z-index: 100;
         }
-        .blob {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: move 25s infinite alternate ease-in-out;
-            filter: blur(40px);
-        }
-        .blob-1 { width: 600px; height: 600px; top: -200px; left: -100px; }
-        .blob-2 { width: 500px; height: 500px; bottom: -150px; right: -100px; background: rgba(0, 0, 0, 0.2); }
 
-        @keyframes move {
-            from { transform: translate(0, 0) scale(1) rotate(0deg); }
-            to { transform: translate(100px, 100px) scale(1.2) rotate(30deg); }
+        .nav-logo {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .nav-text {
+            color: #ffd700;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-close {
+            background: #2196F3;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: background 0.3s;
+        }
+
+        .nav-close:hover {
+            background: #1976D2;
+        }
+
+        /* Login Area Container */
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 70px;
         }
 
         .login-container {
             width: 90%;
-            max-width: 400px;
-            padding: 40px;
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            padding: 50px 20px;
+            background: rgba(30, 30, 40, 0.5); /* Darker translucent background */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.05);
             text-align: center;
             position: relative;
             z-index: 10;
-            transition: all 0.3s;
-        }
-
-        .logo {
-            margin-bottom: 20px;
-        }
-
-        .logo img {
-            width: 140px;
-            height: auto;
         }
 
         h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
-            letter-spacing: 1px;
-            color: var(--primary);
-            margin-bottom: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+            color: var(--white);
+            margin-bottom: 30px;
             text-transform: uppercase;
-            font-weight: 900;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            margin-bottom: 6px;
-            color: #555;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
+            margin-bottom: 20px;
         }
 
         input {
-            width: 100%;
-            padding: 12px 16px;
-            background: #f4f4f4;
-            border: 2px solid #f4f4f4;
-            border-radius: 12px;
-            color: var(--black);
-            font-family: inherit;
+            width: 80%;
+            margin: 0 auto;
+            padding: 14px 20px;
+            background: #ffffff;
+            border: none;
+            border-radius: 30px;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 16px;
+            font-weight: 800;
+            text-align: center;
             outline: none;
             transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 220, 0, 0.7), inset 0 2px 4px rgba(0,0,0,0.1);
+            display: block;
+        }
+        
+        input::placeholder {
+            color: #000; /* Very dark placeholder */
+            font-weight: 800;
         }
 
         input:focus {
-            border-color: var(--primary);
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(238, 28, 37, 0.1);
+            box-shadow: 0 0 20px rgba(255, 220, 0, 1), inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .login-btn {
-            width: 100%;
+            width: 80%;
+            margin: 15px auto 0 auto;
             padding: 14px;
-            margin-top: 10px;
-            background: var(--primary);
+            display: block;
+            background: linear-gradient(180deg, #ffea00 0%, #ffb300 50%, #f57f00 100%);
             border: none;
-            border-radius: 12px;
-            color: var(--white);
+            border-radius: 30px;
+            color: #6a0000; /* Dark maroon/red text */
+            font-family: Arial, Helvetica, sans-serif;
             font-weight: 900;
-            font-size: 18px;
+            font-size: 16px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 8px 20px rgba(238, 28, 37, 0.3);
+            box-shadow: 0 0 15px rgba(245, 127, 0, 0.6), inset 0 2px 5px rgba(255,255,255,0.6);
         }
 
         .login-btn:hover {
-            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(238, 28, 37, 0.4);
+            box-shadow: 0 0 20px rgba(245, 127, 0, 0.8), inset 0 2px 5px rgba(255,255,255,0.6);
         }
 
         .login-btn:active {
             transform: translateY(0);
         }
 
-        /* Mobile Adjustments */
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 30px 20px;
-                max-width: 340px;
-            }
-            .logo img {
-                width: 110px;
-            }
-            h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-            .tagline {
-                font-size: 9px;
-                margin-bottom: 15px;
-                padding: 3px 10px;
-            }
-            input {
-                padding: 10px 14px;
-                font-size: 15px;
-            }
-            .login-btn {
-                padding: 12px;
-                font-size: 16px;
-            }
-            .footer-text {
-                margin-top: 20px;
-                font-size: 11px;
-            }
-        }
-
-        @media (max-height: 600px) {
-            .login-container {
-                padding-top: 20px;
-                padding-bottom: 20px;
-            }
-            .logo {
-                margin-bottom: 15px;
-            }
-            .logo img {
-                width: 90px;
-            }
-            h1 {
-                margin-bottom: 10px;
-            }
+        .version-text {
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            color: #4CAF50;
+            font-size: 16px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: normal;
         }
 
         .error-msg {
             color: var(--error);
-            font-size: 14px;
+            font-size: 15px;
             margin-top: 15px;
             font-weight: 700;
             display: none;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
         .loader {
             display: none;
             width: 24px;
             height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid var(--white);
+            border: 3px solid rgba(0, 0, 0, 0.3);
+            border-top: 3px solid #000;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto;
@@ -223,62 +222,49 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .footer-text {
-            margin-top: 25px;
-            font-size: 12px;
-            color: #888;
-            letter-spacing: 1px;
-            font-weight: 400;
-        }
-
-        .tagline {
-            display: inline-block;
-            background: var(--black);
-            color: var(--white);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
+        
+        /* Hidden labels as placeholders are used */
+        .input-group label {
+            display: none;
         }
     </style>
 </head>
-<body>
-    <div class="bg-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-    </div>
 
-    <div class="login-container">
-        <div class="logo">
+<body>
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <div class="nav-logo">
             <img src="image.png" alt="Platinum Logo">
         </div>
-        <div class="tagline">Premium Quality Goods</div>
-        <h1>L O G I N</h1>
-        <form id="loginForm">
-            <div class="input-group">
-                <label for="username">Username</label>
-                <div class="input-wrapper">
-                    <input type="text" id="username" name="username" required placeholder="Username">
+        <div class="nav-text">FOR AMUSMENT ONLY</div>
+        <button class="nav-close" onclick="window.close()">×</button>
+    </div>
+
+    <!-- Login Area -->
+    <div class="login-wrapper">
+        <div class="login-container">
+            <h1>USER LOGIN</h1>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">LoginId</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required placeholder="LoginId">
+                    </div>
                 </div>
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <div class="input-wrapper">
-                    <input type="password" id="password" name="password" required placeholder="Password">
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" required placeholder="Password">
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="login-btn" id="loginBtn">
-                <span class="btn-text">Log In</span>
-                <div class="loader"></div>
-            </button>
-            <div id="errorMsg" class="error-msg">Invalid username or password.</div>
-        </form>
-        <div class="footer-text">
-            © 2026 PLATINUM SYSTEM • V-4.0.0.0
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-text">LOGIN</span>
+                    <div class="loader"></div>
+                </button>
+                <div id="errorMsg" class="error-msg">Invalid username or password.</div>
+            </form>
+            <div class="version-text">Version-25.0</div>
+        </div>
         </div>
     </div>
 
@@ -287,7 +273,7 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
@@ -342,10 +328,11 @@
                     // Invalid/corrupt session data - clear it
                     sessionStorage.removeItem('user');
                 }
-            } catch(e) {
+            } catch (e) {
                 sessionStorage.removeItem('user');
             }
         }
     </script>
 </body>
+
 </html>

@@ -2,7 +2,7 @@
 Object.assign(window.API, {
     timer: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'PlatinumC/GameApi/Timer.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumC/Timer.php');
             return await response.json();
         } catch (error) {
             console.error('API Timer Error (C):', error);
@@ -12,7 +12,7 @@ Object.assign(window.API, {
 
     insertData: async (data) => {
         try {
-            const response = await fetch(window.BASE_URL + 'PlatinumC/GameApi/InsertData.php', {
+            const response = await fetch(window.BASE_URL + 'PlatinumC/InsertData.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -26,7 +26,7 @@ Object.assign(window.API, {
 
     advancDrawTime: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'PlatinumC/GameApi/AdvancDrawTime.php');
+            const response = await fetch(window.BASE_URL + 'PlatinumC/AdvancDrawTime.php');
             return await response.json();
         } catch (error) {
             console.error('API AdvancDrawTime Error (C):', error);
@@ -36,7 +36,7 @@ Object.assign(window.API, {
 
     betHistory: async (username, date) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/BetHistory.php?username=${username}&record_date=${date}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/BetHistory.php?username=${username}&record_date=${date}`);
             return await response.json();
         } catch (error) {
             console.error('API BetHistory Error (C):', error);
@@ -46,7 +46,7 @@ Object.assign(window.API, {
 
     reprintTicket: async (barcode, username) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/TicketViewAndPrint.php?barcodee=${barcode}&username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API Reprint Error (C):', error);
@@ -56,7 +56,7 @@ Object.assign(window.API, {
 
     currentDrawBetHistory: async (username) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/CurrentDrawBetHistory.php?username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/CurrentDrawBetHistory.php?username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API CurrentDrawBetHistory Error (C):', error);
@@ -66,7 +66,7 @@ Object.assign(window.API, {
 
     ticketCancel: async (id) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/CancleTicket.php?id=${id}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/CancleTicket.php?id=${id}`);
             return await response.json();
         } catch (error) {
             console.error('API TicketCancel Error (C):', error);
@@ -76,7 +76,7 @@ Object.assign(window.API, {
 
     resultDateWise: async (date) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/ResultDateWise.php?record_date=${date}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/ResultDateWise.php?record_date=${date}`);
             return await response.json();
         } catch (error) {
             console.error('API ResultDateWise Error (C):', error);
@@ -86,7 +86,7 @@ Object.assign(window.API, {
 
     result: async () => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/Result.php`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/Result.php`);
             return await response.json();
         } catch (error) {
             console.error('API Result Error (C):', error);
@@ -96,7 +96,7 @@ Object.assign(window.API, {
 
     lastDrawBetAmount: async (username) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/LastDrawBetAmount.php?username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/LastDrawBetAmount.php?username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API LastDrawBetAmount Error (C):', error);
@@ -106,7 +106,7 @@ Object.assign(window.API, {
 
     claimTicket: async (data) => {
         try {
-            const response = await fetch(window.BASE_URL + 'PlatinumC/GameApi/ClaimTickets.php', {
+            const response = await fetch(window.BASE_URL + 'PlatinumC/ClaimTickets.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -120,7 +120,7 @@ Object.assign(window.API, {
 
     lastTenResults: async function () {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/LastTenResults.php`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/LastTenResults.php`);
             return await response.json();
         } catch (error) {
             console.error('API LastTenResults Error (C):', error);
@@ -130,7 +130,7 @@ Object.assign(window.API, {
 
     printTicket: async (barcode, username) => {
         try {
-            const response = await fetch(window.BASE_URL + `PlatinumC/GameApi/PrintTickets.php?barcodee=${barcode}&username=${username}`);
+            const response = await fetch(window.BASE_URL + `PlatinumC/PrintTickets.php?barcodee=${barcode}&username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API PrintTickets Error (C):', error);

@@ -7,6 +7,65 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* H-Game Specific Background */
+    html, body {
+      background: #0a1931 !important; /* Default dark blue background for H game */
+    }
+    .bottom-bar {
+      border-top: none !important;
+    }
+    .header-logo-col {
+      min-width: 120px !important;
+      width: 120px !important;
+    }
+    .h-result-tab {
+      background: transparent;
+      color: #cde8c0;
+      border: none;
+      padding: 14px 28px;
+      cursor: pointer;
+      font-family: 'Oswald', sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      border-bottom: 4px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      outline: none;
+    }
+    .h-result-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .h-result-tab.active {
+      color: #fff;
+      border-bottom: 4px solid #f1ce07;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .h-results-table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+    }
+    .h-results-table td {
+      padding: 12px 20px;
+    }
+    #sharedHeaderBar .hdr-gamename,
+    #sharedHeaderBar .hdr-gamename span,
+    #sharedHeaderBar .hdr-time,
+    #sharedHeaderBar .hdr-tx-lbl,
+    #sharedHeaderBar .hdr-tx-val,
+    #sharedHeaderBar .hdr-ssvi,
+    #sharedHeaderBar .hdr-limit,
+    #sharedHeaderBar .hdr-limit span {
+      color: #f1ce07 !important;
+    }
+  </style>
 </head>
 <body>
   <div class="app-wrapper">
@@ -17,6 +76,7 @@
       <button class="nav-tab" onclick="switchPage('3D')">3D</button>
       <button class="nav-tab" onclick="switchPage('4D')">4D</button>
       <button class="nav-tab" onclick="switchPage('C')">C</button>
+      <button class="nav-tab" onclick="switchPage('D')">D</button>
       <div class="nav-spacer"></div>
       <div class="nav-right">
         <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
@@ -47,12 +107,10 @@
         <div class="header-bar premium-hdr" id="sharedHeaderBar">
           <div class="hdr-group-left">
             <div class="hdr-left-box">
-              <div class="hdr-gamename-stacked" id="hdrGamename">
-                <div>PLATINUM</div>
-                <div>HIT</div>
+              <div class="hdr-gamename" id="hdrGamename" style="font-size: 19px; margin-right: 15px; display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-weight: 900;">
+                PLATINUM<span>HIT</span>
               </div>
-              <span class="hdr-time" id="hdrTime">12:00 pm</span>
-              <div class="hdr-next-draw" style="font-size:12px; color:#ed1c24; margin-top:2px;">NEXT DRAW: <span id="hdrDrawTime">--:--</span></div>
+              <span class="hdr-time" id="hdrTime" style="font-size:24px;">12:00 pm</span>
             </div>
             <div class="hdr-tx-stack" id="hdrTxStack">
               <div class="hdr-tx-lbl">Last Transaction:</div>
@@ -69,10 +127,10 @@
               <span class="hdr-ssvi" id="hdrSsvi">SSNE009</span>
             </div>
             <span class="hdr-limit">Limit: <span id="hdrLimitValue">35318.74</span></span>
+            <button class="hdr-refresh" id="hdrRefresh">↻</button>
           </div>
-          <button class="hdr-refresh" id="hdrRefresh">↻</button>
         </div>
-
+        
         <div class="h-winners" id="hWinners">
           <div class="h-wnum">1006</div>
           <div class="h-wnum">1186</div>
@@ -94,9 +152,9 @@
 
     <!-- MAIN AREA -->
     <div class="main-area">
-      <div class="page active" id="page-H">
-        <div class="h-content">
-          <div class="h-ranges" id="hRanges"></div>
+<div class="page active" id="page-H">
+  <div class="h-content">
+    <div class="h-ranges" id="hRanges"></div>
           <div class="h-boxes-col" id="hMiddleBoxes"></div>
           <div class="h-grid-area">
             <div class="h-col-hdr" id="hColHdr"></div>
@@ -115,27 +173,28 @@
     <!-- SHARED BOTTOM BAR -->
     <div class="bottom-bar fd-footer-mode" id="sharedBottom">
       <div class="bb-claim">
-        <span class="bb-clabel">Claim (U):</span>
-        <input class="bb-cinput" id="claimInput" type="text" placeholder="Pressed F8" />
+        <span class="bb-clabel" style="color:#fff; font-size:13px; font-weight:900; white-space:nowrap;">Claim (U):</span>
+        <input class="bb-cinput" type="text" id="claimInput" placeholder="Pressed F8" style="background:#fff; color:#000; border:1px solid #000; border-radius:4px; height:26px; width:180px; padding:0 6px; font-size:14px; font-weight:bold; text-align:center;" onkeydown="if(event.key==='Enter') handleClaim()" />
       </div>
-      <button class="bb-play" id="playBtn">PLAY(F7)</button>
-      <button class="bb-clear" onclick="clearSelections()">Clear(ESC)</button>
-      <div class="bb-stats main-stats">
-        <div class="bb-stat-pod">
-          <div class="bstat"><label>Total Selected spots</label>
-            <div class="bval" id="statSpots">0</div>
-          </div>
-          <div class="bstat"><label>Prize pool Contribution</label>
-            <div class="bval" id="statPrize">0</div>
-          </div>
+      <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex:1;">
+        <button class="bb-play" id="playBtn">PLAY(F7)</button>
+        <button class="bb-clear" onclick="clearSelections()">Clear(ESC)</button>
+      </div>
+      
+      <div class="bb-stats main-stats" style="display:flex; flex-direction:row; gap:20px; align-items:center; justify-content:center; transform: translateX(-10vw);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="color:#fff; font-size:11px; text-align:center; font-weight:bold; line-height:1.2;">Prize Pool<br>Contribution</div>
+          <div class="bval" id="statPrize" style="background:#967b9a; color:#000; font-weight:900; font-size:22px; padding:2px 15px; border-radius:3px; min-width:80px; text-align:center;">0.00</div>
         </div>
-        <div class="bb-stat-pod">
-          <div class="bstat"><label>Game service</label>
-            <div class="bval">0</div>
-          </div>
-          <div class="bstat"><label>Total Points</label>
-            <div class="bval" id="statTotalPts">0</div>
-          </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="color:#fff; font-size:11px; text-align:center; font-weight:bold; line-height:1.2;">GameService<br>Points</div>
+          <div class="bval" id="statGameService" style="background:#967b9a; color:#000; font-weight:900; font-size:22px; padding:2px 15px; border-radius:3px; min-width:80px; text-align:center;">0.00</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="color:#fff; font-size:11px; text-align:center; font-weight:bold; line-height:1.2;">Total Selected<br>Spot</div>
+          <div class="bval" id="statSpots" style="background:#967b9a; color:#000; font-weight:900; font-size:22px; padding:2px 15px; border-radius:3px; min-width:45px; text-align:center;">0</div>
+          <div class="bval" id="statTotalPts" style="background:#967b9a; color:#000; font-weight:900; font-size:22px; padding:2px 15px; border-radius:3px; min-width:45px; text-align:center;">0</div>
+          <div style="color:#fff; font-size:11px; text-align:center; font-weight:bold; line-height:1.2;">Total<br>Points</div>
         </div>
       </div>
 
@@ -166,7 +225,9 @@
     <!-- Hidden bars -->
     <div id="extraBottomBar" style="display:none;"></div>
     <div class="s3-bottom-bar high-fidelity" id="s3Bottom" style="display:none;"></div>
-    <div class="c-bottom-bar" id="cBottomBar" style="display:none;"></div>
+    <div class="c-bottom-bar" id="cBottomBar" style="display:flex;">
+      <button class="c-scheme">Scheme</button>
+    </div>
 
     <!-- ADVANCE DRAW MODAL -->
     <div id="advanceModal" class="modal-overlay" style="display:none;">
@@ -180,6 +241,11 @@
           <button class="close-modal" onclick="closeAdvanceModal()">&times;</button>
         </div>
         <div class="modal-body">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px; padding:10px; background:#111; border-radius:8px;">
+            <span style="color:#f1ce07; font-weight:bold;">Number of Draws:</span>
+            <input type="number" id="advanceDrawCountInp" min="1" placeholder="Type number..." style="width:120px; padding:8px; border-radius:4px; border:1px solid #444; background:#000; color:#fff; outline:none;" oninput="this.value = this.value.replace(/[^0-9]/g, ''); selectXDraws(this.value)" />
+            <span style="color:#aaa; font-size:12px; margin-left:auto;">Selected: <b id="selectedDrawCount" style="color:#0f0;">0</b></span>
+          </div>
           <div class="draw-grid-container" id="advanceDrawGrid">
             <!-- Draws will be populated here -->
           </div>
@@ -198,7 +264,7 @@
           <div style="display:flex; align-items:center; gap:20px;">
             <h2 style="margin:0;">BET HISTORY</h2>
             <div class="history-controls" style="display:flex; align-items:center; gap:10px;">
-              <input type="date" id="historyDateInput" style="padding:6px 12px; border-radius:6px; background:#111; border:1px solid #444; color:#fff; font-family:'Oswald'; outline:none;">
+              <input type="date" id="historyDateInput" onclick="this.showPicker()" style="padding:6px 12px; border-radius:6px; background:#111; border:1px solid #444; color:#fff; font-family:'Oswald'; outline:none;">
               <button class="modal-btn primary" onclick="fetchBetHistory()" style="padding:6px 20px;">SEARCH</button>
             </div>
           </div>
@@ -238,7 +304,7 @@
           <div style="display:flex; align-items:center; gap:20px;">
             <h2 style="margin:0;">TICKET REPRINT</h2>
             <div class="history-controls" style="display:flex; align-items:center; gap:10px;">
-              <input type="date" id="reprintDateInput" style="padding:6px 12px; border-radius:6px; background:#111; border:1px solid #444; color:#fff; font-family:'Oswald'; outline:none;">
+              <input type="date" id="reprintDateInput" onclick="this.showPicker()" style="padding:6px 12px; border-radius:6px; background:#111; border:1px solid #444; color:#fff; font-family:'Oswald'; outline:none;">
               <button class="modal-btn primary" onclick="fetchReprintHistory()" style="padding:6px 20px;">SEARCH</button>
             </div>
           </div>
@@ -331,36 +397,111 @@
       </div>
     </div>
     <!-- RESULT DASHBOARD MODAL -->
-    <div id="resultModal" class="modal-overlay" style="display:none;">
-      <div class="modal-content" style="max-width:1100px; width:95%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden;">
-        <div class="modal-header" style="background: linear-gradient(90deg, #ffc107 0%, #ff8f00 100%); color:#000;">
-          <div style="display:flex; align-items:center; gap:20px;">
-            <h2 style="margin:0;">RESULT DASHBOARD</h2>
-            <div class="history-controls" style="display:flex; align-items:center; gap:10px;">
-              <input type="date" id="resultDateInput" style="padding:6px 12px; border-radius:6px; background:#fff; border:1px solid #444; color:#000; font-family:'Oswald'; outline:none;">
-              <button class="modal-btn" onclick="fetchResultsDashboard()" style="padding:6px 20px; background:#000; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">SEARCH</button>
+    <div id="resultModal" class="modal-overlay" style="display:none; z-index:9000;">
+      <div style="background:#2d6e1f; border-radius:10px; width:1050px; max-width:95vw; box-shadow:0 10px 40px rgba(0,0,0,0.8); overflow:hidden; font-family:'Oswald',sans-serif; position:relative; display:flex; flex-direction:column;">
+        
+        <!-- TABS ROW -->
+        <div style="display:flex; align-items:stretch; background:#1e5216; border-bottom:2px solid #14380f;">
+          <button class="h-result-tab active" id="htab-results" onclick="hSwitchTab('results')">Results</button>
+          <button class="h-result-tab" id="htab-game" onclick="hSwitchTab('game')">Game</button>
+          <button class="h-result-tab" id="htab-previous" onclick="hSwitchTab('previous')">View Previous Games</button>
+          <button class="h-result-tab" id="htab-report" onclick="hSwitchTab('report')">Report</button>
+          <div style="flex:1;"></div>
+          <div style="display:flex; align-items:center; gap:10px; padding:0 12px;">
+            <span id="hResultTitle" style="color:#fff; font-weight:bold; font-size:16px;">Result</span>
+            <button onclick="closeResultModal()" style="background:#b00; border:2px solid #f66; border-radius:50%; width:26px; height:26px; color:#fff; font-weight:bold; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1;">&times;</button>
+          </div>
+        </div>
+
+        <!-- TAB BODIES -->
+        <div style="min-height:380px; position:relative;">
+
+          <!-- RESULTS TAB -->
+          <div id="htab-content-results" style="padding:14px; display:block;">
+            <div style="background:#5a2e09; color:#fff; font-weight:bold; font-size:22px; padding:12px 0; border-radius:4px; text-align:center; margin-bottom:10px; letter-spacing:0.5px;">
+              <span id="hResultsDateLabel"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px; padding-left:4px;">
+              <button id="hFilterAll" onclick="hSetFilter('all')" style="background:#f1ce07; color:#000; font-weight:bold; border:none; border-radius:4px; padding:6px 24px; cursor:pointer; font-family:'Oswald'; font-size:20px;">All</button>
+              <span id="hFilterCode" style="color:#f1ce07; font-weight:bold; font-size:22px; min-width:50px; margin-left:8px;">0000</span>
+            </div>
+            <div style="max-height:300px; overflow-y:auto; background:rgba(0,0,0,0.25); border-radius:6px; border:1px solid rgba(255,255,255,0.15);">
+              <table class="h-results-table">
+                <tbody id="hResultsBody">
+                  <tr><td colspan="2" style="padding:40px; text-align:center; color:#aaa;">Loading results...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <button class="close-modal" onclick="closeResultModal()" style="color:#000;">&times;</button>
-        </div>
-        <div class="modal-body" style="padding:20px; overflow:hidden; flex:1; display:flex; flex-direction:column; background:#000;">
-          <div class="history-table-container" style="flex:1; overflow-y:auto; border:1px solid #333;">
-            <table class="history-table" style="width:100%; border-collapse:collapse; color:#ddd; font-family:'Oswald', sans-serif;">
-              <thead style="background:#1a1a1a; position:sticky; top:0; z-index:10; border-bottom:2px solid #ffc107;">
-                <tr style="color:#ffc107;">
-                  <th style="padding:15px; text-align:center; width:150px;">DRAW TIME</th>
-                  <th style="padding:15px; text-align:left;">WINNING NUMBERS</th>
-                </tr>
-              </thead>
-              <tbody id="resultHistoryBody" style="text-align:center;">
-                <tr><td colspan="2" style="padding:40px; color:#666;">Select a date to view results...</td></tr>
-              </tbody>
-            </table>
+
+          <!-- GAME TAB -->
+          <div id="htab-content-game" style="display:none; padding:20px;">
+            <div style="background:#fff; color:#000; border-radius:4px; padding:22px 32px; max-width:440px; margin:0 auto; font-family:Arial,sans-serif; font-size:14px; line-height:2.2; border:1px solid #ccc; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+              <div style="font-weight:bold; margin-bottom:6px; font-size:15px; text-align:left;">Game Acknowledgement Slip Fantasy<br>Spot the Ball</div>
+              <hr style="border:none; border-top:1px solid #ccc; margin:8px 0 12px;">
+              <div style="text-align:left;"><strong>Date &amp; Time:</strong> <span id="hGameDateTime"></span></div>
+              <div style="text-align:left;"><strong>Agent Code :</strong> <span id="hGameAgentCode"></span></div>
+              <div style="text-align:left;"><strong>Date From :</strong> <span id="hGameDateFrom"></span></div>
+              <div style="text-align:left;"><strong>Date To :</strong> <span id="hGameDateTo"></span></div>
+              <br>
+              <div style="text-align:left;"><strong>In Points :</strong><span id="hGameInPoints"></span></div>
+              <div style="text-align:left;"><strong>Out Points :</strong><span id="hGameOutPoints"></span></div>
+              <div style="text-align:left;"><strong>Margin :</strong><span id="hGameMargin"></span></div>
+              <div style="text-align:left;"><strong>Net To Pay :</strong><span id="hGameNetToPay"></span></div>
+            </div>
+            <div style="text-align:center; margin-top:20px;">
+              <button onclick="hPrintGameSlip()" style="background:linear-gradient(to bottom,#e8e8e8,#c0c0c0); border:2px solid #888; color:#000; font-weight:bold; font-family:Arial; padding:8px 44px; cursor:pointer; font-size:15px; border-radius:2px;">PRINT</button>
+            </div>
           </div>
+
+          <!-- VIEW PREVIOUS GAMES TAB -->
+          <div id="htab-content-previous" style="display:none; padding:20px;">
+            <div style="max-width:440px; margin:30px auto;">
+              <div style="background:#f5f0a0; border-radius:8px 8px 0 0; padding:35px 20px; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+                <div style="font-weight:bold; font-size:22px; color:#333; margin-bottom:14px; font-family:Arial;">ALERT</div>
+                <div id="hPreviousGamesMsg" style="font-size:28px; color:#111; font-family:Arial; font-weight:bold;">No Result Found.</div>
+              </div>
+              <div style="background:#5a2e09; height:28px; border-radius:0 0 8px 8px;"></div>
+            </div>
+          </div>
+
+          <!-- REPORT TAB -->
+          <div id="htab-content-report" style="display:none; padding:20px;">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:20px; padding-right:10px;">
+              <button onclick="closeResultModal()" style="background:linear-gradient(to bottom,#8b0000,#5a0000); color:#f1ce07; font-size:17px; font-weight:bold; font-family:'Oswald'; padding:8px 32px; border:none; border-radius:6px; cursor:pointer; box-shadow:0 3px 6px rgba(0,0,0,0.3);">Close</button>
+            </div>
+            <div style="background:#3a7a25; border-radius:8px; padding:45px 20px; display:flex; gap:30px; justify-content:center; box-shadow:inset 0 0 15px rgba(0,0,0,0.4);">
+              <button onclick="hOpenReport('daywise')" style="background:#2d6e1f; color:#fff; font-size:18px; font-weight:bold; font-family:'Oswald'; padding:24px 36px; border:none; border-radius:4px; cursor:pointer; min-width:200px; letter-spacing:1px; box-shadow:0 4px 8px rgba(0,0,0,0.3); transition:background 0.2s;">DAY WISE&nbsp;&nbsp; REPORT</button>
+              <button onclick="hOpenReport('gamewise')" style="background:#2d6e1f; color:#fff; font-size:18px; font-weight:bold; font-family:'Oswald'; padding:24px 36px; border:none; border-radius:4px; cursor:pointer; min-width:200px; letter-spacing:1px; box-shadow:0 4px 8px rgba(0,0,0,0.3); transition:background 0.2s;">GAME WISE REPORT</button>
+            </div>
+          </div>
+
         </div>
-        <div class="modal-footer">
-          <button class="modal-btn secondary" onclick="closeResultModal()">CLOSE</button>
+      </div>
+    </div>
+
+    <!-- REPORT DATE RANGE POPUP FOR H PAGE -->
+    <div id="hReportPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:99999; flex-direction:column; font-family:Arial, sans-serif;">
+      <div style="display:flex; align-items:center; gap:18px; padding:14px 22px; border-bottom:1px solid #ccc; background:#fff; flex-wrap:wrap; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="text" id="hReportFromDisplay" readonly style="border:1px solid #999; padding:6px 10px; font-size:15px; font-family:Arial; width:120px; cursor:pointer;" onclick="document.getElementById('hReportFromPicker').showPicker()">
+          <input type="date" id="hReportFromPicker" style="position:absolute; opacity:0; width:0; height:0;" onchange="hSyncReportDate('from',this.value)">
+          <span onclick="document.getElementById('hReportFromPicker').showPicker()" style="cursor:pointer; font-size:24px;">📅</span>
         </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="text" id="hReportToDisplay" readonly style="border:1px solid #999; padding:6px 10px; font-size:15px; font-family:Arial; width:120px; cursor:pointer;" onclick="document.getElementById('hReportToPicker').showPicker()">
+          <input type="date" id="hReportToPicker" style="position:absolute; opacity:0; width:0; height:0;" onchange="hSyncReportDate('to',this.value)">
+          <span onclick="document.getElementById('hReportToPicker').showPicker()" style="cursor:pointer; font-size:24px;">📅</span>
+        </div>
+        <button onclick="hShowReport()" style="border:2px solid #999; background:#f0f0f0; padding:6px 22px; font-size:15px; font-family:Arial; cursor:pointer; font-weight:bold; border-radius:4px;">SHOW</button>
+        <div style="flex:1;"></div>
+        <button onclick="hCloseReport()" style="background:#dd0000; border:3px solid #f88; border-radius:8px; width:46px; height:46px; color:#fff; font-size:28px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1;">&times;</button>
+      </div>
+      <div style="flex:1; background:#ffffff; overflow:auto; display:flex; flex-direction:column;">
+        <div id="hReportContent" style="background:#ffffff; flex:1; padding:20px; font-family:Arial, sans-serif; font-size:16px; color:#000; overflow-y:auto;"></div>
+      </div>
+      <div style="height:22px; background:#ddd; border-top:1px solid #bbb; display:flex; align-items:center; padding:0 4px;">
+        <div style="height:12px; width:55%; background:#aaa; border-radius:6px;"></div>
       </div>
     </div>
     <!-- CLAIM STATUS MODAL -->

@@ -6,16 +6,41 @@ let currentRangeIndex = 0;
 const config = {
   gamename: 'PLATINUM HIT', ver: 'V-4.0.0.0',
   btns: [
-    'SP', { t: 'Cancel\n(F10)', c: '' }, { t: 'Reprint\n(F2)', c: '' },
-    { t: 'Advance\nSpot', c: '' }, { t: 'INFO (F3)', c: 'red' },
-    { t: 'Result (F4)', c: 'pink' }, 'SP',
-    { t: 'Random\nPick', c: 'rand' }, { t: 'fam' }, { t: '3.0.0.0', c: 'ver' }
+    { t: 'Cancel (F10)', c: '' },
+    { t: 'Reprint (F2)', c: '' },
+    { t: 'Advance Spot', c: '' }, { t: 'INFO (F3)', c: 'red' },
+    { t: 'Result (F4)', c: 'pink' }, 'SP', 'SP',
+    { t: 'Random Pick', c: 'rand' }, { t: 'fam' }, { t: 'V-3.0.0.0', c: 'ver' }
   ]
 };
 
+function showGlobalCustomAlert(msg, type = 'loading') {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'globalCustomAlert';
+  overlay.className = 'custom-alert-overlay';
+  
+  let botHtml = `<div class="custom-alert-bot"></div>`;
+
+  overlay.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">ALERT</div>
+          <div class="custom-alert-msg">${msg}</div>
+          ${botHtml}
+      </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 function switchPage(p) {
-  if (p === 'G') window.location.href = '../G/index.html';
-  else if (p !== 'H') window.location.href = '../' + p + '/index.html';
+  if (p === 'H') return;
+  showGlobalCustomAlert('Loading ...!');
+  setTimeout(() => {
+    if (p === 'G') window.location.href = '../G/index.html';
+    else window.location.href = '../' + p + '/index.html';
+  }, 300);
 }
 
 function buildSidebar(btns) {
@@ -65,11 +90,24 @@ function openResultModal() {
   const modal = document.getElementById('resultModal');
   if (modal) {
     modal.style.display = 'flex';
-    const dateInp = document.getElementById('resultDateInput');
-    if (dateInp && !dateInp.value) {
-      dateInp.value = new Date().toISOString().split('T')[0];
+    // Set today's date label
+    const now = new Date();
+    const lbl = document.getElementById('hResultsDateLabel');
+    if (lbl) {
+      const pad = x => String(x).padStart(2, '0');
+      let h = now.getHours(), ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+      lbl.textContent = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()} ${h}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${ap}`;
     }
-    fetchResultsDashboard();
+    const codeEl = document.getElementById('hFilterCode');
+    if (codeEl) {
+      codeEl.textContent = String(currentRangeIndex * 100).padStart(4, '0');
+    }
+    // Load results immediately
+    hLoadResults();
+    // Switch to results tab
+    hSwitchTab('results');
+    // Populate Game tab with user data
+    hLoadGameSlip();
   }
 }
 
@@ -78,38 +116,354 @@ function closeResultModal() {
   if (modal) modal.style.display = 'none';
 }
 
-async function fetchResultsDashboard() {
-  const body = document.getElementById('resultHistoryBody');
-  const dateInp = document.getElementById('resultDateInput');
-  if (!body || !dateInp) return;
+window.hSwitchTab = function(tabName) {
+  const tabs = ['results', 'game', 'previous', 'report'];
+  tabs.forEach(t => {
+    const btn = document.getElementById('htab-' + t);
+    const body = document.getElementById('htab-content-' + t);
+    if (btn) btn.classList.remove('active');
+    if (body) body.style.display = 'none';
+  });
+  const activeBtn = document.getElementById('htab-' + tabName);
+  const activeBody = document.getElementById('htab-content-' + tabName);
+  if (activeBtn) activeBtn.classList.add('active');
+  if (activeBody) activeBody.style.display = 'block';
 
-  const dateStr = dateInp.value || new Date().toISOString().split('T')[0];
-  body.innerHTML = '<tr><td colspan="2" style="padding:40px; color:#666;">Querying results for ' + dateStr + '...</td></tr>';
+  const titles = { results: 'Result', game: 'Game', previous: 'View Previous Game', report: 'Report' };
+  const titleEl = document.getElementById('hResultTitle');
+  if (titleEl) titleEl.textContent = titles[tabName] || '';
+
+  if (tabName === 'previous') hLoadPreviousGames();
+  if (tabName === 'game') hLoadGameSlip();
+};
+
+window.hLoadResults = async function() {
+  const tbody = document.getElementById('hResultsBody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="2" style="padding:20px; text-align:center; color:#ccc;">Loading...</td></tr>';
+  try {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const dd = String(now.getDate()).padStart(2,'0');
+    const todayIsoDate = `${yyyy}-${mm}-${dd}`;
+    const resp = await API.resultDateWise(todayIsoDate);
+    if (resp && resp.status === true && Array.isArray(resp.results) && resp.results.length > 0) {
+      tbody.innerHTML = resp.results.map(r => {
+        const nums = r.result.split(',').map(n => n.trim());
+        const formattedNums = nums.map(n => String(n).padStart(4, '0')).join(' | ') + ' |';
+        return `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.15);">
+            <td style="padding:10px 15px; font-weight:bold; font-size:16px; color:#fff; text-align:left; width:120px; white-space:nowrap;">${r.time}</td>
+            <td style="padding:10px 15px; font-size:16px; color:#fff; text-align:left; font-family:'Oswald', sans-serif; letter-spacing:1px; white-space:nowrap;">${formattedNums}</td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="2" style="padding:30px; text-align:center; color:#aaa;">No results found for today.</td></tr>';
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="2" style="padding:30px; text-align:center; color:#ed1c24;">Error loading results.</td></tr>';
+  }
+};
+
+window.hSetFilter = function(filter) {
+  const btn = document.getElementById('hFilterAll');
+  if (btn) btn.style.background = '#f1ce07';
+};
+
+window.hLoadGameSlip = async function() {
+  const userStr = sessionStorage.getItem('user');
+  const now = new Date();
+  const dateStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+
+  document.getElementById('hGameDateTime').textContent = dateStr;
+  document.getElementById('hGameDateFrom').textContent = dateStr;
+  document.getElementById('hGameDateTo').textContent = dateStr;
+
+  if (!userStr) {
+    document.getElementById('hGameAgentCode').textContent = '---';
+    document.getElementById('hGameInPoints').textContent = '0.00';
+    document.getElementById('hGameOutPoints').textContent = '0.00';
+    document.getElementById('hGameMargin').textContent = '0.00';
+    document.getElementById('hGameNetToPay').textContent = '0.00';
+    return;
+  }
+  const user = JSON.parse(userStr);
+  document.getElementById('hGameAgentCode').textContent = user.username || '---';
 
   try {
-    const res = await API.resultDateWise(dateStr);
-    if (res && res.status === true && Array.isArray(res.results)) {
-      if (res.results.length === 0) {
-        body.innerHTML = '<tr><td colspan="2" style="padding:40px; color:#999;">No results found for this date.</td></tr>';
-        return;
-      }
-      body.innerHTML = res.results.map(r => {
-        const nums = r.result.split(',').map(n => n.trim());
-        const htmlNums = nums.map(n => `<span style="display:inline-block; background:#222; color:#0f0; padding:6px 14px; border-radius:5px; margin:4px; font-weight:bold; border:1px solid #444; font-size:18px;">${n}</span>`).join('');
-        return `
-        <tr style="border-bottom:1px solid #1a1a1a;">
-          <td style="padding:20px; font-weight:bold; font-size:18px; color:#fff;">${r.time}</td>
-          <td style="padding:20px; text-align:left;">${htmlNums}</td>
-        </tr>
-      `}).join('');
-    } else {
-        body.innerHTML = '<tr><td colspan="2" style="padding:40px;">Result data unavailable.</td></tr>';
+    const dd = String(now.getDate()).padStart(2,'0');
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const yyyy = now.getFullYear();
+    const res = await API.betHistory(user.username, `${yyyy}-${mm}-${dd}`);
+    let inPts = 0;
+    let outPts = 0;
+    if (res && res.status && res.tickets) {
+      res.tickets.forEach(t => {
+        inPts += Number(t.amount) || 0;
+        outPts += Number(t.win_amt) || 0;
+      });
     }
-  } catch (err) {
-    console.error("Result fetch error:", err);
-    body.innerHTML = '<tr><td colspan="2" style="padding:40px; color:#ed1c24;">Connection error.</td></tr>';
+    const margin = inPts * 0.06;
+    const netToPay = inPts - margin - outPts;
+    document.getElementById('hGameInPoints').textContent = inPts.toFixed(2);
+    document.getElementById('hGameOutPoints').textContent = outPts.toFixed(2);
+    document.getElementById('hGameMargin').textContent = margin.toFixed(2);
+    document.getElementById('hGameNetToPay').textContent = netToPay.toFixed(2);
+  } catch(e) {
+    document.getElementById('hGameInPoints').textContent = '0.00';
+    document.getElementById('hGameOutPoints').textContent = '0.00';
+    document.getElementById('hGameMargin').textContent = '0.00';
+    document.getElementById('hGameNetToPay').textContent = '0.00';
   }
-}
+};
+
+window.hPrintGameSlip = function() {
+  const slipContent = document.querySelector('#htab-content-game div[style*="background:#fff"]');
+  if (!slipContent) { window.print(); return; }
+  const w = window.open('','_blank','width=500,height=600');
+  w.document.write(`<html><head><title>Game Slip</title></head><body style="font-family:Arial;font-size:14px;padding:20px;">${slipContent.innerHTML}<br><button onclick="window.print()">Print</button></body></html>`);
+  w.document.close();
+};
+
+window.hLoadPreviousGames = async function() {
+  const msgEl = document.getElementById('hPreviousGamesMsg');
+  if (!msgEl) return;
+  msgEl.textContent = 'Loading...';
+  try {
+    const resp = await API.result();
+    if (resp && resp.status === true) {
+      msgEl.textContent = 'No Result Found.';
+    } else {
+      msgEl.textContent = 'No Result Found.';
+    }
+  } catch(e) {
+    msgEl.textContent = 'No Result Found.';
+  }
+};
+
+let _hReportType = 'daywise';
+window.hOpenReport = function(type) {
+  _hReportType = type;
+  const popup = document.getElementById('hReportPopup');
+  if (!popup) return;
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const isoToday = `${yyyy}-${mm}-${dd}`;
+  const dispToday = `${dd}/${mm}/${yyyy}`;
+  const fromDisp = document.getElementById('hReportFromDisplay');
+  const toDisp = document.getElementById('hReportToDisplay');
+  const fromPick = document.getElementById('hReportFromPicker');
+  const toPick = document.getElementById('hReportToPicker');
+  if (fromDisp) fromDisp.value = dispToday;
+  if (toDisp) toDisp.value = dispToday;
+  if (fromPick) fromPick.value = isoToday;
+  if (toPick) toPick.value = isoToday;
+  const content = document.getElementById('hReportContent');
+  if (content) content.innerHTML = '';
+  popup.style.display = 'flex';
+};
+
+window.hCloseReport = function() {
+  const popup = document.getElementById('hReportPopup');
+  if (popup) popup.style.display = 'none';
+};
+
+window.hSyncReportDate = function(which, isoVal) {
+  if (!isoVal) return;
+  const parts = isoVal.split('-');
+  if (parts.length !== 3) return;
+  const disp = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  const dispEl = document.getElementById(which === 'from' ? 'hReportFromDisplay' : 'hReportToDisplay');
+  if (dispEl) dispEl.value = disp;
+};
+
+window.hShowReport = async function() {
+  const content = document.getElementById('hReportContent');
+  if (!content) return;
+  content.innerHTML = '<p style="color:#555;text-align:center;padding:30px;font-size:18px;">Loading report...</p>';
+
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) {
+    content.innerHTML = '<p style="color:#c00;text-align:center;padding:30px;font-size:18px;">Please login to view report.</p>';
+    return;
+  }
+  const user = JSON.parse(userStr);
+  const fromPick = document.getElementById('hReportFromPicker');
+  const toPick = document.getElementById('hReportToPicker');
+  const fromDate = fromPick ? fromPick.value : '';
+  const toDate = toPick ? toPick.value : '';
+
+  try {
+    const res = await API.betHistory(user.username, fromDate);
+    
+    // Formatting date to DD/MM/YYYY for the sub-header row or display
+    const dParts = fromDate.split('-');
+    const displayDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : fromDate;
+
+    if (res && res.status && res.tickets && res.tickets.length > 0) {
+      if (_hReportType === 'daywise') {
+        const byDate = {};
+        res.tickets.forEach(t => {
+          const dStr = t.record_date || fromDate;
+          if (!byDate[dStr]) {
+            byDate[dStr] = { inPoints: 0, outPoints: 0 };
+          }
+          byDate[dStr].inPoints += Number(t.amount) || 0;
+          byDate[dStr].outPoints += Number(t.win_amt) || 0;
+        });
+
+        let totalInPoints = 0;
+        let totalMargin = 0;
+        let totalOutPoints = 0;
+        let totalNetToPay = 0;
+        let idx = 0;
+
+        const dateRows = Object.entries(byDate).map(([dStr, data]) => {
+          const inPts = data.inPoints;
+          const margin = inPts * 0.06;
+          const outPts = data.outPoints;
+          const net = inPts - margin - outPts;
+
+          totalInPoints += inPts;
+          totalMargin += margin;
+          totalOutPoints += outPts;
+          totalNetToPay += net;
+
+          const bg = idx % 2 === 0 ? '#e8e8e8' : '#ffffff';
+          idx++;
+
+          return `
+            <tr style="background:${bg}; color:#000; border-bottom:1px solid #ccc; font-weight:bold; font-size:16px;">
+              <td style="padding:12px 15px; text-align:left; border:1px solid #ccc;">${dStr}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${inPts.toFixed(2)}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${margin.toFixed(2)}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${outPts.toFixed(2)}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${net.toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        content.innerHTML = `
+          <table style="width:100%; border-collapse:collapse; font-family:Arial, sans-serif; font-size:16px; border:1px solid #ccc;">
+            <thead>
+              <tr style="background:#cccccc; color:#000; font-weight:bold;">
+                <th style="padding:12px 15px; text-align:left; border:1px solid #aaa; font-size:16px;">DATE</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">In Points</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">Margin</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">Out Points</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">Net To Pay</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dateRows}
+            </tbody>
+            <tfoot>
+              <tr style="background:#cccccc; color:#000; font-weight:bold; font-size:16px; border-top:2px solid #999;">
+                <td style="padding:12px 15px; text-align:left; border:1px solid #ccc;"></td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalInPoints.toFixed(2)}</td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalMargin.toFixed(2)}</td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalOutPoints.toFixed(2)}</td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalNetToPay.toFixed(2)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      } else {
+        // Game wise
+        const byGame = {};
+        
+        function getGameName(t) {
+          if (t.game_name) return t.game_name;
+          if (t.spot_code) return t.spot_code;
+          if (t.game) {
+            if (t.game === 'G') return 'GREEN';
+            if (t.game === 'H') return 'PLATINUM HIT';
+            if (t.game === '3D') return 'SPOT 3 A';
+            if (t.game === '4D') return 'SPOT 3 B';
+            if (t.game === 'C') return 'SPOT 3 C';
+            return t.game;
+          }
+          return 'SPOT 3 A'; // fallback default
+        }
+
+        res.tickets.forEach(t => {
+          let gName = getGameName(t);
+          if (!byGame[gName]) {
+            byGame[gName] = { playPoints: 0, winPoints: 0 };
+          }
+          byGame[gName].playPoints += Number(t.amount) || 0;
+          byGame[gName].winPoints += Number(t.win_amt) || 0;
+        });
+
+        let totalPlayPoints = 0;
+        let totalMargin = 0;
+        let totalWinPoints = 0;
+        let totalNetPay = 0;
+        let idx = 0;
+
+        const gameRows = Object.entries(byGame).map(([name, data]) => {
+          const play = data.playPoints;
+          const margin = play * 0.06;
+          const win = data.winPoints;
+          const net = play - margin - win;
+
+          totalPlayPoints += play;
+          totalMargin += margin;
+          totalWinPoints += win;
+          totalNetPay += net;
+
+          const bg = idx % 2 === 0 ? '#e8e8e8' : '#ffffff';
+          idx++;
+
+          return `
+            <tr style="background:${bg}; color:#000; border-bottom:1px solid #ccc; font-weight:bold; font-size:16px;">
+              <td style="padding:12px 15px; text-align:left; border:1px solid #ccc;">${name}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${play.toFixed(2)}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${margin.toFixed(2)}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${win.toFixed(2)}</td>
+              <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${net.toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        content.innerHTML = `
+          <table style="width:100%; border-collapse:collapse; font-family:Arial, sans-serif; font-size:16px; border:1px solid #ccc;">
+            <thead>
+              <tr style="background:#cccccc; color:#000; font-weight:bold;">
+                <th style="padding:12px 15px; text-align:left; border:1px solid #aaa; font-size:16px;">GAME NAME</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">PLAY POINTS</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">MARGIN</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">WIN POINTS</th>
+                <th style="padding:12px 15px; text-align:right; border:1px solid #aaa; font-size:16px;">NET PAY</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:#ffffff; font-weight:bold;"><td colspan="5" style="padding:12px 15px; text-align:left; color:#0022ff;">${displayDate}</td></tr>
+              ${gameRows}
+            </tbody>
+            <tfoot>
+              <tr style="background:#cccccc; color:#000; font-weight:bold; font-size:16px; border-top:2px solid #999;">
+                <td style="padding:12px 15px; text-align:left; border:1px solid #ccc;"></td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalPlayPoints.toFixed(2)}</td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalMargin.toFixed(2)}</td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalWinPoints.toFixed(2)}</td>
+                <td style="padding:12px 15px; text-align:right; border:1px solid #ccc;">${totalNetPay.toFixed(2)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        `;
+      }
+    } else {
+      content.innerHTML = '<p style="color:#555;text-align:center;padding:40px;font-size:18px;">No data found for selected date range.</p>';
+    }
+  } catch(e) {
+    content.innerHTML = '<p style="color:#c00;text-align:center;padding:30px;font-size:18px;">Error loading report.</p>';
+  }
+};
 
 function randomPick() {
   const startNum = currentRangeIndex * 100;
@@ -187,16 +541,17 @@ async function submitCancel(ticketId) {
       try {
         const res = await API.ticketCancel(ticketId);
         if (res && (res.status === true || res.status === "true")) {
-          alert(res.message || "Ticket cancelled successfully!");
+          showStatusModal("SUCCESS", res.message || "Ticket cancelled successfully!", "success");
           closeConfirmCancel();
           fetchCancelHistory();
           if (typeof window.getBalance === 'function') window.getBalance();
+          setTimeout(() => { window.location.reload(); }, 1500);
         } else {
-          alert("Cancellation Failed: " + (res.message || "Unknown error"));
+          showStatusModal("CANCEL FAILED", res.message || "Unknown error", "error");
         }
       } catch (err) {
         console.error("Cancel error:", err);
-        alert("Error during cancellation.");
+        showStatusModal("ERROR", "Error during cancellation.", "error");
       } finally {
         finalBtn.disabled = false;
         finalBtn.textContent = "YES, CANCEL IT";
@@ -576,12 +931,12 @@ function updateStats() {
           
           if (rangeIdx >= 0 && rangeIdx < 10) {
               rangeQty[rangeIdx] += qty;
-              rangePts[rangeIdx] += qty * 10; // Assuming point multiplier is 10 for Pts
+              rangePts[rangeIdx] += qty * 2; // Price is 2
           }
           
           totalSpots++;
           totalQty += qty;
-          totalPts += qty * 10;
+          totalPts += qty * 2; // Price is 2
       }
   }
 
@@ -598,13 +953,19 @@ function updateStats() {
       }
   }
   
+  const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
+  const finalSpots = totalSpots * drawCount;
+  const finalPoints = totalPts * drawCount;
+
   const spotsEl = document.getElementById('statSpots');
   const prizeEl = document.getElementById('statPrize');
+  const serviceEl = document.getElementById('statGameService');
   const totalPtsEl = document.getElementById('statTotalPts');
   
-  if (spotsEl) spotsEl.textContent = totalSpots; 
-  if (totalPtsEl) totalPtsEl.textContent = totalQty;
-  if (prizeEl) prizeEl.textContent = totalPts;
+  if (spotsEl) spotsEl.textContent = finalSpots; 
+  if (prizeEl) prizeEl.textContent = (finalPoints * 0.9).toFixed(2);
+  if (serviceEl) serviceEl.textContent = (finalPoints * 0.1).toFixed(2);
+  if (totalPtsEl) totalPtsEl.textContent = finalPoints;
 }
 
 function clearSelections() {
@@ -623,7 +984,7 @@ let advanceTimeVal = [];
 
 async function playH() {
   const userStr = sessionStorage.getItem('user');
-  if (!userStr) return alert("Please Login");
+  if (!userStr) return showStatusModal("LOGIN REQUIRED", "Please login to play.", "error");
   const user = JSON.parse(userStr);
 
   let hasBets = false;
@@ -641,7 +1002,7 @@ async function playH() {
   }
 
   if (!hasBets) {
-    alert("Please enter some points before playing!");
+    showStatusModal("NO BETS", "Please enter some points before playing!", "error");
     return;
   }
 
@@ -660,7 +1021,6 @@ async function playH() {
   try {
     const res = await API.insertData(payload);
     if (res && res.status === true) {
-      alert(res.message || "Bet placed successfully!");
       fetchLastTransaction();
       if (res.barcodes && res.barcodes.length > 0) {
         // Collect all tickets to print in a single job
@@ -683,21 +1043,26 @@ async function playH() {
       clearSelections();
       advanceTimeVal = [];
       if (typeof window.getBalance === 'function') window.getBalance();
+      setTimeout(() => { window.location.reload(); }, 1500);
     } else {
-      alert(res.message || "Failed to place bet.");
+      showStatusModal("FAILED", res.message || "Failed to place bet.", "error");
     }
   } catch (e) {
     console.error("Bet error:", e);
-    alert("System error while placing bet.");
+    showStatusModal("ERROR", "System error while placing bet.", "error");
   }
 }
+
+let allAvailableSlotsH = [];
 
 async function openAdvanceModal() {
   const modal = document.getElementById('advanceModal');
   const grid = document.getElementById('advanceDrawGrid');
   const sa = document.getElementById('selectAllDraws');
+  const inp = document.getElementById('advanceDrawCountInp');
   if (!modal || !grid) return;
 
+  if (inp) inp.value = ''; // Reset input
   grid.innerHTML = '<div style="color:white; padding:20px;">Loading draws...</div>';
   if (sa) sa.checked = false;
   advanceTimeVal = [];
@@ -705,13 +1070,9 @@ async function openAdvanceModal() {
 
   try {
     const res = await API.advancDrawTime();
-    grid.innerHTML = '';
     if (res && res.status === true && Array.isArray(res.slots)) {
-      grid.innerHTML = res.slots.map((s) =>
-        `<label style="display:flex;align-items:center;background:#222;padding:10px;border-radius:6px;gap:8px;color:#fff;cursor:pointer;">
-           <input type="checkbox" class="adv_slot_cb" value="${s}">${s}
-        </label>`
-      ).join('');
+      allAvailableSlotsH = res.slots;
+      renderDrawSlotsH();
     } else {
       grid.innerHTML = '<p style="color:#ed1c24; padding:20px;">No upcoming draws available.</p>';
     }
@@ -721,11 +1082,50 @@ async function openAdvanceModal() {
   }
 }
 
+function renderDrawSlotsH() {
+  const grid = document.getElementById('advanceDrawGrid');
+  if (!grid || !allAvailableSlotsH) return;
+
+  grid.innerHTML = allAvailableSlotsH.map((s) => {
+    const isChecked = advanceTimeVal.includes(s);
+    return `<label style="display:flex;align-items:center;background:${isChecked ? '#ed1c24' : '#222'};padding:10px;border-radius:6px;gap:8px;color:#fff;cursor:pointer;transition:background 0.2s;">
+              <input type="checkbox" class="adv_slot_cb" value="${s}" ${isChecked ? 'checked' : ''} onchange="toggleSlotH('${s}', this.checked)">${s}
+            </label>`;
+  }).join('');
+  updateDrawCountUI();
+}
+
+window.toggleSlotH = function (slot, isChecked) {
+  if (isChecked) {
+    if (!advanceTimeVal.includes(slot)) advanceTimeVal.push(slot);
+  } else {
+    advanceTimeVal = advanceTimeVal.filter(s => s !== slot);
+  }
+  renderDrawSlotsH();
+};
+
+window.selectXDraws = function (count) {
+  const n = parseInt(count);
+  if (isNaN(n) || n < 0) {
+    advanceTimeVal = [];
+  } else {
+    advanceTimeVal = allAvailableSlotsH.slice(0, n);
+  }
+  renderDrawSlotsH();
+};
+
+function updateDrawCountUI() {
+  const countEl = document.getElementById('selectedDrawCount');
+  if (countEl) countEl.textContent = advanceTimeVal.length;
+}
+
 function toggleSelectAllDraws(isChecked) {
-  const checkboxes = document.querySelectorAll('.adv_slot_cb');
-  checkboxes.forEach(cb => {
-    cb.checked = isChecked;
-  });
+  if (isChecked) {
+    advanceTimeVal = [...allAvailableSlotsH];
+  } else {
+    advanceTimeVal = [];
+  }
+  renderDrawSlotsH();
 }
 
 function closeAdvanceModal() {
@@ -734,12 +1134,8 @@ function closeAdvanceModal() {
 }
 
 function confirmAdvanceDraw() {
-  const sels = document.querySelectorAll('.adv_slot_cb:checked');
-  advanceTimeVal = Array.from(sels).map(cb => cb.value);
-  if (advanceTimeVal.length > 0) {
-    alert("Advance Draws Selected: " + advanceTimeVal.join(', '));
-  }
   closeAdvanceModal();
+  updateStats();
 }
 
 async function fetchBetHistory() {
@@ -859,7 +1255,7 @@ async function fetchReprintHistory() {
 
 async function handleReprintSubmit() {
   const inp = document.getElementById('reprintBarcodeInp');
-  if (!inp || !inp.value) return alert("Enter barcode.");
+  if (!inp || !inp.value) return showStatusModal("EMPTY BARCODE", "Please enter barcode.", "error");
   directReprint(inp.value.trim().toUpperCase());
 }
 
@@ -872,14 +1268,26 @@ async function directReprint(barcode) {
     if (res && res.status && res.tickets) {
       printTickets(res.tickets);
     } else {
-      alert(res.message || "Ticket not found or error.");
+      showStatusModal("FAILED", res.message || "Ticket not found.", "error");
     }
-  } catch (e) { alert("Reprint failed."); }
+  } catch (e) { showStatusModal("ERROR", "Reprint failed.", "error"); }
 }
 
 function printTickets(ticketsArray) {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) return alert("Pop-up blocked. Allow pop-ups for printing.");
+  // Use a hidden iframe for printing instead of window.open to keep user on the same page
+  let printFrame = document.getElementById('printFrame');
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'printFrame';
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = 'none';
+    printFrame.style.visibility = 'hidden';
+    document.body.appendChild(printFrame);
+  }
 
   const ticketsHtml = ticketsArray.map((ticketObj) => {
     const ticket = ticketObj.ticket || ticketObj;
@@ -937,7 +1345,7 @@ function printTickets(ticketsArray) {
           <img src="${barcodeData}" style="width:100%; height:auto;" alt="barcode" />
         </div>
         <div style="border-top:1px dashed #000; margin:12px 0;"></div>
-        <div style="font-size:10px; font-weight:bold;">*** THANK YOU & GOOD LUCK ***</div>
+       
       </div>
     `;
   }).join('');
@@ -954,13 +1362,20 @@ function printTickets(ticketsArray) {
         @media print { .ticket-page { border-bottom: none; } }
       </style>
     </head>
-    <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
+    <body>
       ${ticketsHtml}
     </body>
     </html>
   `;
-  printWindow.document.write(content);
-  printWindow.document.close();
+  const doc = printFrame.contentWindow.document;
+  doc.open();
+  doc.write(content);
+  doc.close();
+
+  setTimeout(() => {
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+  }, 500);
 }
 
 function updateClock() {
@@ -1045,7 +1460,7 @@ function scaleFonts() {
 
   document.querySelectorAll('.hcell').forEach(el => { el.style.fontSize = clamp(11 * s, 9, 20) + 'px'; });
   document.querySelectorAll('.h-rlbl').forEach(el => { el.style.fontSize = clamp(9 * s, 7, 14) + 'px'; });
-  document.querySelectorAll('.h-wnum').forEach(el => { el.style.fontSize = clamp(20 * s, 13, 32) + 'px'; });
+  document.querySelectorAll('.h-wnum').forEach(el => { el.style.fontSize = clamp(32 * s, 22, 48) + 'px'; });
   document.querySelectorAll('.nav-tab').forEach(el => { el.style.fontSize = clamp(17 * s, 13, 26) + 'px'; });
   document.querySelectorAll('.sb-btn,.sb-random').forEach(el => {
     el.style.fontSize = clamp(11 * s, 9, 18) + 'px';
@@ -1081,6 +1496,19 @@ function applyMobileScale() {
     document.body.style.height = (DESIGN_H * scale) + 'px';
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+  } else if (window.innerWidth > 600) {
+    const scale = window.innerHeight / 768;
+    wrapper.style.width = (window.innerWidth / scale) + "px";
+    wrapper.style.height = '768px';
+    wrapper.style.transformOrigin = 'top left';
+    wrapper.style.transform = `scale(${scale})`;
+    wrapper.style.position = 'absolute';
+    wrapper.style.top = '0';
+    wrapper.style.left = '0';
+
+    document.body.style.height = window.innerHeight + 'px';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
   } else {
     wrapper.style.width = '';
     wrapper.style.height = '';
@@ -1097,6 +1525,7 @@ function applyMobileScale() {
 
 window.addEventListener('resize', applyMobileScale);
 window.addEventListener('orientationchange', applyMobileScale);
+document.addEventListener('fullscreenchange', applyMobileScale);
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('body-H');
@@ -1164,4 +1593,37 @@ document.addEventListener('DOMContentLoaded', () => {
   applyMobileScale();
   setInterval(updateClock, 1000);
   setInterval(updateCountdowns, 1000);
+});
+
+function showStatusModal(title, message, type) {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = 'globalCustomAlert';
+  modal.className = "custom-alert-overlay";
+  
+  modal.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">${title}</div>
+          <div class="custom-alert-msg">${message}</div>
+          <div class="custom-alert-bot">
+              <button class="custom-alert-btn" onclick="this.closest('.custom-alert-overlay').remove()">OK</button>
+          </div>
+      </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+window.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    if (e.target.id) {
+      e.target.style.display = 'none';
+    } else {
+      e.target.remove();
+    }
+  }
+  if (e.target.classList.contains('logout-modal')) {
+    e.target.style.display = 'none';
+  }
 });

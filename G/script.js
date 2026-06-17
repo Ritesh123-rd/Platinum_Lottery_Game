@@ -15,9 +15,52 @@ const config = {
   ]
 };
 
+function showGlobalCustomAlert(msg, type = 'loading') {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'globalCustomAlert';
+  overlay.className = 'custom-alert-overlay';
+  
+  let botHtml = `<div class="custom-alert-bot"></div>`;
+
+  overlay.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">ALERT</div>
+          <div class="custom-alert-msg">${msg}</div>
+          ${botHtml}
+      </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function showStatusModal(title, message, type) {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = 'globalCustomAlert';
+  modal.className = "custom-alert-overlay";
+  
+  modal.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">${title}</div>
+          <div class="custom-alert-msg">${message}</div>
+          <div class="custom-alert-bot">
+              <button class="custom-alert-btn" onclick="this.closest('.custom-alert-overlay').remove()">OK</button>
+          </div>
+      </div>
+  `;
+  document.body.appendChild(modal);
+}
+
 function switchPage(p) {
-  if (p === 'G') window.location.href = 'index.html';
-  else window.location.href = '../' + p + '/index.html';
+  if (p === 'G') return;
+  showGlobalCustomAlert('Loading ...!');
+  setTimeout(() => {
+    window.location.href = '../' + p + '/index.html';
+  }, 300);
 }
 
 function buildSidebar(btns) {
@@ -46,7 +89,7 @@ function buildSidebar(btns) {
     if (b.t.includes('Cancel')) btn.onclick = openCancelModal;
     if (b.t.includes('Clear')) btn.onclick = clearSelections;
     if (b.t.includes('Advance')) btn.onclick = openAdvanceModal;
-    if (b.t.includes('INFO')) btn.onclick = openBetHistoryModal;
+    if (b.t.includes('INFO')) btn.onclick = openInfoTabsModal;
     if (b.t.includes('Reprint')) btn.onclick = openReprintModal;
     sb.appendChild(btn);
   });
@@ -109,7 +152,7 @@ function buildGGrid() {
     labels.appendChild(blank);
     LETTERS.forEach(L => {
       const d = document.createElement('div'); d.className = 'g-lbl';
-      d.innerHTML = `<span class="cell-code" style="display:block;font-size:10px;margin-bottom:2px;pointer-events:none;">${L}</span><input type="tel" class="lbl-input" maxlength="3" style="display:block;width:100%;flex:1;border:none;background:transparent;text-align:center;color:#fff;outline:none;font-weight:900;font-size:16px;padding:0;box-sizing:border-box;cursor:text;position:relative;z-index:2;"/>`;
+      d.innerHTML = `<input type="tel" class="lbl-input" placeholder="" maxlength="3" style="display:block;width:100%;height:100%;border:none;background:transparent;text-align:center;color:#fff;outline:none;font-weight:normal;font-family:'Impact',sans-serif;letter-spacing:1px;font-size:16px;padding:0;box-sizing:border-box;cursor:text;position:relative;z-index:2;"/>`;
       const inp = d.querySelector('.lbl-input');
       d.onclick = (e) => { if (e.target !== inp) inp.focus(); };
       inp.oninput = () => {
@@ -128,7 +171,7 @@ function buildGGrid() {
     prev.innerHTML = '';
     for (let i = 0; i < 10; i++) {
       const c = document.createElement('div'); c.className = 'prev-cell';
-      c.innerHTML = `<span class="cell-code" style="display:block;font-size:10px;margin-bottom:2px;pointer-events:none;">${i}</span><input type="tel" class="prev-input" maxlength="3" style="display:block;width:100%;flex:1;border:none;background:transparent;text-align:center;color:#000;outline:none;font-weight:900;font-size:16px;padding:0;box-sizing:border-box;cursor:text;position:relative;z-index:2;"/>`;
+      c.innerHTML = `<input type="tel" class="prev-input" placeholder="" maxlength="3" style="display:block;width:100%;height:100%;border:none;background:transparent;text-align:center;color:#000;outline:none;font-weight:normal;font-family:'Impact',sans-serif;letter-spacing:1px;font-size:16px;padding:0;box-sizing:border-box;cursor:text;position:relative;z-index:2;"/>`;
       const inp = c.querySelector('.prev-input');
       c.onclick = (e) => { if (e.target !== inp) inp.focus(); };
       inp.oninput = () => {
@@ -151,7 +194,7 @@ function buildGGrid() {
         const code = L + String(n).padStart(2, '0');
         const c = document.createElement('div');
         c.className = 'gcell';
-        c.innerHTML = `<span class="cell-code" style="display:block;font-size:10px;margin-bottom:2px;pointer-events:none;">${code}</span><input type="tel" class="cell-bet" data-code="${code}" maxlength="3" autocomplete="off" style="display:block;width:100%;flex:1;border:none;background:transparent;text-align:center;color:#000;outline:none;font-weight:900;font-size:16px;padding:0;box-sizing:border-box;cursor:text;position:relative;z-index:2;"/>`;
+        c.innerHTML = `<input type="tel" class="cell-bet" data-code="${code}" placeholder="${code}" maxlength="3" autocomplete="off" style="display:block;width:100%;height:100%;border:none;background:transparent;text-align:center;color:#000;outline:none;font-weight:normal;font-family:'Impact',sans-serif;letter-spacing:1px;font-size:16px;padding:0;box-sizing:border-box;cursor:text;position:relative;z-index:2;"/>`;
         const cellBet = c.querySelector('.cell-bet');
         cellBet.oninput = () => { applyValue(code, parseInt(cellBet.value) || 0); updateStats(); };
         c.onclick = (e) => { if (e.target !== cellBet) cellBet.focus(); };
@@ -176,14 +219,18 @@ function updateStats() {
 
   const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
   const finalSpots = totalSpots * drawCount;
-  const finalAmount = totalAmount * drawCount;
+  const finalQty = totalAmount * drawCount;
+  const finalPoints = finalQty * 5;
 
   const spotsEl = document.getElementById('statSpots');
   const prizeEl = document.getElementById('statPrize');
+  const serviceEl = document.getElementById('statGameService');
   const totalPointsEl = document.getElementById('statTotalPts');
+  
   if (spotsEl) spotsEl.textContent = finalSpots;
-  if (prizeEl) prizeEl.textContent = finalAmount;
-  if (totalPointsEl) totalPointsEl.textContent = finalAmount;
+  if (prizeEl) prizeEl.textContent = (finalPoints * 0.9).toFixed(2);
+  if (serviceEl) serviceEl.textContent = (finalPoints * 0.1).toFixed(2);
+  if (totalPointsEl) totalPointsEl.textContent = finalPoints;
 }
 
 function clearSelections() {
@@ -215,37 +262,126 @@ function updateCountdowns() {
   }
 }
 
-function randomPick() {
-  const avail = [...document.querySelectorAll('.gcell:not(.sel)')];
-  if (!avail.length) return;
-  const pick = avail[Math.floor(Math.random() * avail.length)];
-  const code = pick.querySelector('.cell-bet').dataset.code;
-  applyValue(code, Math.floor(Math.random() * 100) + 1);
-  updateStats();
+window.randomPick = function() {
+  const overlay = document.createElement('div');
+  overlay.className = "modal-overlay";
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
+  
+  overlay.innerHTML = `
+    <div style="background:#b0b8c6; padding:30px 40px; border-radius:4px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:Arial, sans-serif; color:#333; width:500px; border: 2px solid #fff;">
+      <h3 style="margin-bottom:30px; font-size:18px; font-weight:bold; color:#333;">RANDOM PICK</h3>
+      <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
+        <div style="display:flex; flex-direction:column; align-items:center; width:45%;">
+          <label style="font-size:14px; margin-bottom:5px; font-weight:bold; color:#444;">Quantity</label>
+          <input type="number" id="randQty" value="10" style="width:100%; padding:8px; border:none; font-size:18px; text-align:center; background:#fff; outline:none; font-family:'Times New Roman', serif;" />
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; width:45%;">
+          <label style="font-size:14px; margin-bottom:5px; font-weight:bold; color:#444;">Generate Total</label>
+          <input type="number" id="randTotal" style="width:100%; padding:8px; border:none; font-size:18px; text-align:center; background:#fff; outline:none; font-family:'Times New Roman', serif;" />
+        </div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:15px;">
+        <button id="btnRandOk" style="padding:8px 30px; background:#cddc39; color:#000; border:none; cursor:pointer; font-weight:bold; font-size:14px;">OK</button>
+        <button id="btnRandCancel" style="padding:8px 25px; background:#ff5722; color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:14px;">CANCEL</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById('btnRandCancel').onclick = () => overlay.remove();
+  document.getElementById('btnRandOk').onclick = () => {
+    let qtyInput = parseInt(document.getElementById('randQty').value) || 0;
+    let totalInput = parseInt(document.getElementById('randTotal').value) || 0;
+    
+    overlay.remove();
+    
+    // As per user rule: Quantity = amount per ticket, Generate Total = number of grids
+    let amountPerTicket = qtyInput > 0 ? qtyInput : 10;
+    let numGrids = totalInput > 0 ? totalInput : (qtyInput > 0 ? qtyInput : 10);
+    
+    if (numGrids <= 0) return;
+    
+    const avail = [...document.querySelectorAll('.gcell:not(.sel)')];
+    if (avail.length === 0) return;
+    
+    if (numGrids > avail.length) numGrids = avail.length;
+
+    for (let i = avail.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [avail[i], avail[j]] = [avail[j], avail[i]];
+    }
+    
+    for (let i = 0; i < numGrids; i++) {
+      const code = avail[i].querySelector('.cell-bet').dataset.code;
+      applyValue(code, amountPerTicket);
+    }
+    updateStats();
+  };
 }
+
+let allAvailableSlotsG = [];
 
 window.openAdvanceModal = async function () {
   const modal = document.getElementById('advanceModal');
-  if (modal) modal.style.display = 'flex';
   const grid = document.getElementById('advanceDrawGrid');
-  if (grid) grid.innerHTML = '<p style="color:#fff;">Loading...</p>';
+  const inp = document.getElementById('advanceDrawCountInp');
+  if (!modal || !grid) return;
+
+  if (inp) inp.value = ''; // Reset input
+  grid.innerHTML = '<p style="color:#fff; padding:20px;">Loading...</p>';
+  advanceTimeVal = [];
+  modal.style.display = 'flex';
+
   try {
     const res = await API.advancDrawTime();
     if (res.status && res.slots && res.slots.length > 0) {
-      if (grid) {
-        grid.innerHTML = res.slots.map((s) =>
-          `<label style="display:flex;align-items:center;background:#222;padding:10px;border-radius:6px;gap:8px;color:#fff;cursor:pointer;">
-             <input type="checkbox" class="adv_slot_cb" value="${s}">${s}
-          </label>`
-        ).join('');
-      }
+      allAvailableSlotsG = res.slots;
+      renderDrawSlotsG();
     } else {
-      if (grid) grid.innerHTML = '<p style="color:#f44;">No advance times available.</p>';
+      grid.innerHTML = '<p style="color:#f44; padding:20px;">No advance times available.</p>';
     }
   } catch (err) {
-    if (grid) grid.innerHTML = '<p style="color:#f44;">Error fetching advance draw times.</p>';
+    console.error("Advance draw fetch error:", err);
+    grid.innerHTML = '<p style="color:#f44; padding:20px;">Error fetching advance draw times.</p>';
   }
 };
+
+function renderDrawSlotsG() {
+  const grid = document.getElementById('advanceDrawGrid');
+  if (!grid || !allAvailableSlotsG) return;
+
+  grid.innerHTML = allAvailableSlotsG.map((s) => {
+    const isChecked = advanceTimeVal.includes(s);
+    return `<label style="display:flex;align-items:center;background:${isChecked ? '#f1ce07' : '#222'};padding:10px;border-radius:6px;gap:8px;color:${isChecked ? '#000' : '#fff'};cursor:pointer;transition:background 0.2s;">
+              <input type="checkbox" class="adv_slot_cb" value="${s}" ${isChecked ? 'checked' : ''} onchange="toggleSlotG('${s}', this.checked)">${s}
+            </label>`;
+  }).join('');
+  updateDrawCountUI();
+}
+
+window.toggleSlotG = function (slot, isChecked) {
+  if (isChecked) {
+    if (!advanceTimeVal.includes(slot)) advanceTimeVal.push(slot);
+  } else {
+    advanceTimeVal = advanceTimeVal.filter(s => s !== slot);
+  }
+  renderDrawSlotsG();
+};
+
+window.selectXDraws = function (count) {
+  const n = parseInt(count);
+  if (isNaN(n) || n < 0) {
+    advanceTimeVal = [];
+  } else {
+    advanceTimeVal = allAvailableSlotsG.slice(0, n);
+  }
+  renderDrawSlotsG();
+};
+
+function updateDrawCountUI() {
+  const countEl = document.getElementById('selectedDrawCount');
+  if (countEl) countEl.textContent = advanceTimeVal.length;
+}
 
 window.closeAdvanceModal = function () {
   const modal = document.getElementById('advanceModal');
@@ -253,13 +389,8 @@ window.closeAdvanceModal = function () {
 };
 
 window.confirmAdvanceDraw = function () {
-  const sels = document.querySelectorAll('.adv_slot_cb:checked');
-  advanceTimeVal = Array.from(sels).map(cb => cb.value);
-  if (advanceTimeVal.length > 0) {
-    alert("Advance time(s) selected: " + advanceTimeVal.join(', '));
-  }
-  updateStats();
   closeAdvanceModal();
+  updateStats();
 };
 
 window.openCancelModal = function () {
@@ -327,15 +458,16 @@ window.cancelTicket = async function (id) {
     try {
       const res = await API.cancleTicket(id);
       if (res.status) {
-        alert("Ticket cancelled successfully.");
+        showStatusModal("SUCCESS", "Ticket cancelled successfully.", "success");
         if (window.fetchCancelHistory) window.fetchCancelHistory();
         const refreshBtn = document.getElementById('hdrRefresh');
         if (refreshBtn) refreshBtn.click();
+        setTimeout(() => { window.location.reload(); }, 1500);
       } else {
-        alert(res.message || "Failed to cancel ticket.");
+        showStatusModal("CANCEL FAILED", res.message || "Failed to cancel ticket.", "error");
       }
     } catch (e) {
-      alert("Error cancelling ticket.");
+      showStatusModal("ERROR", "Error cancelling ticket.", "error");
     }
   };
 };
@@ -385,7 +517,7 @@ window.fetchBetHistory = async function () {
 
 async function playG() {
   const userStr = sessionStorage.getItem('user');
-  if (!userStr) return alert("Please Login");
+  if (!userStr) return showStatusModal("LOGIN REQUIRED", "Please login to play.", "error");
   const user = JSON.parse(userStr);
 
   let all_datas12 = [];
@@ -401,7 +533,7 @@ async function playG() {
     }
   }
 
-  if (all_datas12.length === 0) return alert("Please select at least one bet.");
+  if (all_datas12.length === 0) return showStatusModal("NO BETS", "Please select at least one bet.", "error");
 
   const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
   const payloadAmount = total_load_c_amount * drawCount;
@@ -501,12 +633,13 @@ async function playG() {
       advanceTimeVal = [];
       const refreshBtn = document.getElementById('hdrRefresh');
       if (refreshBtn) refreshBtn.click();
+      setTimeout(() => { window.location.reload(); }, 1500);
     } else {
-      alert("Error: " + (res.message || "Failed to place bet."));
+      showStatusModal("FAILED", res.message || "Failed to place bet.", "error");
     }
   } catch (err) {
     console.error(err);
-    alert("Error placing bet.");
+    showStatusModal("ERROR", "Error placing bet.", "error");
   }
 }
 
@@ -676,7 +809,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               getBalance();        // Correct function call to refresh balance
           } catch (err) {
               console.error(err);
-              alert("Claim failed. Please try again.");
+              showStatusModal("CLAIM FAILED", "Claim failed. Please try again.", "error");
           }
       };
 
@@ -688,6 +821,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (claimInp.value.length === 10) processClaim();
       });
   }
+
+  scaleFonts();
 });
 
 window.openReprintModal = async function () {
@@ -733,9 +868,9 @@ window.directReprint = async function (barcode) {
     if (res && res.status === true && res.tickets && res.tickets.length > 0) {
       printTickets(res.tickets.map(t => ({ ticket: t, lines: t.bet_lines })));
     } else {
-      alert("Print error: " + (res.message || "Ticket not found."));
+      showStatusModal("FAILED", res.message || "Ticket not found.", "error");
     }
-  } catch (err) { alert("Reprint failed."); }
+  } catch (err) { showStatusModal("ERROR", "Reprint failed.", "error"); }
 };
 
 window.toggleAllReprint = function (checked) {
@@ -744,7 +879,7 @@ window.toggleAllReprint = function (checked) {
 
 window.reprintSelected = async function () {
   const selected = Array.from(document.querySelectorAll('.reprint-cb:checked')).map(cb => cb.value);
-  if (selected.length === 0) return alert("Select at least one ticket.");
+  if (selected.length === 0) return showStatusModal("SELECTION EMPTY", "Select at least one ticket.", "error");
 
   const userStr = sessionStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
@@ -756,9 +891,9 @@ window.reprintSelected = async function () {
     if (res && res.status === true && res.tickets && res.tickets.length > 0) {
       printTickets(res.tickets.map(t => ({ ticket: t, lines: t.bet_lines })));
     } else {
-      alert("Print error.");
+      showStatusModal("ERROR", "Print error.", "error");
     }
-  } catch (err) { alert("Reprint failed."); }
+  } catch (err) { showStatusModal("ERROR", "Reprint failed.", "error"); }
 };
 
 window.handleReprintSubmit = function () {
@@ -777,10 +912,19 @@ window.closeReprintModal = function () {
 function printTickets(ticketsArray) {
   if (!ticketsArray || ticketsArray.length === 0) return;
 
-  const printWindow = window.open('', '_blank', 'width=400,height=700');
-  if (!printWindow) {
-    alert("Please allow popups for printing");
-    return;
+  // Use a hidden iframe for printing instead of window.open to keep user on the same page
+  let printFrame = document.getElementById('printFrame');
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'printFrame';
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = 'none';
+    printFrame.style.visibility = 'hidden';
+    document.body.appendChild(printFrame);
   }
 
   let ticketsHtml = '';
@@ -858,8 +1002,7 @@ function printTickets(ticketsArray) {
           <div class="barcode-box">
             <img class="barcode-img" src="${barcodeData}" alt="barcode" />
           </div>
-          <div class="luck-msg">*** THANK YOU & GOOD LUCK ***</div>
-          <div style="font-size: 8px; margin-top: 3px; color: #000;">Platinum Lottery </div>
+       
         </div>
       </div>
     `;
@@ -919,13 +1062,20 @@ function printTickets(ticketsArray) {
         }
       </style>
     </head>
-    <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
+    <body>
       ${ticketsHtml}
     </body>
     </html>
   `;
-  printWindow.document.write(content);
-  printWindow.document.close();
+  const doc = printFrame.contentWindow.document;
+  doc.open();
+  doc.write(content);
+  doc.close();
+
+  setTimeout(() => {
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+  }, 500);
 }
 
 document.addEventListener('keydown', (e) => {
@@ -952,9 +1102,9 @@ document.addEventListener('keydown', (e) => {
     openCancelModal();
   }
   // I: Info (Bet History)
-  else if (e.key === 'i' || e.key === 'I') {
+  else if (e.key === 'i' || e.key === 'I' || e.key === 'F3') {
     e.preventDefault();
-    openBetHistoryModal();
+    openInfoTabsModal();
   }
   // ESC: Clear
   else if (e.key === 'Escape') {
@@ -963,3 +1113,130 @@ document.addEventListener('keydown', (e) => {
     clearSelections();
   }
 });
+
+window.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    if (e.target.id) {
+      e.target.style.display = 'none';
+    } else {
+      e.target.remove();
+    }
+  }
+  if (e.target.classList.contains('logout-modal')) {
+    e.target.style.display = 'none';
+  }
+});
+
+// ==========================================
+// INFO TABS MODAL (From Reference Image)
+// ==========================================
+window.openInfoTabsModal = function() {
+  const modal = document.getElementById('infoTabsModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('infoDateSelectView').style.display = 'flex';
+    document.getElementById('infoResultsView').style.display = 'none';
+    const dateInp = document.getElementById('infoTabDate');
+    if (dateInp && !dateInp.value) {
+      dateInp.value = new Date().toISOString().split('T')[0];
+    }
+  }
+};
+
+window.closeInfoTabsModal = function() {
+  const modal = document.getElementById('infoTabsModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+};
+
+window.submitInfoTabDate = function() {
+  const dateInp = document.getElementById('infoTabDate').value;
+  if(!dateInp) return;
+  
+  // Format date as dd/mm/yyyy
+  const parts = dateInp.split('-');
+  if(parts.length !== 3) return;
+  const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  document.getElementById('infoResultsDateLabel').innerText = formattedDate;
+
+  // Show results view
+  document.getElementById('infoDateSelectView').style.display = 'none';
+  document.getElementById('infoResultsView').style.display = 'block';
+
+  // Populate dummy data to match image exactly
+  const tbody = document.getElementById('infoResultsTableBody');
+  const dummyResults = [
+    { time: '06:27 PM', res: 'B15' },
+    { time: '06:02 PM', res: 'G65' },
+    { time: '05:57 PM', res: 'B14' },
+    { time: '04:52 PM', res: 'B19' },
+    { time: '04:27 PM', res: 'O28' },
+    { time: '04:02 PM', res: 'A01' },
+    { time: '03:57 PM', res: 'H77' },
+    { time: '03:52 PM', res: 'B9' }
+  ];
+
+  let html = '';
+  dummyResults.forEach((r, i) => {
+    // Alternating green backgrounds
+    const bg = i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.1)';
+    html += `
+      <tr style="background:${bg}; border-bottom:1px solid #2a4012;">
+        <td style="padding: 12px 15px; font-size:14px; width:40%; text-align:right;">${r.time}</td>
+        <td style="padding: 12px 15px; font-size:14px; width:60%; text-align:left; padding-left:40px;">${r.res}</td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+};
+
+window.backToInfoDateSelect = function() {
+  document.getElementById('infoResultsView').style.display = 'none';
+  document.getElementById('infoDateSelectView').style.display = 'flex';
+};
+
+function scaleFonts() {
+  const isMobile = window.innerWidth <= 768;
+  const elements = document.querySelectorAll('.gcell, .g-lbl, .prev-cell, .nav-tab, .sb-btn, .sb-random, .h-wnum');
+
+  if (isMobile) {
+    elements.forEach(el => {
+      el.style.fontSize = '';
+      if (el.classList.contains('sb-btn') || el.classList.contains('sb-random')) {
+        el.style.padding = '';
+      }
+    });
+    return;
+  }
+
+  const vh = window.innerHeight;
+  const base = 768;
+  const s = vh / base;
+  const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, Math.round(v)));
+
+  document.querySelectorAll('.gcell').forEach(el => { 
+    el.style.fontSize = clamp(11 * s, 9, 20) + 'px'; 
+  });
+  document.querySelectorAll('.gcell .cell-code').forEach(el => { 
+    el.style.fontSize = clamp(8 * s, 6, 14) + 'px'; 
+  });
+  document.querySelectorAll('.g-lbl').forEach(el => { 
+    el.style.fontSize = clamp(10 * s, 8, 18) + 'px'; 
+  });
+  document.querySelectorAll('.prev-cell').forEach(el => { 
+    el.style.fontSize = clamp(10 * s, 8, 18) + 'px'; 
+  });
+  document.querySelectorAll('.nav-tab').forEach(el => { 
+    el.style.fontSize = clamp(16 * s, 13, 26) + 'px'; 
+  });
+  document.querySelectorAll('.h-wnum').forEach(el => { 
+    el.style.fontSize = clamp(32 * s, 22, 48) + 'px'; 
+  });
+  document.querySelectorAll('.sb-btn,.sb-random').forEach(el => {
+    el.style.fontSize = clamp(11 * s, 9, 18) + 'px';
+    el.style.padding = clamp(9 * s, 6, 16) + 'px 4px';
+  });
+}
+
+window.addEventListener('resize', scaleFonts);

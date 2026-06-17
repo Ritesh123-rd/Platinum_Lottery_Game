@@ -1,7 +1,7 @@
 Object.assign(window.API, {
     insertData: async (data) => {
         try {
-            const response = await fetch(window.BASE_URL + 'Platinum3D/GameApi/InsertData.php', {
+            const response = await fetch(window.BASE_URL + 'Platinum3D/InsertData.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -15,7 +15,7 @@ Object.assign(window.API, {
 
     advancDrawTime: async () => {
         try {
-            const response = await fetch(window.BASE_URL + 'Platinum3D/GameApi/AdvancDrawTime.php');
+            const response = await fetch(window.BASE_URL + 'Platinum3D/AdvancDrawTime.php');
             return await response.json();
         } catch (error) {
             console.error('API AdvancDrawTime Error (3D):', error);
@@ -25,7 +25,7 @@ Object.assign(window.API, {
 
     betHistory: async (username, date) => {
         try {
-            const response = await fetch(window.BASE_URL + `Platinum3D/GameApi/BetHistory.php?username=${username}&record_date=${date}`);
+            const response = await fetch(window.BASE_URL + `Platinum3D/BetHistory.php?username=${username}&record_date=${date}`);
             return await response.json();
         } catch (error) {
             console.error('API BetHistory Error (3D):', error);
@@ -35,7 +35,7 @@ Object.assign(window.API, {
 
     currentDrawBetHistory: async (username) => {
         try {
-            const response = await fetch(window.BASE_URL + `Platinum3D/GameApi/CurrentDrawBetHistory.php?username=${username}`);
+            const response = await fetch(window.BASE_URL + `Platinum3D/CurrentDrawBetHistory.php?username=${username}`);
             return await response.json();
         } catch (error) {
             console.error('API CurrentDrawBetHistory Error (3D):', error);
@@ -45,7 +45,7 @@ Object.assign(window.API, {
 
     ticketCancel: async (id) => {
         try {
-            const response = await fetch(window.BASE_URL + `Platinum3D/GameApi/CancleTicket.php?id=${id}`);
+            const response = await fetch(window.BASE_URL + `Platinum3D/CancleTicket.php?id=${id}`);
             return await response.json();
         } catch (error) {
             console.error('API TicketCancel Error (3D):', error);
@@ -55,10 +55,34 @@ Object.assign(window.API, {
 
     resultDateWise: async (date) => {
         try {
-            const response = await fetch(window.BASE_URL + `Platinum3D/GameApi/ResultDateWise.php?record_date=${date}`);
+            const response = await fetch(window.BASE_URL + `Platinum3D/ResultDateWise.php?record_date=${date}`);
             return await response.json();
         } catch (error) {
             console.error('API ResultDateWise Error (3D):', error);
+            throw error;
+        }
+    },
+
+    printTicket: async (barcode, username) => {
+        try {
+            const response = await fetch(window.BASE_URL + `Platinum3D/PrintTickets.php?barcodee=${barcode}&username=${username}`);
+            return await response.json();
+        } catch (error) {
+            console.error('API PrintTickets Error (3D):', error);
+            throw error;
+        }
+    },
+    
+    claimTickets: async (data) => {
+        try {
+            const response = await fetch(window.BASE_URL + 'Platinum3D/ClaimTickets.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('API ClaimTickets Error (3D):', error);
             throw error;
         }
     }

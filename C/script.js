@@ -1,11 +1,35 @@
-const sel = { C: new Map() }; // Changed to Map to store card name and bet amount
+const sel = { C: new Map(), CHistory: new Map() }; // Store card bets and history of bets added
 let currentPage = "C";
 let countdown3 = 208;
 let currentQty = 10; // Default QTY
 
+function showGlobalCustomAlert(msg, type = 'loading') {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'globalCustomAlert';
+  overlay.className = 'custom-alert-overlay';
+  
+  let botHtml = `<div class="custom-alert-bot"></div>`;
+
+  overlay.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">ALERT</div>
+          <div class="custom-alert-msg">${msg}</div>
+          ${botHtml}
+      </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 function switchPage(p) {
-  if (p === "G") window.location.href = "../G/index.html";
-  else if (p !== "C") window.location.href = "../" + p + "/index.html";
+  if (p === "C") return;
+  showGlobalCustomAlert('Loading ...!');
+  setTimeout(() => {
+    if (p === "G") window.location.href = "../G/index.html";
+    else window.location.href = "../" + p + "/index.html";
+  }, 300);
 }
 
 async function buildCHistory() {
@@ -69,15 +93,86 @@ function toggleCard(el, name) {
 
   // Update the Map
   sel.C.set(name, currentBet);
+  
+  // Track history for right-click undo
+  let history = sel.CHistory.get(name) || [];
+  history.push(currentQty);
+  sel.CHistory.set(name, history);
 
   // Add selected class if not already added
   el.classList.add("sel");
 
+  // Swap background frame to Green
+  const bgImg = el.querySelector(".c-bg-img");
+  if (bgImg) {
+    bgImg.src = "../assets/Green.png";
+  }
+
   // Update the white box display on card
   const namebox = el.querySelector(".c-namebox");
   if (namebox) {
-    namebox.textContent = currentBet;
-    namebox.style.display = "flex";
+    namebox.value = currentBet;
+  }
+
+  updateCStats();
+}
+
+function removeCardBet(event, el, name) {
+  event.preventDefault(); // Prevent default browser right-click menu
+
+  let history = sel.CHistory.get(name) || [];
+  let currentBet = sel.C.get(name) || 0;
+  
+  if (history.length > 0) {
+    // Pop the exact last bet amount added to this specific card
+    let lastBetAmount = history.pop();
+    currentBet -= lastBetAmount;
+    
+    // Update history stack
+    sel.CHistory.set(name, history);
+    
+    // Update the white box display on card
+    const namebox = el.querySelector(".c-namebox");
+    
+    if (currentBet <= 0) {
+      // If bet becomes 0 or less, remove it entirely
+      sel.C.delete(name);
+      sel.CHistory.delete(name);
+      el.classList.remove("sel");
+      
+      const bgImg = el.querySelector(".c-bg-img");
+      if (bgImg) {
+        bgImg.src = "../assets/Blue.png";
+      }
+      
+      if (namebox) {
+        namebox.value = "";
+      }
+    } else {
+      // Otherwise just update the lower bet amount
+      sel.C.set(name, currentBet);
+      if (namebox) {
+        namebox.value = currentBet;
+      }
+    }
+    
+    updateCStats();
+  }
+}
+
+function updateCardBetFromInput(inputEl, name) {
+  let val = parseInt(inputEl.value) || 0;
+  const itemEl = inputEl.closest('.c-item');
+  const bgImg = itemEl.querySelector(".c-bg-img");
+
+  if (val > 0) {
+    sel.C.set(name, val);
+    itemEl.classList.add('sel');
+    if (bgImg) bgImg.src = "../assets/Green.png";
+  } else {
+    sel.C.delete(name);
+    itemEl.classList.remove('sel');
+    if (bgImg) bgImg.src = "../assets/Blue.png";
   }
 
   updateCStats();
@@ -140,12 +235,11 @@ function doubleBets() {
     // We need to find the element associated with this name
     const items = document.querySelectorAll(".c-item");
     items.forEach((item) => {
-      const img = item.querySelector("img");
+      const img = item.querySelector(".c-card-img");
       if (img && img.alt === name) {
         const namebox = item.querySelector(".c-namebox");
         if (namebox) {
-          namebox.textContent = newAmount;
-          namebox.style.display = "flex";
+          namebox.value = newAmount;
         }
       }
     });
@@ -157,13 +251,17 @@ function doubleBets() {
 function clearSelections() {
   sel.C.clear();
 
-  // Remove selected class and clear white boxes
+  // Remove selected class, clear white boxes, and reset background images
   document.querySelectorAll(".c-item.sel").forEach((e) => {
     e.classList.remove("sel");
     const namebox = e.querySelector(".c-namebox");
     if (namebox) {
-      namebox.textContent = "";
-      namebox.style.display = "none";
+      namebox.value = "";
+    }
+    // Swap background frame back to Blue
+    const bgImg = e.querySelector(".c-bg-img");
+    if (bgImg) {
+      bgImg.src = "../assets/Blue.png";
     }
   });
 
@@ -305,7 +403,6 @@ function confirmAdvanceDraw() {
   }
 
   const selectedTimes = Array.from(selectedDraws).join(", ");
-  showStatusModal("ADVANCE DRAW", `Selected ${selectedDraws.size} draws:\n${selectedTimes}`, "success");
 
   // Here you can process the selected draws
   console.log("Selected draws:", Array.from(selectedDraws));
@@ -417,12 +514,25 @@ async function betHistoryReprint() {
     await showReprintModal(false);
 }
 
-function confirmReprint(barcode) {
-    showStatusModal(
-        "SUCCESS",
-        "Ticket " + barcode + " reprinted successfully!",
-        "success"
-    );
+async function confirmReprint(barcode) {
+    if (!barcode) return;
+    const userStr = sessionStorage.getItem("user");
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+
+    try {
+        const res = await window.API.printTicket(barcode, user.username);
+        if (res && res.status && res.tickets && res.tickets.length > 0) {
+            const allTicketsToPrint = res.tickets.map(t => ({ ticket: t, lines: t.bet_lines }));
+            printTickets(allTicketsToPrint);
+            showStatusModal("SUCCESS", "Ticket " + barcode + " reprinted successfully!", "success");
+        } else {
+            showStatusModal("FAILED", "Ticket not found or error occurred.", "error");
+        }
+    } catch (err) {
+        console.error("Reprint Error:", err);
+        showStatusModal("ERROR", "Connection error.", "error");
+    }
 
     const modal = document.querySelector(".modal-overlay");
     if (modal) modal.remove();
@@ -536,6 +646,7 @@ async function cancelTicketById(ticketId) {
           if (limitVal) limitVal.textContent = balanceRes.data.balance;
         }
       }
+      setTimeout(() => { window.location.reload(); }, 1500);
     } else {
       showStatusModal("FAILED", res.message || "Failed to cancel ticket.", "error");
     }
@@ -627,6 +738,19 @@ function applyMobileScale() {
     document.body.style.height = DESIGN_H * scale + "px";
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
+  } else if (window.innerWidth > 600) {
+    const scale = window.innerHeight / 768;
+    wrapper.style.width = (window.innerWidth / scale) + "px";
+    wrapper.style.height = '768px';
+    wrapper.style.transformOrigin = "top left";
+    wrapper.style.transform = `scale(${scale})`;
+    wrapper.style.position = "absolute";
+    wrapper.style.top = "0";
+    wrapper.style.left = "0";
+
+    document.body.style.height = window.innerHeight + "px";
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
   } else {
     wrapper.style.width = "";
     wrapper.style.height = "";
@@ -715,7 +839,6 @@ async function playC() {
   try {
     const res = await window.API.insertData(payload);
     if (res && res.status) {
-      showStatusModal("SUCCESS", res.message || "Bet placed successfully!", "success");
       
       const barcodes = (res.barcodes && Array.isArray(res.barcodes) && res.barcodes.length > 0) 
                          ? res.barcodes 
@@ -761,6 +884,7 @@ async function playC() {
           if (limitVal) limitVal.textContent = balanceRes.data.balance;
         }
       }
+      setTimeout(() => { window.location.reload(); }, 1500);
     } else {
       showStatusModal("FAILED", res.message || "Failed to place bet.", "error");
     }
@@ -771,8 +895,20 @@ async function playC() {
 }
 
 function printTickets(ticketsArray) {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) return alert("Pop-up blocked. Allow pop-ups for printing.");
+  // Use a hidden iframe for printing instead of window.open to keep user on the same page
+  let printFrame = document.getElementById('printFrame');
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'printFrame';
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = 'none';
+    printFrame.style.visibility = 'hidden';
+    document.body.appendChild(printFrame);
+  }
 
   const mapping = {
     '01': 'Horse', '02': 'Ball', '03': 'Sun', '04': 'Cow',
@@ -826,47 +962,65 @@ function printTickets(ticketsArray) {
         const gDate = ticket.record_date || new Date().toISOString().split('T')[0];
         const username = ticket.username || (sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user')).username : 'guest');
 
-        // Build bet lines as div cards
-        let betCardsHtml = '';
+        // Build bet lines as table rows
+        let tableRowsHtml = '';
         if (lines && Array.isArray(lines)) {
           const sortedLines = [...lines].sort((a, b) => parseInt(a.num) - parseInt(b.num));
-          sortedLines.forEach(line => {
-            const numVal = String(line.num).padStart(2, '0');
-            const name = mapping[numVal] || numVal;
-            const imgSrc = imageDataMap[numVal] || '';
-            const imgTag = imgSrc ? `<img src="${imgSrc}" style="width:24px; height:24px; object-fit:contain;" />` : '';
-            betCardsHtml += `
-              <div style="display:flex; align-items:center; gap:2px; border:1px solid #000; padding:1px 3px;">
-                ${imgTag}
-                <span style="font-weight:900; font-size:9px;">${line.qty}</span>
-              </div>`;
-          });
+          
+          for (let i = 0; i < sortedLines.length; i += 2) {
+            tableRowsHtml += `<tr style="border-bottom:1px solid #000;">`;
+            for (let j = 0; j < 2; j++) {
+              const line = sortedLines[i + j];
+              if (line) {
+                const numVal = String(line.num).padStart(2, '0');
+                const imgSrc = imageDataMap[numVal] || '';
+                const imgTag = imgSrc ? `<img src="${imgSrc}" style="width:36px; height:36px; object-fit:contain; display:block; margin:0 auto;" />` : '';
+                tableRowsHtml += `
+                  <td style="border-right:1px solid #000; padding:2px; text-align:center;">${imgTag}</td>
+                  <td style="${j < 1 ? 'border-right:1px solid #000;' : ''} padding:2px; text-align:center; font-size:16px; font-weight:900; word-break:break-all;">${line.qty}</td>
+                `;
+              } else {
+                tableRowsHtml += `
+                  <td style="border-right:1px solid #000; padding:2px;"></td>
+                  <td style="${j < 1 ? 'border-right:1px solid #000;' : ''} padding:2px;"></td>
+                `;
+              }
+            }
+            tableRowsHtml += `</tr>`;
+          }
         }
 
         return `
-          <div class="ticket-page" style="text-align:center; font-family:'Courier New', Courier, monospace; width:48mm; margin:0 0 0 5%; padding:2px 4px; background:white; color:black; border:none; page-break-after: always;">
-            <h2 style="margin:1px 0; font-size:12px; font-weight:900;">PLATINUM LOTTERY HIT</h2>
-            <p style="font-size:7px; margin:0; font-weight:bold;">(Ticket valid for 10 days)</p>
-            <div style="border-top:1px dashed #000; margin:3px 0;"></div>
+          <div class="ticket-page" style="text-align:center; font-family: 'Times New Roman', Times, serif; width:52mm; margin:0 auto; padding:4px 8px; background:white; color:black; border:none; page-break-after: always;">
+            <h2 style="margin:2px 0; font-size:18px; font-weight:900; letter-spacing:-0.5px;">Lucky 12 Game</h2>
+            <div style="border-top:1.5px solid #000; margin:6px 0 4px 0; width:100%;"></div>
             
-            <div style="text-align:left; font-size:8px; line-height:1.3; font-weight:900;">
-              <div>Game Date : ${gDate}</div>
-              <div>Draw Time : ${dTime}</div>
+            <div style="text-align:left; font-size:12px; line-height:1.3; font-weight:900; margin-bottom:8px;">
+              <div>Ticket Date : ${gDate}</div>
               <div>Ticket Time : ${bTime}</div>
+              <div>Draw Time : ${dTime}</div>
               <div>Retailer ID : ${username}</div>
-              <div>Total Point : ${ticket.amount || 0}</div>
-              <div>Total Qty : ${ticket.qty || 0}</div>
+              <div>Total Amount : ${ticket.amount || 0}</div>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:2px; margin-top:4px;">
-              ${betCardsHtml}
-            </div>
+            <table style="width:100%; border-collapse:collapse; border:1.5px solid #000; font-weight:900; font-size:11px; table-layout: fixed;">
+              <thead>
+                <tr style="border-bottom:1.5px solid #000;">
+                  <th style="border-right:1px solid #000; padding:2px; width:30%;">Num</th>
+                  <th style="border-right:1px solid #000; padding:2px; width:20%;">Qty</th>
+                  <th style="border-right:1px solid #000; padding:2px; width:30%;">Num</th>
+                  <th style="padding:2px; width:20%;">Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRowsHtml}
+              </tbody>
+            </table>
 
-            <div style="margin-top:5px; text-align:center;">
+            <div style="margin-top:12px; text-align:center;">
+              <div style="border-top:1.5px solid #000; margin:4px 0; width:100%;"></div>
               <img src="${barcodeData}" style="width:100%; height:auto;" alt="barcode" />
             </div>
-            <div style="border-top:1px dashed #000; margin:4px 0;"></div>
-            <div style="font-size:7px; font-weight:bold;">*** THANK YOU & GOOD LUCK ***</div>
           </div>
         `;
       }).join('');
@@ -883,33 +1037,41 @@ function printTickets(ticketsArray) {
             @media print { .ticket-page { border-bottom: none; } }
           </style>
         </head>
-        <body onload="setTimeout(() => { window.print(); window.close(); }, 1200);">
+        <body>
           ${ticketsHtml}
         </body>
         </html>
       `;
-      printWindow.document.write(content);
-      printWindow.document.close();
+
+      const doc = printFrame.contentWindow.document;
+      doc.open();
+      doc.write(content);
+      doc.close();
+
+      // Trigger print after a delay to ensure barcode image is loaded
+      setTimeout(() => {
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+      }, 1200);
     });
 }
 
 function showStatusModal(title, message, type) {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
   const modal = document.createElement("div");
-  modal.className = "status-modal-overlay";
-  
-  const icon = type === "success" ? "✓" : "✕";
+  modal.id = 'globalCustomAlert';
+  modal.className = "custom-alert-overlay";
   
   modal.innerHTML = `
-    <div class="status-modal-box">
-      <div class="status-modal-header ${type}">
-        <div class="status-icon">${icon}</div>
-        <div class="status-title">${title}</div>
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">${title}</div>
+          <div class="custom-alert-msg">${message}</div>
+          <div class="custom-alert-bot">
+              <button class="custom-alert-btn" onclick="this.closest('.custom-alert-overlay').remove()">OK</button>
+          </div>
       </div>
-      <div class="status-modal-body">
-        <div class="status-message">${message}</div>
-        <button class="status-btn ${type}" onclick="this.closest('.status-modal-overlay').remove()">OK</button>
-      </div>
-    </div>
   `;
   document.body.appendChild(modal);
 }
@@ -917,6 +1079,7 @@ function showStatusModal(title, message, type) {
 
 window.addEventListener("resize", applyMobileScale);
 window.addEventListener("orientationchange", applyMobileScale);
+document.addEventListener("fullscreenchange", applyMobileScale);
 
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("body-C");
@@ -1071,4 +1234,17 @@ document.addEventListener("DOMContentLoaded", () => {
   applyMobileScale();
   setInterval(updateClock, 1000);
   setInterval(updateCountdowns, 1000);
+});
+
+window.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    if (e.target.id) {
+      e.target.style.display = 'none';
+    } else {
+      e.target.remove();
+    }
+  }
+  if (e.target.classList.contains('logout-modal')) {
+    e.target.style.display = 'none';
+  }
 });

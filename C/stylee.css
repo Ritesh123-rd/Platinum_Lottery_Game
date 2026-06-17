@@ -169,24 +169,25 @@
 /* White box on card for amount display */
 .c-namebox {
   position: absolute;
-  bottom: 30px;
+  bottom: 18%;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.95);
   color: #333;
   font-weight: bold;
-  font-size: 16px;
-  padding: 4px 12px;
-  border-radius: 30px;
-  min-width: 35px;
+  font-size: 14px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  min-width: 40px;
   text-align: center;
-  display: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 10;
 }
 
 .c-item.sel .c-namebox {
-  display: block !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .c-item {

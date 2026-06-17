@@ -10,6 +10,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="stylee.css" />
   </head>
 
@@ -22,6 +23,7 @@
         <button class="nav-tab" onclick="switchPage('3D')">3D</button>
         <button class="nav-tab" onclick="switchPage('4D')">4D</button>
         <button class="nav-tab active" onclick="switchPage('C')">C</button>
+        <button class="nav-tab" onclick="switchPage('D')">D</button>
         <div class="nav-spacer"></div>
         <div class="nav-right">
           <span class="nav-datetime" id="navDatetime">2/3/2026 | 11:45:40</span>
@@ -104,8 +106,9 @@
           <div class="c-card-bg">
             <div class="c-grid-border">
               <div class="c-grid">
-                <div class="c-item" onclick="toggleCard(this, 'Horse')">
+                <div class="c-item" onclick="toggleCard(this, 'Horse')" oncontextmenu="removeCardBet(event, this, 'Horse')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Horse.png"
@@ -114,10 +117,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Ball')">
+                <div class="c-item" onclick="toggleCard(this, 'Ball')" oncontextmenu="removeCardBet(event, this, 'Ball')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Football.png"
@@ -126,10 +130,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Sun')">
+                <div class="c-item" onclick="toggleCard(this, 'Sun')" oncontextmenu="removeCardBet(event, this, 'Sun')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Sun.png"
@@ -138,10 +143,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Cow')">
+                <div class="c-item" onclick="toggleCard(this, 'Cow')" oncontextmenu="removeCardBet(event, this, 'Cow')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Cow.png"
@@ -150,10 +156,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Lamp')">
+                <div class="c-item" onclick="toggleCard(this, 'Lamp')" oncontextmenu="removeCardBet(event, this, 'Lamp')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Lamp.png"
@@ -162,10 +169,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Kite')">
+                <div class="c-item" onclick="toggleCard(this, 'Kite')" oncontextmenu="removeCardBet(event, this, 'Kite')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Kite.png"
@@ -174,10 +182,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Umbrella')">
+                <div class="c-item" onclick="toggleCard(this, 'Umbrella')" oncontextmenu="removeCardBet(event, this, 'Umbrella')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Umbrella.png"
@@ -186,10 +195,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Rabbit')">
+                <div class="c-item" onclick="toggleCard(this, 'Rabbit')" oncontextmenu="removeCardBet(event, this, 'Rabbit')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Rabbit.png"
@@ -198,10 +208,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Dove')">
+                <div class="c-item" onclick="toggleCard(this, 'Dove')" oncontextmenu="removeCardBet(event, this, 'Dove')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Pegion.png"
@@ -210,10 +221,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Butterfly')">
+                <div class="c-item" onclick="toggleCard(this, 'Butterfly')" oncontextmenu="removeCardBet(event, this, 'Butterfly')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Butterfly.png"
@@ -222,10 +234,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Tiger')">
+                <div class="c-item" onclick="toggleCard(this, 'Tiger')" oncontextmenu="removeCardBet(event, this, 'Tiger')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Tiger.png"
@@ -234,10 +247,11 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
-                <div class="c-item" onclick="toggleCard(this, 'Rose')">
+                <div class="c-item" onclick="toggleCard(this, 'Rose')" oncontextmenu="removeCardBet(event, this, 'Rose')">
                   <div class="c-oval">
+                    <img src="../assets/Blue.png" class="c-bg-img" alt="" />
                     <div class="c-floral"></div>
                     <img
                       src="../assets/Platinum-Game/Rose.png"
@@ -246,7 +260,7 @@
                       onerror="this.style.opacity = 0"
                     />
                   </div>
-                  <div class="c-namebox"></div>
+                  <input type="number" class="c-namebox" style="display: flex !important;" placeholder="" readonly />
                 </div>
               </div>
             </div>
@@ -276,7 +290,7 @@
                 </div>
               </div>
               <div class="c-play-row">
-                <button class="c-playbtn" id="playBtn">PLAY (P)</button>
+                <button class="c-playbtn" id="playBtn"><img src="../assets/C/play1.png" alt="PLAY (P)" class="c-playbtn-img"></button>
                 <button class="c-advbtn" onclick="showAdvanceDrawModal()">
                   Advance Draw
                 </button>

@@ -1,0 +1,1489 @@
+/* ========================================
+   C Game (Platinum Card) Specific Styles
+   Extracted from shared style.css
+   These override/extend the root style.css
+======================================== */
+
+.layout-g .c-bottom-bar {
+    grid-column: 1 / span 2;
+    grid-row: 6;
+    display: flex !important;
+}
+
+.c-floral::before {
+    content: '' !important;
+    display: none !important;
+}
+
+.c-header {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(180deg, #331166, #1a0033);
+    padding: 0 12px 0 0 !important;
+    gap: 8px;
+    border-bottom: 2px solid #4a0088;
+    flex-shrink: 0;
+    height: 50px;
+}
+
+#page-C .plat-logo {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f12517 !important;
+    /* Premium Red from other pages */
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    min-width: 75px !important;
+    height: 100% !important;
+    /* Fill header height */
+    margin: 0 !important;
+    border-radius: 0 !important;
+    /* Square edge consistent with header columns */
+    overflow: hidden !important;
+    position: relative !important;
+    z-index: 999 !important;
+}
+
+#page-C .plat-logo .plat-img {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+}
+
+.c-hdr-box {
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .1);
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.c-hdr-gamename,
+
+.c-hdr-ssvi,
+
+.c-hdr-time,
+
+.c-hdr-lasttx,
+
+.c-hdr-limit {
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.c-hdr-countdown {
+    background: #11002a !important;
+    /* Dark Purple-Black base from image */
+    border: 3.5px solid #ff0000 !important;
+    /* Red Border per request */
+    color: #4dfcfd !important;
+    /* High-Fidelity Cyan Text (Aqua) */
+    font-family: 'Orbitron', sans-serif !important;
+    /* Digital Font per image */
+    font-size: 24px !important;
+    padding: 2px 14px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.4) !important;
+    letter-spacing: 2px !important;
+    text-shadow: 0 0 5px rgba(77, 252, 253, 0.6) !important;
+    /* Slight Cyan glow on digits */
+}
+
+.c-hdr-limit {
+    margin-left: auto;
+}
+
+.c-card-bg {
+    flex: 2;
+    background: url('assets/Platinum-Game/bg.png') center/cover no-repeat;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 6px;
+    min-height: 320px;
+}
+
+.c-grid-border {
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    padding: 3px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.c-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.c-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    cursor: pointer;
+    position: relative;
+}
+
+.c-oval {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.c-bg-img {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.c-floral {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: auto;
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+}
+
+.c-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: relative;
+    z-index: 2;
+    transform: scale(1.2);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.c-namebox {
+    background: #fff;
+    width: 60px;
+    height: 22px;
+    border-radius: 12px;
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ccc;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    outline: none;
+}
+
+.c-namebox:focus {
+    border-color: #64dd17;
+}
+
+.c-namebox::-webkit-inner-spin-button,
+
+.c-namebox::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.c-floral::before {
+    content: 'Ã¢Å“Â¿';
+    font-size: 26px;
+    color: #fff;
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-shadow: 0 0 8px rgba(255, 255, 255, .9);
+}
+
+.c-bottom {
+    display: grid;
+    grid-template-columns: 1fr 240px 1fr;
+    gap: 15px;
+    padding: 10px 15px;
+    align-items: flex-start;
+    background: url(assets/Platinum-Game/bg.png) center / cover no-repeat !important;
+    background-color: #0a0acc !important;
+}
+
+.c-stats-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.c-stat-pod {
+    background: #0000bb;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    border: 1px solid rgba(255, 255, 255, .2);
+}
+
+.c-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.c-stat label {
+    font-size: 11px;
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 2px;
+    text-align: center;
+    line-height: 1.1;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.c-stat .csv {
+    background: #d4c483;
+    width: 100%;
+    height: 48px;
+    border-radius: 4px;
+    border: 1px solid #000;
+    color: #000;
+    font-size: 22px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.c-play-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.c-playbtn {
+    background: none;
+    border: none;
+    padding: 0;
+    height: 70px;
+    cursor: pointer;
+    box-shadow: none;
+    text-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+.c-playbtn-img {
+    height: 100%;
+    width: auto;
+    display: block;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.c-playbtn:hover .c-playbtn-img {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.c-playbtn:active .c-playbtn-img {
+    transform: scale(0.95);
+    filter: brightness(0.95);
+}
+
+.c-advbtn {
+    background: #e91e63;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 10px 0px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 130px;
+}
+
+.c-claim-inp {
+    background: #fff;
+    color: #888;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #000;
+    width: 250px;
+    margin: 15px auto 0;
+    display: block;
+}
+
+.c-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3px;
+    background: #110033;
+    padding: 10px;
+    border: 1.5px solid #331166;
+    border-radius: 6px;
+}
+
+.cact-btn {
+    background: #554444;
+    color: #332222;
+    border: 1px solid #332222;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    padding: 10px 5px;
+}
+
+.cact-btn.red {
+    background: #ff0000;
+    color: #fff;
+    border: 1px solid #000;
+}
+
+.cact-btn.gold {
+    background: linear-gradient(180deg, #f1ce07 0%, #d4a020 100%);
+    color: #000;
+    border: 1px solid #8a6010;
+}
+
+.c-qty-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #0044bb;
+    padding: 10px;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+.c-qty-row {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.cqty-btn {
+    flex: 1;
+    height: 70px;
+    background: #fff;
+    border: 1.5px solid #444;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.qty-l {
+    background: #ffe26ef5;
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 4px 0;
+    text-align: center;
+    border-bottom: 1.5px solid #444;
+}
+
+.qty-v {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 900;
+    color: #000;
+    background: linear-gradient(180deg, #fff 0%, #47b4eb 100%);
+}
+
+.cqty-btn.sel {
+    border: 5.5px solid #ff0000 !important;
+    box-shadow: 0 0 12px rgba(255, 0, 0, .6);
+}
+
+.c-history {
+    background: linear-gradient(180deg,
+            #f5e6c8 0%,
+            /* warm cream top */
+            #ede0b8 40%,
+            /* golden tan middle */
+            #e8d8a8 70%,
+            /* deeper warm bottom */
+            #dcc890 100%
+            /* rich gold base */
+        ) !important;
+    border: 2px solid #8b6914 !important;
+    border-radius: 4px !important;
+    display: flex !important;
+    height: 90px !important;
+    /* matches screenshot height */
+    overflow: hidden !important;
+    margin-top: 6px !important;
+    box-shadow:
+        inset 0 1px 3px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.15),
+        0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.c-hist-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #c8a855 !important;
+    /* golden divider */
+    position: relative;
+    background: transparent !important;
+    /* let parent gradient show */
+}
+
+.c-hist-item:last-child {
+    border-right: none;
+}
+
+.c-hist-img {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.c-hist-img img {
+    height: 58px !important;
+    /* fixed image height matching screenshot */
+    width: auto;
+    max-width: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.c-hist-time {
+    background: #2a1800 !important;
+    /* very dark brown */
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    padding: 2px 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    border-top: 1px solid #8b6914 !important;
+}
+
+#page-C .c-bottom {
+    position: relative !important;
+    background: #0a0a92 !important;
+    /* Blue base color */
+    overflow: hidden !important;
+}
+
+#page-C .c-bottom::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: url('assets/Platinum-Game/bg.png') no-repeat !important;
+    background-color: #0a0acc !important;
+
+    /* 
+     Scale and shift so the star (at 72%,72% of image)
+     lands just RIGHT of Advance Draw button (~310px from left of footer)
+     
+     Image is square (1024x1024px approx).
+     Footer height ~180px. Scale image to 500px wide.
+     Star at 72% = 360px from left of scaled image.
+     We want star at ~310px from footer left.
+     So offset left = 310 - 360 = -50px
+    */
+    background-size: 500px 500px !important;
+    background-position: 100px -240px !important;
+    /* 
+     FINE-TUNE:
+     First value (X): more negative = star moves LEFT
+                      less negative / positive = star moves RIGHT
+     Second value (Y): more negative = star moves UP into view
+                       less negative = star moves DOWN out of view
+    */
+    z-index: 0 !important;
+    pointer-events: none !important;
+}
+
+#page-C .c-bottom>* {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.c-bottom-bar {
+    background: #000000 !important;
+    padding: 2px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid #111 !important;
+    flex-shrink: 0;
+    height: 22px !important;
+    /* Reduced from 30px */
+}
+
+.c-scheme {
+    background: linear-gradient(180deg, #ffd700 0%, #ffae42 100%) !important;
+    /* Brighter gold gradient */
+    border: 1px solid #333 !important;
+    color: #000 !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    padding: 0 12px !important;
+    border-radius: 50px !important;
+    /* True pill shape */
+    cursor: pointer !important;
+    text-decoration: none !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 17px !important;
+    /* Adjusted for 22px bar */
+    width: fit-content !important;
+}
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+
+    html,
+    body {
+        overflow: auto;
+    }
+
+    .app-wrapper {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ NAV Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .top-nav {
+        padding: 2px 6px 0;
+        gap: 3px;
+    }
+
+    .nav-tab {
+        width: 60px;
+        padding: 4px 0;
+        font-size: 12px;
+    }
+
+    .nav-datetime {
+        font-size: 11px;
+        margin-right: 8px;
+    }
+
+    .nav-loc {
+        display: none;
+    }
+
+    .icon-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        border-width: 2px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ HEADER Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .header-section {
+        border-top-width: 2px;
+    }
+
+    .header-logo-col {
+        min-width: 50px;
+        padding: 2px 6px;
+    }
+
+    .plat-img {
+        width: 28px;
+        height: 28px;
+    }
+
+    .plat-label {
+        font-size: 7px;
+    }
+
+    .header-bar {
+        min-height: 28px;
+        padding: 2px 6px;
+        gap: 6px;
+    }
+
+    .header-bar.premium-hdr {
+        gap: 4px;
+        padding: 2px 6px !important;
+    }
+
+    .header-bar.premium-hdr .hdr-group-left,
+    .header-bar.premium-hdr .hdr-group-right {
+        height: 30px;
+        padding: 0 8px;
+        border-radius: 6px;
+    }
+
+    .premium-hdr .hdr-gamename,
+    .premium-hdr .hdr-gamename-stacked,
+    .premium-hdr .hdr-time,
+    .premium-hdr .hdr-ssvi,
+    .premium-hdr .hdr-limit {
+        font-size: 10px !important;
+    }
+
+    .hdr-gamename-stacked {
+        font-size: 9px;
+    }
+
+    .hdr-time {
+        font-size: 11px;
+    }
+
+    .hdr-ssvi {
+        font-size: 11px;
+    }
+
+    .hdr-limit {
+        font-size: 11px;
+    }
+
+    .countdown-style {
+        font-size: 13px;
+        min-width: 52px;
+        height: 20px;
+    }
+
+    /* 4D header landscape */
+    .fd-hdr-mode .header-bar {
+        height: 36px;
+        gap: 8px;
+    }
+
+    .fd-hdr-mode .countdown-style {
+        height: 26px;
+        min-width: 60px;
+        font-size: 18px;
+    }
+
+    .fd-hdr-mode .hdr-time {
+        font-size: 13px;
+    }
+
+    .fd-hdr-mode .hdr-tx-lbl {
+        font-size: 9px;
+    }
+
+    .fd-hdr-mode .hdr-tx-val {
+        font-size: 15px;
+    }
+
+    .fd-hdr-mode .hdr-ssvi {
+        font-size: 11px;
+    }
+
+    .fd-hdr-mode .hdr-limit {
+        font-size: 13px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ WINNERS BAR Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .h-winners {
+        padding: 1px 3px;
+    }
+
+    .h-wnum {
+        font-size: 20px;
+        height: 28px;
+        min-width: 26px;
+    }
+
+    .h-time-box {
+        font-size: 10px;
+        height: 28px;
+        padding: 0 6px;
+    }
+
+    .h-ver-lbl {
+        font-size: 10px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ TICKER Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .ticker-bar {
+        padding: 4px 1px;
+    }
+
+    .ticker-track {
+        height: 28px;
+    }
+
+    .ti {
+        font-size: 11px;
+        min-width: 90px;
+        padding: 2px 8px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ MAIN AREA Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .main-area {
+        gap: 3px;
+        padding: 2px 4px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ PAGE G Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .g-layout {
+        grid-template-columns: 36px 1fr;
+        gap: 4px;
+    }
+
+    .g-lbl {
+        font-size: 8px;
+    }
+
+    .gcell {
+        font-size: 9px;
+    }
+
+    .prev-cell {
+        font-size: 8px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ PAGE H Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .h-content {
+        padding: 2px;
+        gap: 1px;
+    }
+
+    .h-ranges {
+        width: 72px;
+    }
+
+    .h-rlbl {
+        font-size: 7px;
+    }
+
+    .h-boxes-col {
+        width: 44px;
+    }
+
+    .h-mbox {
+        font-size: 7px;
+    }
+
+    .hcell-num {
+        font-size: 8px;
+    }
+
+    .h-qty-pts {
+        width: 58px;
+    }
+
+    .h-qp-hdr span {
+        font-size: 8px;
+    }
+
+    .h-grid-area {
+        grid-template-rows: 30px 0px repeat(10, 1fr);
+    }
+
+    .h-ranges {
+        grid-template-rows: 15px 15px repeat(10, 1fr);
+    }
+
+    .h-boxes-col {
+        grid-template-rows: 15px 15px repeat(10, 1fr);
+    }
+
+    .h-qty-pts {
+        grid-template-rows: 30px 0px repeat(10, 1fr);
+    }
+
+    .h-qp-hdr {
+        grid-row: 1;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ PAGE 3D Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .s3-logo-box {
+        width: 36px;
+        height: 40px;
+        margin-left: 8px;
+    }
+
+    .s3-topbar {
+        height: 30px;
+        padding: 2px 8px;
+    }
+
+    .s3-gamename {
+        font-size: 10px;
+    }
+
+    .s3-time,
+    .s3-tx,
+    .s3-ssvi-label {
+        font-size: 12px;
+    }
+
+    .s3-hdr-mid {
+        gap: 12px;
+    }
+
+    .s3-limit-box {
+        font-size: 11px;
+    }
+
+    .s3-cnt-box {
+        font-size: 13px !important;
+        min-width: 58px;
+        height: 22px;
+    }
+
+    .s3-filterbar {
+        padding: 3px 6px;
+        gap: 4px;
+    }
+
+    .s3-tbtn-group {
+        height: 36px;
+    }
+
+    .s3-tbtn-top {
+        height: 14px;
+    }
+
+    .s3-tbtn-bot {
+        font-size: 8px;
+    }
+
+    .cbx-lbl {
+        font-size: 9px;
+    }
+
+    .s3-digit-controls {
+        padding: 4px 6px;
+        gap: 0px;
+    }
+
+    .s3-all-btn-purple {
+        height: 32px;
+        min-width: 50px;
+        font-size: 11px;
+        padding: 0 8px;
+    }
+
+    .s3-dgt {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+
+    .s3-addnum-area {
+        padding: 4px 8px;
+        gap: 8px;
+    }
+
+    .s3-addnum-btn-p {
+        font-size: 10px;
+        padding: 4px 12px;
+        min-width: 90px;
+    }
+
+    .s3-range-lbl,
+    .s3-to-lbl {
+        font-size: 13px;
+    }
+
+    .s3-num-input {
+        font-size: 10px;
+        padding: 4px 12px;
+        min-width: 70px;
+    }
+
+    .s3-res-time {
+        font-size: 7px;
+    }
+
+    .s3-res-code {
+        font-size: 11px;
+    }
+
+    .s3-side-btn {
+        font-size: 11px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ PAGE 4D Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .fd-layout {
+        padding: 2px;
+    }
+
+    .fd-f-row {
+        height: 26px;
+        margin-bottom: 1px;
+    }
+
+    .fd-chk-box {
+        font-size: 9px;
+        padding: 0 3px;
+    }
+
+    .fd-chk-box.individual {
+        width: 75px;
+    }
+
+    .fd-chk-box input {
+        appearance: none !important;
+        width: 14px !important;
+        height: 14px !important;
+        background: #fff !important;
+        border: 1.5px solid #000 !important;
+        border-radius: 2px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-right: 4px !important;
+        vertical-align: middle !important;
+        cursor: pointer !important;
+        transition: all 0.2s;
+    }
+
+
+
+    .fd-chk-box.mt,
+    .fd-chk-box.all {
+        width: 38px;
+    }
+
+    .fd-chk-box.blue {
+        width: 46px;
+    }
+
+    .fd-chip-box {
+        font-size: 8px;
+        padding: 0 4px;
+    }
+
+    .fd-ima-stack {
+        width: 60px;
+    }
+
+    .ima-col label {
+        font-size: 7px;
+    }
+
+    .fd-range-sidebar {
+        width: 78px;
+    }
+
+    .fd-r-box {
+        font-size: 7px;
+    }
+
+    .fd-grid-main {
+        grid-template-columns: 40px repeat(10, 1fr);
+    }
+
+    .fd-num-top {
+        font-size: 10px;
+    }
+
+    .fd-qp-body {
+        width: 58px;
+    }
+
+    .fd-footer-bar {
+        height: 46px;
+        padding: 3px 8px;
+        gap: 8px;
+    }
+
+    .fd-claim-inp {
+        width: 100px;
+        font-size: 13px;
+        margin-left: 4px;
+    }
+
+    .fd-f-btn {
+        padding: 5px 10px;
+    }
+
+    .fd-btn-play {
+        font-size: 13px;
+        min-width: 90px;
+    }
+
+    .fd-btn-clear {
+        font-size: 11px;
+        min-width: 68px;
+    }
+
+    .fd-f-stat label {
+        font-size: 7px;
+        width: 56px;
+    }
+
+    .fd-f-val {
+        width: 42px;
+        height: 22px;
+    }
+
+    .fd-claim-grp label {
+        font-size: 12px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ PAGE C Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .c-header {
+        height: 36px;
+        padding: 2px 8px;
+        gap: 5px;
+    }
+
+    .c-hdr-gamename,
+    .c-hdr-ssvi,
+    .c-hdr-time,
+    .c-hdr-lasttx,
+    .c-hdr-limit {
+        font-size: 11px;
+    }
+
+    .c-hdr-countdown {
+        font-size: 13px;
+        line-height: 1.1;
+        padding: 2px;
+        padding: 1px 7px;
+    }
+
+    .plat-emoji {
+        font-size: 16px;
+    }
+
+    .plat-label {
+        font-size: 7px;
+    }
+
+    .c-card-bg {
+        padding: 3px;
+    }
+
+    .c-grid-border {
+        padding: 8px;
+    }
+
+    .c-grid {
+        gap: 8px;
+    }
+
+    .c-emoji {
+        font-size: 40px;
+    }
+
+    .c-namebox {
+        width: 55px;
+        height: 20px;
+        border-radius: 10px;
+        margin-top: -10px;
+    }
+
+    .c-floral::before {
+        font-size: 18px;
+        top: -6px;
+    }
+
+    .c-bottom {
+        grid-template-columns: 1fr 160px 1fr;
+        gap: 8px;
+        padding: 5px 8px;
+
+    }
+
+    .c-stat-pod {
+        padding: 5px 8px;
+        gap: 8px;
+    }
+
+    .c-stat label {
+        font-size: 9px;
+        height: 20px;
+    }
+
+    .c-stat .csv {
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .c-play-row {
+        gap: 8px;
+        margin-top: 5px;
+    }
+
+    .c-playbtn {
+        height: 48px;
+        padding: 0;
+    }
+
+    .c-advbtn {
+        font-size: 12px;
+        padding: 8px 6px;
+        width: 90px;
+    }
+
+    .c-claim-inp {
+        width: 160px;
+        font-size: 18px;
+        padding: 6px;
+        margin: 8px auto 0;
+    }
+
+    .c-actions {
+        gap: 5px;
+        padding: 6px;
+    }
+
+    .cact-btn {
+        font-size: 11px;
+        padding: 7px 3px;
+    }
+
+    .c-qty-section {
+        gap: 6px;
+        padding: 6px;
+        border-radius: 8px;
+    }
+
+    .c-qty-row {
+        gap: 4px;
+    }
+
+    .qty-l {
+        font-size: 8px;
+    }
+
+    .qty-v {
+        font-size: 21px;
+
+
+    }
+
+    .c-history {
+        height: 55px;
+    }
+
+    .c-hist-img {
+        width: 46px;
+        height: 42px;
+        font-size: 28px;
+    }
+
+    .c-hist-time {
+        font-size: 9px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ RIGHT SIDEBAR (compact vertical in landscape) Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .right-sb {
+        width: 78px;
+        margin-right: 2px;
+        gap: 3px;
+    }
+
+    .right-sb-premium {
+        padding: 15px 5px 5px 5px;
+        gap: 0;
+        height: calc(100% - 10px);
+        margin-top: 5px;
+    }
+
+    .right-sb-premium .sb-btn {
+        height: 30px;
+        font-size: 9px;
+    }
+
+    .right-sb-premium .sb-btn,
+    .right-sb-premium .sb-family,
+    .right-sb-premium .sb-ver {
+        width: 68px;
+        white-space: nowrap;
+        letter-spacing: -0.2px;
+    }
+
+    .sb-btn {
+        font-size: 9px;
+        padding: 5px 2px;
+    }
+
+    .sb-random {
+        font-size: 8px;
+        padding: 5px 2px;
+    }
+
+    .sb-family {
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .sb-family label {
+        font-size: 9px;
+    }
+
+    .sb-ver {
+        font-size: 8px;
+        padding: 2px;
+    }
+
+    /* Ã¢â€â‚¬Ã¢â€â‚¬ BOTTOM BAR Ã¢â€â‚¬Ã¢â€â‚¬ */
+    .bottom-bar {
+        padding: 3px 6px;
+        gap: 5px;
+    }
+
+    .bb-clabel {
+        font-size: 11px;
+    }
+
+    .bb-cinput {
+        width: 100px;
+        padding: 3px 5px;
+        font-size: 10px;
+    }
+
+    .bb-play {
+        font-size: 13px;
+        padding: 5px 8px;
+    }
+
+    .bb-clear {
+        font-size: 11px;
+        padding: 5px 6px;
+    }
+
+    .bstat label {
+        font-size: 7px;
+    }
+
+    .bval {
+        font-size: 13px;
+        min-width: 55px;
+        padding: 2px 0;
+    }
+
+    .bb-ver {
+        font-size: 9px;
+        padding: 2px 5px;
+    }
+
+    .s3-bottom-bar {
+        padding: 5px 8px;
+        gap: 5px;
+    }
+
+    .s3-stats-row {
+        gap: 6px;
+    }
+
+    .s3-bstat label {
+        font-size: 8px;
+    }
+
+    .s3-bval {
+        font-size: 12px;
+        padding: 3px 8px;
+        min-width: 60px;
+    }
+
+    .s3-bottom-actions {
+        gap: 8px;
+    }
+
+    .s3-randpick {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .s3-family-check label {
+        font-size: 11px;
+    }
+
+    .s3-claim-input {
+        width: 160px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    /* Total Points box layout (Label on right) */
+    .h-footer-mode .bb-stats .bb-stat-pod:nth-child(2) .bstat:nth-child(2) {
+        flex-direction: row-reverse !important;
+        margin-right: 0 !important;
+        /* Revert the hacky margin */
+    }
+
+    .h-footer-mode .bb-stats .bb-stat-pod:nth-child(2) .bstat:nth-child(2) label {
+        text-align: left !important;
+        margin-left: 6px !important;
+        width: 60px !important;
+        white-space: nowrap !important;
+        display: block !important;
+    }
+
+    .s3-motor-btn,
+    .s3-screen-btn,
+    .s3-info-btn-red {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}
+}
+
+@media (hover: none) {
+
+    .gcell:active,
+    .hcell:active,
+    .fdcell:active,
+    .s3-dgt:active {
+        opacity: .75;
+        transform: scale(.95);
+    }
+
+    .sb-btn:active,
+    .bb-play:active,
+    .bb-clear:active,
+    .s3-side-btn:active,
+    .cact-btn:active {
+        transform: translateY(1px);
+        opacity: .9;
+    }
+}
+}
+
+.c-card-bg {
+    /* Updated background to use the high-fidelity 'image copy.png' asset */
+    background: url('assets/image copy.png') center / cover no-repeat !important;
+    position: relative;
+    padding: 0px;
+}
+
+.c-grid-border {
+    /* Increased border thickness to 5px as requested */
+    border: 5px dashed #ff33aa !important;
+    border-radius: 12px !important;
+    padding: 20px;
+    background: transparent !important;
+    /* Removed any other color/grid-background as requested */
+    box-shadow: none;
+}
+
+.c-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+}
+
+.c-oval {
+    width: 150px !important;
+    height: 185px !important;
+    /* Using contain to ensure the FULL part of the asset is visible without any cutting */
+    background: url('assets/card-frame.png') center / contain no-repeat !important;
+    border: none !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    margin: 0 auto;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
+    margin-top: -19px;
+}
+
+.c-floral,
+
+.c-namebox {
+    display: none !important;
+}
+
+.c-namebox {
+    display: flex !important;
+    position: absolute !important;
+    bottom: 22px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 58px !important;
+    height: 20px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    z-index: 20 !important;
+}
+
+.c-card-img {
+    width: 47% !important;
+    height: 48% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7)) !important;
+    margin-top: -24px !important;
+    /* Perfectly centered within the contained frame */
+    position: relative;
+    z-index: 5;
+    background: transparent !important;
+    /* Keep multiply OFF as transparent PNGs work best on this background */
+}
+
+.c-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.c-item.sel .c-oval {
+    filter: drop-shadow(0 0 15px rgba(255, 230, 0, 0.7)) brightness(1.15) !important;
+    transform: scale(1.03);
+}
+
+.c-item:hover .c-oval {
+    filter: brightness(1.1);
+}
+

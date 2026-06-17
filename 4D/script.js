@@ -2,25 +2,24 @@
 // ADVANCE DRAW LOGIC (4D)
 // ==========================================
 let advanceTimeVal = [];
+let allAvailableSlots4D = [];
 
 async function openAdvanceModal() {
   const modal = document.getElementById('advanceModal');
   const grid = document.getElementById('advanceDrawGrid');
+  const inp = document.getElementById('advanceDrawCountInp');
   if (!modal || !grid) return;
 
+  if (inp) inp.value = ''; // Reset input
   grid.innerHTML = '<div style="color:white; padding:20px;">Loading draws...</div>';
   advanceTimeVal = [];
   modal.style.display = 'flex';
 
   try {
     const res = await API.getAdvanceDrawTimes();
-    grid.innerHTML = '';
     if (res && res.status === true && Array.isArray(res.slots)) {
-      grid.innerHTML = res.slots.map((s) =>
-        `<label style="display:flex;align-items:center;background:#222;padding:10px;border-radius:6px;gap:8px;color:#fff;cursor:pointer;">
-           <input type="checkbox" class="adv_slot_cb" value="${s}">${s}
-        </label>`
-      ).join('');
+      allAvailableSlots4D = res.slots;
+      renderDrawSlots();
     } else {
       grid.innerHTML = '<p style="color:#ed1c24; padding:20px;">No upcoming draws available.</p>';
     }
@@ -30,18 +29,51 @@ async function openAdvanceModal() {
   }
 }
 
+function renderDrawSlots() {
+  const grid = document.getElementById('advanceDrawGrid');
+  if (!grid || !allAvailableSlots4D) return;
+
+  grid.innerHTML = allAvailableSlots4D.map((s) => {
+    const isChecked = advanceTimeVal.includes(s);
+    return `<label style="display:flex;align-items:center;background:${isChecked ? '#ed1c24' : '#222'};padding:10px;border-radius:6px;gap:8px;color:#fff;cursor:pointer;transition:background 0.2s;">
+              <input type="checkbox" class="adv_slot_cb" value="${s}" ${isChecked ? 'checked' : ''} onchange="toggleSlot('${s}', this.checked)">${s}
+            </label>`;
+  }).join('');
+  updateDrawCountUI();
+}
+
+function toggleSlot(slot, isChecked) {
+  if (isChecked) {
+    if (!advanceTimeVal.includes(slot)) advanceTimeVal.push(slot);
+  } else {
+    advanceTimeVal = advanceTimeVal.filter(s => s !== slot);
+  }
+  renderDrawSlots();
+}
+
+function selectXDraws(count) {
+  const n = parseInt(count);
+  if (isNaN(n) || n < 0) {
+    advanceTimeVal = [];
+  } else {
+    advanceTimeVal = allAvailableSlots4D.slice(0, n);
+  }
+  renderDrawSlots();
+}
+
+function updateDrawCountUI() {
+  const countEl = document.getElementById('selectedDrawCount');
+  if (countEl) countEl.textContent = advanceTimeVal.length;
+}
+
 function closeAdvanceModal() {
   const modal = document.getElementById('advanceModal');
   if (modal) modal.style.display = 'none';
 }
 
-// No longer needed with checkbox implementation
-
 function confirmAdvanceDraw() {
-  const sels = document.querySelectorAll('.adv_slot_cb:checked');
-  advanceTimeVal = Array.from(sels).map(cb => cb.value);
   if (advanceTimeVal.length > 0) {
-    alert("Advance Draws Selected: " + advanceTimeVal.join(', '));
+    // alert("Advance Draws Selected: " + advanceTimeVal.join(', '));
   }
   closeAdvanceModal();
   updateStats();
@@ -83,9 +115,33 @@ const config = {
   ]
 };
 
+function showGlobalCustomAlert(msg, type = 'loading') {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'globalCustomAlert';
+  overlay.className = 'custom-alert-overlay';
+  
+  let botHtml = `<div class="custom-alert-bot"></div>`;
+
+  overlay.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">ALERT</div>
+          <div class="custom-alert-msg">${msg}</div>
+          ${botHtml}
+      </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 function switchPage(p) {
-  if (p === 'G') window.location.href = '../G/index.html';
-  else if (p !== '4D') window.location.href = '../' + p + '/index.html';
+  if (p === '4D') return;
+  showGlobalCustomAlert('Loading ...!');
+  setTimeout(() => {
+    if (p === 'G') window.location.href = '../G/index.html';
+    else window.location.href = '../' + p + '/index.html';
+  }, 300);
 }
 
 function buildSidebar(btns) {
@@ -117,8 +173,74 @@ function buildSidebar(btns) {
     if (b.t.includes('Reprint')) btn.onclick = openReprintModal;
     if (b.t.includes('Advance')) btn.onclick = openAdvanceModal;
     if (b.t.includes('INFO')) btn.onclick = openBetHistoryModal;
+    if (b.t.includes('Result')) btn.onclick = openResultModal;
+    if (b.t.includes('Screen')) btn.onclick = () => openScreenModal(b.t);
     sb.appendChild(btn);
   });
+}
+
+function openResultModal() {
+  const modal = document.getElementById('resultModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    const dateInp = document.getElementById('resultDateInput');
+    if (dateInp && !dateInp.value) {
+      dateInp.value = new Date().toISOString().split('T')[0];
+    }
+    fetchResultsDashboard();
+  }
+}
+
+function closeResultModal() {
+  const modal = document.getElementById('resultModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function fetchResultsDashboard() {
+  const body = document.getElementById('resultHistoryBody');
+  const dateInp = document.getElementById('resultDateInput');
+  if (!body || !dateInp) return;
+
+  const dateStr = dateInp.value || new Date().toISOString().split('T')[0];
+  body.innerHTML = '<tr><td colspan="2" style="padding:40px; color:#666;">Querying results for ' + dateStr + '...</td></tr>';
+
+  try {
+    const res = await API.resultDateWise(dateStr);
+    if (res && res.status === true && Array.isArray(res.results)) {
+      if (res.results.length === 0) {
+        body.innerHTML = '<tr><td colspan="2" style="padding:40px; color:#999;">No results found for this date.</td></tr>';
+        return;
+      }
+      body.innerHTML = res.results.map(r => {
+        // Assume r.result is "1045, 1139, ..."
+        const nums = r.result.split(',').map(n => n.trim());
+        const htmlNums = nums.map(n => `<span style="display:inline-block; background:#222; color:#e91e63; padding:6px 14px; border-radius:5px; margin:4px; font-weight:bold; border:1px solid #444; font-size:18px;">${n}</span>`).join('');
+        return `
+        <tr style="border-bottom:1px solid #1a1a1a;">
+          <td style="padding:20px; font-weight:bold; font-size:18px; color:#fff;">${r.time || r.result_time || '--:--'}</td>
+          <td style="padding:20px; text-align:left;">${htmlNums}</td>
+        </tr>
+      `}).join('');
+    } else {
+        body.innerHTML = '<tr><td colspan="2" style="padding:40px;">Result data unavailable.</td></tr>';
+    }
+  } catch (err) {
+    console.error("Result fetch error:", err);
+    body.innerHTML = '<tr><td colspan="2" style="padding:40px; color:#ed1c24;">Connection error.</td></tr>';
+  }
+}
+
+function openScreenModal(btnText) {
+  const screenNum = btnText.includes('1') ? 1 : 3;
+  if (screenNum === 1) currentMasterStart = 1000;
+  else if (screenNum === 3) currentMasterStart = 5000;
+  
+  // Update UI to match
+  buildFDRangesSidebar();
+  renderFDGridItems();
+  updateWinnerHeader();
+  
+  showStatusModal("SCREEN ACTIVATED", `Screen ${screenNum} (Range ${currentMasterStart}) is now active.`, "success");
 }
 
 function getCheckedSidebarIndices() {
@@ -253,7 +375,7 @@ function buildFDGrid() {
     hdr.innerHTML = '';
     for (let c = 0; c < cols; c++) {
       const h = document.createElement('div'); h.className = 'fd-chdr';
-      h.innerHTML = `<input type="text" class="h-col-inp" data-col="${c}" maxlength="3" style="width:100%; height:100%; border:none; background:transparent; text-align:center; color:inherit; outline:none; font-weight:bold; font-size:14px;">`;
+      h.innerHTML = `<input type="text" class="h-col-inp" data-col="${c}" maxlength="3" style="width:100%; height:100%; border:none; background:transparent; text-align:center; color:inherit; outline:none; font-weight:bold; font-size:16px;">`;
       h.querySelector('input').oninput = function() {
         let val = parseInt(this.value) || 0;
         for (let r = 0; r < 10; r++) {
@@ -348,7 +470,7 @@ function renderFDGridItems() {
     
     for (let r = 0; r < 10; r++) {
       const bSide = document.createElement('div'); bSide.className = 'fd-row-b';
-      bSide.innerHTML = `<input type="text" class="h-row-inp" maxlength="3" style="width:100%; height:100%; border:none; background:transparent; text-align:center; color:inherit; outline:none; font-weight:bold; font-size:14px;">`;
+      bSide.innerHTML = `<input type="text" class="h-row-inp" maxlength="3" style="width:100%; height:100%; border:none; background:transparent; text-align:center; color:inherit; outline:none; font-weight:bold; font-size:16px;">`;
       bSide.querySelector('input').oninput = function() {
           let val = parseInt(this.value) || 0;
           for (let c = 0; c < 10; c++) {
@@ -406,6 +528,7 @@ function renderFDGridItems() {
 }
 
 function updateStats() {
+  let totalSpots = 0;
   let totalQty = 0;
   let totalPts = 0;
 
@@ -414,10 +537,11 @@ function updateStats() {
   let rangePts = new Array(10).fill(0);
 
   for (let num in allBets) {
-      let val = allBets[num];
-      if (val > 0) {
-          totalQty += 1;
-          totalPts += val;
+      let qty = allBets[num];
+      if (qty > 0) {
+          totalSpots += 1;
+          totalQty += qty;
+          totalPts += qty * 2;
           
           let absNum = parseInt(num);
           let mStart = Math.floor(absNum / 1000) * 1000;
@@ -425,8 +549,8 @@ function updateStats() {
               let relInsideMaster = absNum - mStart;
               let rIdx = Math.floor(relInsideMaster / 100);
               if (rIdx >= 0 && rIdx < 10) {
-                  rangeQty[rIdx] += 1;
-                  rangePts[rIdx] += val;
+                  rangeQty[rIdx] += qty;
+                  rangePts[rIdx] += qty * 2;
               }
           }
       }
@@ -436,32 +560,99 @@ function updateStats() {
   qpEntries.forEach((row, i) => {
       const cells = row.querySelectorAll('.fd-qp-c');
       if (cells.length === 2) {
-          cells[0].textContent = rangeQty[i] || '';
-          cells[1].textContent = rangePts[i] || '';
+          cells[0].textContent = rangeQty[i] > 0 ? rangeQty[i] : '';
+          cells[1].textContent = rangePts[i] > 0 ? rangePts[i] : '';
       }
   });
 
+  const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
+  const finalSpots = totalSpots * drawCount;
+  const finalPoints = totalPts * drawCount;
+
   const s4s = document.getElementById('statSpots4D');
   const s4p = document.getElementById('statPrize4D');
-  const drawCount = advanceTimeVal.length > 0 ? advanceTimeVal.length : 1;
-  const grandTotalQty = totalQty * drawCount;
-  const grandTotalPts = totalPts * drawCount;
-
-  if (s4s) s4s.textContent = grandTotalQty; 
-  if (s4p) s4p.textContent = grandTotalPts;
+  if (s4s) s4s.textContent = finalSpots; 
+  if (s4p) s4p.textContent = finalPoints;
   
   const spotsEl = document.getElementById('statSpots');
   const prizeEl = document.getElementById('statPrize');
+  const serviceEl = document.getElementById('statGameService');
   const totalPtsDisplay = document.querySelector('.main-stats .bb-stat-pod:nth-of-type(2) .bstat:nth-of-type(2) .bval');
+  const totalPtsEl = document.getElementById('statTotalPts'); // Fallback if exists
 
-  if (spotsEl) spotsEl.textContent = grandTotalQty; 
-  if (prizeEl) prizeEl.textContent = grandTotalPts;
-  if (totalPtsDisplay) totalPtsDisplay.textContent = grandTotalPts;
+  if (spotsEl) spotsEl.textContent = finalSpots; 
+  if (prizeEl) prizeEl.textContent = (finalPoints * 0.9).toFixed(2);
+  if (serviceEl) serviceEl.textContent = (finalPoints * 0.1).toFixed(2);
+  if (totalPtsDisplay) totalPtsDisplay.textContent = finalPoints;
+  if (totalPtsEl) totalPtsEl.textContent = finalPoints;
 }
+
+window.randomPick = function() {
+  const overlay = document.createElement('div');
+  overlay.className = "modal-overlay";
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
+  
+  overlay.innerHTML = `
+    <div style="background:#b0b8c6; padding:30px 40px; border-radius:4px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:Arial, sans-serif; color:#333; width:500px; border: 2px solid #fff;">
+      <h3 style="margin-bottom:30px; font-size:18px; font-weight:bold; color:#333;">RANDOM PICK</h3>
+      <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
+        <div style="display:flex; flex-direction:column; align-items:center; width:45%;">
+          <label style="font-size:14px; margin-bottom:5px; font-weight:bold; color:#444;">Quantity</label>
+          <input type="number" id="randQty" value="10" style="width:100%; padding:8px; border:none; font-size:18px; text-align:center; background:#fff; outline:none; font-family:'Times New Roman', serif;" />
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; width:45%;">
+          <label style="font-size:14px; margin-bottom:5px; font-weight:bold; color:#444;">Generate Total</label>
+          <input type="number" id="randTotal" style="width:100%; padding:8px; border:none; font-size:18px; text-align:center; background:#fff; outline:none; font-family:'Times New Roman', serif;" />
+        </div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:15px;">
+        <button id="btnRandOk" style="padding:8px 30px; background:#cddc39; color:#000; border:none; cursor:pointer; font-weight:bold; font-size:14px;">OK</button>
+        <button id="btnRandCancel" style="padding:8px 25px; background:#ff5722; color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:14px;">CANCEL</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById('btnRandCancel').onclick = () => overlay.remove();
+  document.getElementById('btnRandOk').onclick = () => {
+    let qtyInput = parseInt(document.getElementById('randQty').value) || 0;
+    let totalInput = parseInt(document.getElementById('randTotal').value) || 0;
+    
+    overlay.remove();
+    
+    // As per user rule: Quantity = amount per ticket, Generate Total = number of grids
+    let amountPerTicket = qtyInput > 0 ? qtyInput : 10;
+    let numGrids = totalInput > 0 ? totalInput : (qtyInput > 0 ? qtyInput : 10);
+    
+    if (numGrids <= 0) return;
+    
+    // Select from currently visible, unselected cells
+    const avail = [...document.querySelectorAll('.fdcell:not(.sel)')];
+    
+    if (avail.length === 0) return;
+    if (numGrids > avail.length) numGrids = avail.length;
+
+    for (let i = avail.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [avail[i], avail[j]] = [avail[j], avail[i]];
+    }
+    
+    for (let i = 0; i < numGrids; i++) {
+      const el = avail[i];
+      const numStr = el.getAttribute('data-num');
+      allBets[numStr] = amountPerTicket;
+      const inp = el.querySelector('input');
+      if (inp) inp.value = amountPerTicket;
+      el.classList.add('sel');
+    }
+    
+    updateStats();
+  };
+};
 
 async function play4D() {
   const userStr = sessionStorage.getItem('user');
-  if (!userStr) return alert("Please Login");
+  if (!userStr) return showStatusModal("LOGIN REQUIRED", "Please login to play.", "error");
   const user = JSON.parse(userStr);
 
   let hasBets = false;
@@ -479,7 +670,7 @@ async function play4D() {
   }
 
   if (!hasBets) {
-    alert("Please enter some points before playing!");
+    showStatusModal("NO BETS", "Please enter some points before playing!", "error");
     return;
   }
 
@@ -498,7 +689,6 @@ async function play4D() {
   try {
     const res = await API.insertData(payload);
     if (res && (res.status === true || res.status === "true")) {
-      alert(res.message || "Bet placed successfully!");
       if (typeof fetchLastTransaction === 'function') fetchLastTransaction();
 
       // AUTO PRINT LOGIC (Matching H game)
@@ -519,12 +709,13 @@ async function play4D() {
       clearSelections();
       advanceTimeVal = [];
       if (typeof window.getBalance === 'function') window.getBalance();
+      setTimeout(() => { window.location.reload(); }, 1500);
     } else {
-      alert("Failed to place bet. Reason: " + (res ? res.message : "Unknown error"));
+      showStatusModal("FAILED", res.message || "Failed to place bet.", "error");
     }
   } catch (e) {
     console.error("Bet error:", e);
-    alert("System error while placing bet. Check console for details.");
+    showStatusModal("ERROR", "System error while placing bet.", "error");
   }
 }
 
@@ -648,14 +839,26 @@ async function handleReprintDirect(bc) {
     if (res && res.status && res.tickets) {
       printTickets(res.tickets);
     } else {
-      alert(res.message || "Ticket not found or error.");
+      showStatusModal("FAILED", res.message || "Ticket not found.", "error");
     }
-  } catch (e) { alert("Reprint failed."); }
+  } catch (e) { showStatusModal("ERROR", "Reprint failed.", "error"); }
 }
 
 function printTickets(ticketsArray) {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) return alert("Pop-up blocked. Allow pop-ups for printing.");
+  // Use a hidden iframe for printing instead of window.open to keep user on the same page
+  let printFrame = document.getElementById('printFrame');
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'printFrame';
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = 'none';
+    printFrame.style.visibility = 'hidden';
+    document.body.appendChild(printFrame);
+  }
 
   const ticketsHtml = ticketsArray.map((ticketObj) => {
     const ticket = ticketObj.ticket || ticketObj;
@@ -712,7 +915,7 @@ function printTickets(ticketsArray) {
           <img src="${barcodeData}" style="width:100%; height:auto;" alt="barcode" />
         </div>
         <div style="border-top:1px dashed #000; margin:12px 0;"></div>
-        <div style="font-size:10px; font-weight:bold;">*** THANK YOU & GOOD LUCK ***</div>
+       
       </div>
     `;
   }).join('');
@@ -729,18 +932,25 @@ function printTickets(ticketsArray) {
         @media print { .ticket-page { border-bottom: none; } }
       </style>
     </head>
-    <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
+    <body>
       ${ticketsHtml}
     </body>
     </html>
   `;
-  printWindow.document.write(content);
-  printWindow.document.close();
+  const doc = printFrame.contentWindow.document;
+  doc.open();
+  doc.write(content);
+  doc.close();
+
+  setTimeout(() => {
+    printFrame.contentWindow.focus();
+    printFrame.contentWindow.print();
+  }, 500);
 }
 
 async function handleReprintSubmit() {
   const bcInp = document.getElementById('reprintBarcodeInp');
-  if (!bcInp || !bcInp.value) return alert("Enter barcode");
+  if (!bcInp || !bcInp.value) return showStatusModal("EMPTY BARCODE", "Please enter barcode.", "error");
   handleReprintDirect(bcInp.value.trim().toUpperCase());
 }
 
@@ -803,14 +1013,15 @@ async function submitCancel(ticketId) {
       try {
         const res = await API.ticketCancel(ticketId);
         if (res && (res.status === true || res.status === "true")) {
-          alert(res.message || "Ticket cancelled!");
+          showStatusModal("SUCCESS", res.message || "Ticket cancelled!", "success");
           closeConfirmCancel();
           fetchCancelHistory();
           if (typeof window.getBalance === 'function') window.getBalance();
+          setTimeout(() => { window.location.reload(); }, 1500);
         } else {
-          alert("Cancel Failed: " + (res.message || "Unknown error"));
+          showStatusModal("CANCEL FAILED", res.message || "Unknown error", "error");
         }
-      } catch (err) { alert("Error during cancel."); }
+      } catch (err) { showStatusModal("ERROR", "Error during cancel.", "error"); }
       finally {
         finalBtn.disabled = false;
         finalBtn.textContent = "YES, CANCEL IT";
@@ -934,9 +1145,9 @@ function scaleFonts() {
   const s = vh / base;
   const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, Math.round(v)));
 
-  document.querySelectorAll('.fdcell').forEach(el => { el.style.fontSize = clamp(11 * s, 9, 20) + 'px'; });
-  document.querySelectorAll('.fd-rlbl').forEach(el => { el.style.fontSize = clamp(9 * s, 7, 14) + 'px'; });
-  document.querySelectorAll('.h-wnum').forEach(el => { el.style.fontSize = clamp(20 * s, 13, 32) + 'px'; });
+  document.querySelectorAll('.fdcell').forEach(el => { el.style.fontSize = clamp(14 * s, 11, 24) + 'px'; });
+  document.querySelectorAll('.fd-r-box').forEach(el => { el.style.fontSize = clamp(11 * s, 9, 16) + 'px'; });
+  document.querySelectorAll('.h-wnum').forEach(el => { el.style.fontSize = clamp(32 * s, 22, 48) + 'px'; });
   document.querySelectorAll('.nav-tab').forEach(el => { el.style.fontSize = clamp(17 * s, 13, 26) + 'px'; });
   document.querySelectorAll('.sb-btn,.sb-random').forEach(el => {
     el.style.fontSize = clamp(11 * s, 9, 18) + 'px';
@@ -972,6 +1183,19 @@ function applyMobileScale() {
     document.body.style.height = (DESIGN_H * scale) + 'px';
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+  } else if (window.innerWidth > 600) {
+    const scale = window.innerHeight / 768;
+    wrapper.style.width = (window.innerWidth / scale) + "px";
+    wrapper.style.height = '768px';
+    wrapper.style.transformOrigin = 'top left';
+    wrapper.style.transform = `scale(${scale})`;
+    wrapper.style.position = 'absolute';
+    wrapper.style.top = '0';
+    wrapper.style.left = '0';
+
+    document.body.style.height = window.innerHeight + 'px';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
   } else {
     wrapper.style.width = '';
     wrapper.style.height = '';
@@ -988,6 +1212,7 @@ function applyMobileScale() {
 
 window.addEventListener('resize', applyMobileScale);
 window.addEventListener('orientationchange', applyMobileScale);
+document.addEventListener('fullscreenchange', applyMobileScale);
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('body-4D');
@@ -1033,6 +1258,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const playBtn = document.getElementById('playBtn');
   if (playBtn) playBtn.onclick = play4D;
 
+  const claimInp = document.getElementById('claimInput');
+  if (claimInp) {
+    claimInp.addEventListener('input', (e) => {
+      if (e.target.value.length === 10) {
+        handleClaim();
+      }
+    });
+  }
+
   updateClock();
   fetchGameResults();
   setInterval(fetchGameResults, 60000); // Update every minute
@@ -1040,4 +1274,102 @@ document.addEventListener('DOMContentLoaded', () => {
   applyMobileScale();
   setInterval(updateClock, 1000);
   setInterval(updateCountdowns, 1000);
+});
+
+async function handleClaim() {
+  const inp = document.getElementById('claimInput');
+  if (!inp || !inp.value) return;
+
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+
+  const barcode = inp.value.trim().toUpperCase();
+  inp.value = ''; // Clear after reading
+
+  try {
+    const res = await window.API.claimTickets({
+      barcode_number: barcode,
+      username: user.username
+    });
+
+    if (res && res.status) {
+      showStatusModal("SUCCESS", res.message || "Ticket claimed successfully!", "success");
+      // Update balance display
+      const balRes = await window.API.balance(user.username, null, '4D');
+      if (balRes && balRes.success && balRes.data) {
+        const limitVal = document.getElementById('hdrLimitValue');
+        if (limitVal) limitVal.textContent = balRes.data.balance;
+      }
+    } else {
+      showStatusModal("CLAIM FAILED", res.message || "Failed to claim ticket.", "error");
+    }
+  } catch (err) {
+    console.error("Claim Error:", err);
+    showStatusModal("ERROR", "Connection error. Please try again.", "error");
+  }
+}
+
+function showStatusModal(title, message, type) {
+  let existing = document.getElementById('globalCustomAlert');
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = 'globalCustomAlert';
+  modal.className = "custom-alert-overlay";
+  
+  modal.innerHTML = `
+      <div class="custom-alert-box">
+          <div class="custom-alert-top">${title}</div>
+          <div class="custom-alert-msg">${message}</div>
+          <div class="custom-alert-bot">
+              <button class="custom-alert-btn" onclick="this.closest('.custom-alert-overlay').remove()">OK</button>
+          </div>
+      </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'F7') { 
+    e.preventDefault(); 
+    if (typeof play4D === 'function') play4D(); 
+  }
+  if (e.key === 'F8') {
+    e.preventDefault();
+    const ci = document.getElementById('claimInput');
+    if (ci) ci.focus();
+  }
+  if (e.key === 'F10') {
+    e.preventDefault();
+    if (typeof openCancelModal === 'function') openCancelModal();
+  }
+  if (e.key === 'F2') {
+    e.preventDefault();
+    if (typeof openReprintModal === 'function') openReprintModal();
+  }
+  if (e.key === 'F4') {
+    e.preventDefault();
+    openResultModal();
+  }
+  if (e.key === 'F3') {
+    e.preventDefault();
+    openBetHistoryModal();
+  }
+  if (e.key === 'Escape') {
+    if (typeof clearSelections === 'function') clearSelections();
+  }
+});
+
+window.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    if (e.target.id) {
+      e.target.style.display = 'none';
+    } else {
+      e.target.remove();
+    }
+  }
+  if (e.target.classList.contains('logout-modal')) {
+    e.target.style.display = 'none';
+  }
 });
